@@ -109,6 +109,7 @@ function withTimeout(p, ms, what) {
 // createClient — supabase.createClient (браузер) или мок (тесты); fetchFn — fetch.
 function makeDb(createClient, fetchFn, url = SB_URL, key = SB_KEY) {
   const sb = createClient(url, key, { auth: { persistSession: true, autoRefreshToken: true } });
+  let chanSeq = 0;
   const chk = ({ data, error }) => { if (error) throw new Error(error.message || String(error)); return data; };
   return {
     url,
@@ -124,7 +125,9 @@ function makeDb(createClient, fetchFn, url = SB_URL, key = SB_KEY) {
     async add(device, note) { return chk(await sb.from('probe').insert({ device, note }).select('id,at,email,device,note').single()); },
     // onRow(row) — новая строка от кого угодно; onStatus(s) — 'SUBSCRIBED' | 'CHANNEL_ERROR' | 'TIMED_OUT' | 'CLOSED'
     subscribe(onRow, onStatus) {
-      const ch = sb.channel('probe-ins')
+      // Имя канала — новое на каждую подписку: supabase-js отдаёт уже открытый канал с тем же именем,
+      // и повторная подписка (проверка + живой список) падала «cannot add callbacks after subscribe()».
+      const ch = sb.channel('probe-ins-' + (++chanSeq))
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'probe' }, p => onRow(p.new))
         .subscribe(s => onStatus && onStatus(s));
       return () => sb.removeChannel(ch);
