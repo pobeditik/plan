@@ -126,12 +126,20 @@ function makeDb(createClient, fetchFn, url = SB_URL, key = SB_KEY) {
     async add(device, note) { return chk(await sb.from('probe').insert({ device, note }).select('id,at,email,device,note').single()); },
     // onRow(row) — новая строка от кого угодно; onStatus(s) — 'SUBSCRIBED' | 'CHANNEL_ERROR' | 'TIMED_OUT' | 'CLOSED'
     subscribe(onRow, onStatus) {
-      // Имя канала — новое на каждую подписку: supabase-js отдаёт уже открытый канал с тем же именем,
-      // и повторная подписка (проверка + живой список) падала «cannot add callbacks after subscribe()».
-      const ch = sb.channel('probe-ins-' + (++chanSeq))
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'probe' }, p => onRow(p.new))
-        .subscribe(s => onStatus && onStatus(s));
-      return () => sb.removeChannel(ch);
+      // Сначала передаём каналу ключ вошедшего пользователя, потом подписываемся. Иначе при входе,
+      // восстановленном из памяти браузера, канал успевал подключиться как гость (supabase-js передаёт
+      // ключ фоном) — RLS гостю строк не отдаёт: «канал подключился, но строка не пришла» (06.10).
+      // Имя канала — новое на каждую подписку: supabase-js отдаёт уже открытый канал с тем же именем.
+      let ch = null, off = false;
+      (async () => {
+        const s = (await sb.auth.getSession()).data.session;
+        if (s) await sb.realtime.setAuth(s.access_token);
+        if (off) return;
+        ch = sb.channel('probe-ins-' + (++chanSeq))
+          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'probe' }, p => onRow(p.new))
+          .subscribe(st => onStatus && onStatus(st));
+      })().catch(e => onStatus && onStatus('CHANNEL_ERROR', e));
+      return () => { off = true; if (ch) sb.removeChannel(ch); };
     }
   };
 }
