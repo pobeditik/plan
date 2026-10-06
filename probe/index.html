@@ -97,6 +97,7 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
 const SB_URL = 'https://kzzyttgdlbhhusklpflk.supabase.co';
 const SB_KEY = 'sb_publishable_wFI2_ijY2I2G6CvPifB4ag_Peg9Eg41'; // публичный ключ, его можно видеть всем
 const STEP_MS = 15000;
+const RT_HINT = 'соединение WebSocket (wss) режет антивирус, прокси или сеть этого устройства';
 
 function withTimeout(p, ms, what) {
   let t;
@@ -178,15 +179,20 @@ async function runChecks(db, creds, device, note, report, ms = STEP_MS) {
     return { results, rows };
   }
   // Realtime: подписываемся до записи и ждём свою же строку обратно.
-  let unsub = () => {}, gotRow, rtFail;
-  const seen = new Set();
+  // Для диагностики запоминаем статусы канала: «не подключился» и «подключился, но строка не пришла» — разные причины.
+  let unsub = () => {}, gotRow, rtFail, subMs = null;
+  const seen = new Set(), statuses = [], subT0 = Date.now();
   const subscribed = new Promise((res, rej) => {
     unsub = db.subscribe(r => { if (r) seen.add(r.id); if (gotRow) gotRow(r); }, s => {
-      if (s === 'SUBSCRIBED') res();
-      else if (s === 'CHANNEL_ERROR' || s === 'TIMED_OUT') rej(new Error('канал realtime: ' + s));
+      statuses.push(s);
+      if (s === 'SUBSCRIBED') { if (subMs === null) subMs = Date.now() - subT0; res(); }
+      else if (s === 'CHANNEL_ERROR' || s === 'TIMED_OUT') rej(new Error('канал мгновенных обновлений: ' + s + ' — ' + RT_HINT));
     });
   });
   subscribed.catch(e => { rtFail = e; });
+  const rtDiag = () => subMs === null
+    ? `канал мгновенных обновлений не подключился за ${ms / 1000} с (статусы: ${statuses.join(', ') || 'нет'}) — ${RT_HINT}`
+    : `канал подключился за ${subMs} мс, но своя строка не пришла за ${ms / 1000} с`;
   let mine = null;
   try {
     mine = await step('write', () => db.add(device, note));
@@ -194,12 +200,16 @@ async function runChecks(db, creds, device, note, report, ms = STEP_MS) {
   } catch (e) { /* запись не прошла — realtime проверить нечем */ }
   if (!mine) { unsub(); skipRest('write'); return { results, rows }; }
   try {
-    await step('rt', async () => {
-      if (rtFail) throw rtFail;
-      await subscribed;
-      // Своя строка могла прийти раньше, чем дошли сюда — тогда она уже в seen.
-      await new Promise((res) => { gotRow = r => { if (r && r.id === mine.id) res(); }; if (seen.has(mine.id)) res(); });
-    });
+    await step('rt', () => new Promise((res, rej) => {
+      const timer = setTimeout(() => rej(new Error(rtDiag())), Math.max(ms - 100, 10));
+      const done = () => { clearTimeout(timer); res(); };
+      if (rtFail) { clearTimeout(timer); return rej(rtFail); }
+      subscribed.then(() => {
+        // Своя строка могла прийти раньше, чем дошли сюда — тогда она уже в seen.
+        gotRow = r => { if (r && r.id === mine.id) done(); };
+        if (seen.has(mine.id)) done();
+      }, e => { clearTimeout(timer); rej(e); });
+    }));
   } catch (e) { /* уже записано в results */ }
   unsub();
   return { results, rows };
