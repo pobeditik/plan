@@ -28,7 +28,7 @@ button{cursor:pointer}
 :focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 
 /* ---------- шапка ---------- */
-.top{position:sticky;top:0;z-index:40;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%);border-bottom:1px solid var(--rule)}
+.top{position:sticky;top:0;z-index:65;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%);border-bottom:1px solid var(--rule)}
 .top-in{display:flex;align-items:center;gap:28px;padding:14px 28px 0;flex-wrap:wrap}
 .brand h1{margin:0;font-size:22px;font-weight:700;letter-spacing:-.015em;line-height:1.1}
 .brand p{margin:3px 0 0;color:var(--ink3);font-size:13px}
@@ -465,9 +465,9 @@ body.dragging,body.dragging *{cursor:grabbing!important;user-select:none!importa
 .btn.pri.dirty{box-shadow:0 0 0 0 color-mix(in srgb,var(--red) 40%,transparent)}
 .me{font-size:13px;color:var(--ink3);white-space:nowrap;margin-right:6px}
 @media(max-width:1180px){.btn.ico span{display:none}.btn.ico{padding:7px 10px}}
-@media(max-width:820px){.me{display:none}}
+@media(max-width:820px){.me{font-size:12px;margin-right:0}}   /* на телефоне имя и «Выйти» нужны (аудит 06.10, В8) */
 @media (max-width:760px){
- .hbtns>*:not(#saveBtn){display:none!important}
+ .hbtns>*:not(#saveBtn):not(#me){display:none!important}   /* имя и «Выйти» остаются (аудит В8) */
  #tab-gnt .filters,#tab-gnt .tgl,#tab-gnt .fdiv,#tab-gnt [data-act="today"],#tab-gnt .gtools .lab{display:none!important}
  .row.blk .nm .ic{display:none}
  #tab-iss .filters,#tab-iss [data-act="addiss"],.iss-top p{display:none!important}
@@ -578,6 +578,19 @@ body.land .dr-h{padding-top:12px;touch-action:auto}
 .login-card .btn:disabled{opacity:.6}
 .login-err{min-height:18px;margin:-2px 0 8px;color:var(--red);font-size:13px}
 .login-card .m{margin:14px 0 0;font-size:12.5px;color:var(--ink3)}
+/* статус вопроса без права менять (аудит 06.10, В2) — текстом, в той же форме, что переключатель */
+.st-ro{display:inline-flex;align-items:center;height:30px;padding:0 12px;border-radius:999px;background:var(--sunk);color:var(--ink2);font-size:13px;font-weight:600}
+.st-ro::first-letter{text-transform:uppercase}
+/* выбор человека (аудит 06.10, В3) — тот же вид, что меню «⋯» */
+.pick{position:relative;display:block;min-width:0}
+.pick-l{position:absolute;left:0;top:calc(100% + 4px);z-index:75;min-width:100%;max-width:320px;max-height:280px;overflow:auto;padding:5px;border:1px solid var(--rule);border-radius:10px;background:var(--raised);box-shadow:0 16px 40px -18px rgba(58,54,51,.45)}
+.pick-l[hidden]{display:none}
+.pick-l button{display:block;width:100%;padding:7px 10px;border:0;border-radius:7px;background:none;color:var(--ink);font:inherit;font-size:14px;text-align:left;cursor:pointer;white-space:nowrap}
+.pick-l button.on,.pick-l button:hover{background:var(--sunk)}
+.pick-l button.new{color:var(--ink2);font-weight:600}
+.rp.e{overflow:visible}
+.hint-late{margin:4px 0 12px;padding:8px 11px;border-radius:9px;background:var(--ochre-t);color:var(--ink);font-size:13px;line-height:1.4}
+.dr-sec [data-done]{margin-top:8px}
 
 </style>
 </head>
@@ -833,7 +846,7 @@ function logPush(log,e,noMerge){const out=(log||[]).slice(),last=out[out.length-
   const m={...last,to:e.to,at:e.at};if(m.from===m.to)out.pop();else out[out.length-1]=m;return out}
  out.push(e);return out.length>LOG_MAX?out.slice(out.length-LOG_MAX):out}
 /* запись → строка без разметки (окно журнала и текст «отменено: …») */
-function logText(e){const q=e.name?"«"+e.name+"»":"",ft=(a,b)=>a!=null&&a!==""?a+" → "+(b===""||b==null?"—":b):(b??"");
+function logText(e){const q=e.name?"«"+e.name+"»":"",dv=v=>typeof v==="string"&&/^\d{4}-\d\d-\d\d$/.test(v)?v.slice(8)+"."+v.slice(5,7)+"."+v.slice(2,4):v,ft=(a,b)=>(a=dv(a),b=dv(b),a!=null&&a!==""?a+" → "+(b===""||b==null?"—":b):(b??""));
  switch(e.act){
   case"edit":case"issue":return[q,e.field&&ft(e.from,e.to)?(e.field+" "+ft(e.from,e.to)):(e.field||"")].filter(Boolean).join(" — ");
   case"link":return q+" — предшественники "+ft(e.from,e.to);
@@ -1237,7 +1250,7 @@ function touch(u){const t=T(u);t.by=S.me;t.at=new Date().toISOString()}
 function touchIss(u){const i=S.issues[u];if(i){i.by=S.me;i.at=new Date().toISOString()}touch(u)}
 function touchSteps(u){const s=S.steps[u];if(s){s.by=S.me;s.at=new Date().toISOString()}touch(u)}
 const upd=u=>{const t=S.tasks[u];return t&&t.at?{who:t.by,at:new Date(t.at)}:null};
-const updText=u=>{const x=upd(u);return x?`Обновлено: ${x.who||"—"}, ${fDT(x.at)}`:`Данные Project от ${fDT(D(DATA.saved))}`};
+const updText=u=>{const x=upd(u);return x?`Обновлено: ${x.who||"—"}, ${fDT(x.at)}`:"Обновлений ещё не было"};
 
 /* ================== расчёт: проценты и прогноз ================== */
 function stepPlan(u){const t=byId[u],items=ST(u);let cur=+t.S0,base=+t.S0;
@@ -1269,9 +1282,13 @@ const expectedPct=ids=>{let a=0,b=0;ids.forEach(i=>{const t=byId[i],d=w(i),x=Mat
 function stat(u){if(openIss(u))return"prob";const p=pct(u);if(p>=100)return"done";const f=FC[u];if(f&&f.F0<TODAY)return"late";if(p>0||(f&&f.S<=TODAY))return"work";return"todo"}
 const ST_=({prob:{t:"Проблема",c:"var(--red)"},late:{t:"Просрочено",c:"var(--ochre)"},work:{t:"В работе",c:"var(--work)"},todo:{t:"Не начато",c:"var(--ghost)"},done:{t:"Выполнено",c:"var(--green)"}});
 function blockRag(b){const op=b.ids.filter(i=>openIss(i)).length,late=b.ids.filter(i=>stat(i)==="late").length;
- const shift=b.main!=null&&FC[b.main]?dd(FC[b.main].F0,FC[b.main].F):0;
+ const shift=blockShift(b);
  if(op)return{c:"var(--red)",t:op+" "+plural(op,"проблемный вопрос","проблемных вопроса","проблемных вопросов")};
- if(late||shift>.05)return{c:"var(--ochre)",t:"Есть отставание"};return{c:"var(--green)",t:"Идёт по плану"}}
+ if(shift>.05)return{c:"var(--ochre)",t:"Отставание +"+fN(shift)+" сут"};if(late)return{c:"var(--ochre)",t:"Есть просрочка"};return{c:"var(--green)",t:"Идёт по плану"}}
+/* Сдвиг блока в сутках — одна мера для цвета статуса, крупной цифры и полос (DECISIONS 06.10): прогноз окончания
+   против утверждённого плана (у пары «план/факт» — окончание блока «ПЛАН», согласованный срок); у блока без своего
+   утверждённого плана — против его срока по графику. */
+function blockShift(b){const f=b.main!=null&&FC[b.main];if(!f)return 0;return dd(b.plan!=null?byId[b.plan].F0:f.F0,f.F)}
 const people=()=>{const s=new Set();RAW.forEach(t=>t.resp&&t.resp.split("/").forEach(x=>s.add(x.trim())));
  Object.values(S.issues).forEach(i=>i.who&&s.add(i.who));Object.values(S.steps).forEach(a=>(a.items||[]).forEach(x=>x.who&&s.add(x.who)));
  return[...s].filter(Boolean).sort((a,b)=>a.localeCompare(b,"ru"))};
@@ -1289,7 +1306,7 @@ function restoreSnap(str){const x=JSON.parse(str),keep={me:S.me,log:S.log,rev:S.
  UI.blocks=UI.blocks.filter(k=>BK[k]);if(!UI.blocks.length){const b=BLOCKS.find(y=>y.def&&y.kind!=="misc")||BLOCKS[0];if(b)UI.blocks=[b.key]}
  if(!S.lastImport)UI.showImp=false;
  if(UI.sel&&!byId[UI.sel])closeDrawer();$("#asof").innerHTML=asofHTML();rerender();if(SITE)SYNC.run()}
-function undo(){toast.hot=false;if(!HIST)return;const s=HIST.undo();if(s===null)return toast("Отменять нечего");restoreSnap(s);const d=UNDO_D.pop()||"действие";REDO_D.push(d);logNow({act:"undo",t:d});toast("Отменено",{l:"Вернуть",a:"redo"})}
+function undo(){toast.hot=false;if(!HIST)return;const s=HIST.undo();if(s===null)return toast(SITE?"Отменять нечего: после обновления страницы или правки другого человека отмена начинается заново":"Отменять нечего");restoreSnap(s);const d=UNDO_D.pop()||"действие";REDO_D.push(d);logNow({act:"undo",t:d});toast("Отменено",{l:"Вернуть",a:"redo"})}
 function redo(){toast.hot=false;if(!HIST)return;const s=HIST.redo();if(s===null)return toast("Возвращать нечего");restoreSnap(s);const d=REDO_D.pop()||"действие";UNDO_D.push(d);logNow({act:"redo",t:d});toast("Возвращено",{l:"Отменить",a:"undo"})}
 /* Поля-тексты растут по содержимому скриптом: CSS field-sizing есть не во всех Chrome. */
 const grow=el=>{if(!el.offsetParent)return;el.style.height="auto";el.style.height=(el.scrollHeight+el.offsetHeight-el.clientHeight)+"px"};
@@ -1324,6 +1341,33 @@ const meNames=()=>{const cur=S.me||ME.get(),pp=people();return[GD_NAME,...pp.fil
 function askMe(cb){meCb=cb||null;meSel=S.me||ME.get();openModal(`<h3>Кто вносит правку?</h3><p>Выберите свою фамилию. Она запомнится на этом устройстве и будет стоять рядом с каждой правкой и комментарием.</p>
  <div class="names">${meNames().map(p=>`<button class="chip ${p===meSel?"on":""}" data-me="${esc(p)}">${esc(p)}</button>`).join("")}</div>
  <div class="mfoot"><button class="btn ghost" data-act="mclose">Отмена</button><button class="btn pri" data-act="meok" ${meSel?"":"disabled"}>Сохранить</button></div>`)}
+/* Права в интерфейсе (аудит 06.10, В1/В2): чего человеку нельзя — показываем текстом, а не полем. Проверяет всё
+   равно база; здесь — чтобы не обещать того, что не сохранится. В версии-файле можно всё. */
+const can=a=>!SITE||siteCan(a);
+const isAdmin=()=>!SITE||(ME_&&ME_.role==="admin");
+/* ================== выбор человека ==================
+   Ответственный операции и вопроса — из списка людей проекта с поиском по буквам (аудит 06.10, В3: «Сол» больше не
+   сохранится). Новая фамилия — только явным пунктом «+ Новый: …». Уйти из поля с чем-то не из списка — значение вернётся. */
+const pickHTML=(attr,val,ph)=>`<span class="pick"><input class="ed" ${attr} value="${esc(val||"")}" placeholder="${esc(ph||"—")}" autocomplete="off" spellcheck="false" data-pick><span class="pick-l" hidden></span></span>`;
+const pickNorm=v=>String(v||"").replace(/\s+/g," ").trim();
+function pickList(inp){const q=pickNorm(inp.value).toLowerCase(),pp=people().sort((a,b)=>a.localeCompare(b,"ru"));
+ const hit=pp.filter(p=>!q||p.toLowerCase().includes(q)).sort((a,b)=>(b.toLowerCase().startsWith(q)?1:0)-(a.toLowerCase().startsWith(q)?1:0)).slice(0,8);
+ const it=hit.map(p=>({v:p,t:p}));if(q&&!pp.some(p=>p.toLowerCase()===q))it.push({v:pickNorm(inp.value),t:"+ Новый: «"+pickNorm(inp.value)+"»",n:1});
+ if(!q&&inp.defaultValue)it.unshift({v:"",t:"— не назначен"});
+ const l=inp.nextElementSibling;l.innerHTML=it.map((x,k)=>`<button type="button" class="${k===0?"on":""} ${x.n?"new":""}" data-pv="${esc(x.v)}">${esc(x.t)}</button>`).join("");l.hidden=!it.length}
+function pickSet(inp,v){inp.value=v;inp.dataset.ok="1";inp.nextElementSibling.hidden=true;inp.dispatchEvent(new Event("change",{bubbles:true}))}
+function pickOk(inp){const v=pickNorm(inp.value);if(inp.dataset.ok==="1"){delete inp.dataset.ok;return true}
+ if(!v||v===pickNorm(inp.defaultValue)||people().includes(v))return true;
+ inp.value=inp.defaultValue;toast("Выберите человека из списка или пункт «+ Новый»");return false}
+document.addEventListener("focusin",e=>{if(e.target.dataset&&e.target.dataset.pick!==undefined)pickList(e.target)});
+document.addEventListener("focusout",e=>{if(e.target.dataset&&e.target.dataset.pick!==undefined)setTimeout(()=>{const l=e.target.nextElementSibling;if(l)l.hidden=true},150)});
+document.addEventListener("input",e=>{if(e.target.dataset.pick!==undefined)pickList(e.target)});
+document.addEventListener("mousedown",e=>{const b=e.target.closest(".pick-l [data-pv]");if(!b)return;e.preventDefault();pickSet(b.parentElement.previousElementSibling,b.dataset.pv)});
+document.addEventListener("keydown",e=>{const inp=e.target;if(!inp.dataset||inp.dataset.pick===undefined)return;const l=inp.nextElementSibling,bs=[...l.querySelectorAll("button")];
+ if(e.key==="Escape"){inp.value=inp.defaultValue;l.hidden=true;e.stopPropagation();return}
+ if(l.hidden||!bs.length)return;let k=bs.findIndex(b=>b.classList.contains("on"));
+ if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();k=(k+(e.key==="ArrowDown"?1:-1)+bs.length)%bs.length;bs.forEach((b,j)=>b.classList.toggle("on",j===k))}
+ if(e.key==="Enter"){e.preventDefault();pickSet(inp,bs[Math.max(0,k)].dataset.pv)}},true);
 const need=cb=>SITE?(siteWriter()?cb():toast("Только просмотр: правки вам недоступны")):S.me?cb():askMe(cb);
 /* ================== ЖУРНАЛ ================== */
 let LOGQ=[],UNDO_D=[],REDO_D=[];
@@ -1334,7 +1378,7 @@ const ISSF={problem:"проблема",solution:"решение",who:"ответ
 
 /* ================== СВОДКА ================== */
 function strip(b){const f=FC[b.main];let pS,pF,lab;
- if(b.plan!=null){pS=byId[b.plan].S0;pF=byId[b.plan].F0;lab="план"}else{pS=byId[b.main].S0;pF=byId[b.main].F0;lab="срок по Project"}
+ if(b.plan!=null){pS=byId[b.plan].S0;pF=byId[b.plan].F0;lab="утверждённый план"}else{pS=byId[b.main].S0;pF=byId[b.main].F0;lab="срок"}
  const a=Math.min(+pS,+f.S,+TODAY)-2*DAY,z=Math.max(+pF,+f.F,+TODAY)+2*DAY,x=d=>((+d-a)/(z-a)*100).toFixed(2)+"%",wd=(p,q)=>(Math.max(0,+q-+p)/(z-a)*100).toFixed(2)+"%";
  const late=+f.F>+pF+36e5;let tk="";
  for(let d=new Date(a);+d<=z;d=new Date(+d+DAY)){d.setHours(0,0,0,0);if(d.getDate()===1||d.getDate()===15)tk+=`<span class="tk" style="left:${x(d)}">${fD(d)}</span>`}
@@ -1348,12 +1392,12 @@ const curOp=ids=>ids.find(i=>{const p=pct(i);return p>0&&p<100})||ids.find(i=>pc
 function panel(b){const rg=blockRag(b),f=FC[b.main],act=blockPct(b.ids),cur=curOp(b.ids),nxt=b.ids[b.ids.indexOf(cur)+1];
  let head,facts;
  if(b.plan!=null){const pF=byId[b.plan].F0,lag=dd(pF,f.F),exp=expectedPct(b.pids);
-  head=`<div><div class="big" style="--bigc:${lag>.05?"var(--ochre)":"var(--green)"}">${lag>.05?"+":""}${fN(lag)}<small>сут</small></div><div class="big-cap">к плановому окончанию</div></div>`;
-  facts=`<span>Прогноз окончания <b>${fD(f.F)}</b>, по плану <b>${fD(pF)}</b></span><span>В графике Project окончание <b>${fD(f.F0)}</b></span>`;
+  head=`<div><div class="big" style="--bigc:${lag>.05?"var(--ochre)":"var(--green)"}">${lag>.05?"+":""}${fN(lag)}<small>сут</small></div><div class="big-cap">к утверждённому плану</div></div>`;
+  facts=`<span>Прогноз окончания <b>${fD(f.F)}</b></span><span>Утверждённый план <b>${fD(pF)}</b></span>`;
   b._exp=exp}
  else{const open=b.ids.filter(i=>pct(i)<100),lk=dd(f.F0,f.F);
   head=`<div><div class="big">${Math.round(act)}<small>%</small></div><div class="big-cap">готовность</div></div>`;
-  facts=`<span>Срок по Project <b>${fD(f.F0)}</b>${lk>.05?`, прогноз <b style="color:var(--ochre)">${fD(f.F)}</b>`:""}</span><span>Не закрыто <b>${open.length}</b> из ${b.ids.length} ${plural(b.ids.length,"операции","операций","операций")}</span>`;
+  facts=`<span>Срок <b>${fD(f.F0)}</b>${lk>.05?`, прогноз <b style="color:var(--ochre)">${fD(f.F)}</b>`:""}</span><span>Не закрыто <b>${open.length}</b> из ${b.ids.length} ${plural(b.ids.length,"операции","операций","операций")}</span>`;
   b._exp=expectedPct(b.ids)}
  return `<article class="panel" style="--st:${rg.c}">
   <div class="p-head"><h2>${esc(b.title)}</h2><span class="sub">${esc(b.sub||"")}</span><span class="rag"><i></i>${rg.t}</span></div>
@@ -1368,7 +1412,7 @@ function renderSum(){compute();
  $("#tab-sum").innerHTML=`<div class="sum"><div class="panels">${shown.map(panel).join("")}</div>
   <div class="sec-h"><h2>Проблемные вопросы</h2><span class="sub">${iss.length?iss.length+" открыто"+(iss.filter(i=>S.issues[i].gd).length?", из них нужно решение ГД — "+iss.filter(i=>S.issues[i].gd).length:""):"открытых нет"}</span></div>
   <div class="plist">${iss.length?iss.map(pliHTML).join(""):`<div class="empty">Открытых проблемных вопросов нет</div>`}</div>
-  <div class="rules"><span style="--c:var(--red)">красный — есть открытый проблемный вопрос</span><span style="--c:var(--ochre)">жёлтый — просрочка или прогноз позже срока</span><span style="--c:var(--green)">зелёный — идёт по плану</span><span style="--c:var(--ink)">прогноз: незавершённые операции с прошедшим сроком сдвигают следующие по связям Project</span></div></div>`}
+  <div class="rules"><span style="--c:var(--red)">красный — есть открытый проблемный вопрос</span><span style="--c:var(--ochre)">жёлтый — прогноз позже утверждённого плана или просрочка</span><span style="--c:var(--green)">зелёный — идёт по плану</span><span style="--c:var(--ink)">прогноз: график плюс поправка на просроченные операции — они сдвигают следующие по связям</span></div></div>`}
 const goneList=()=>Object.keys(S.issues).map(Number).filter(u=>S.issues[u].gone&&!byId[u]);
 /* Открытые — сначала с пометкой «Нужно решение ГД», затем остальные; внутри каждой группы — ручной порядок S.order (EDITOR.md). Решённые следом. */
 const issExists=u=>byId[u]&&BOF[u]!=null;
@@ -1385,7 +1429,7 @@ function pliHTML(u){const i=S.issues[u],t=byId[u];
 /* ================== ПРОБЛЕМНЫЕ ВОПРОСЫ ================== */
 let litId=null;const EDS=new Set();
 function stepsHTML(u){const sp=stepPlan(u),cur=sp.find(x=>!x.locked&&x.pct<100);
- if(!EDS.has(u))return `<div class="pipe"><div class="pipe-h"><h4>Этапы решения</h4><button data-eds="${u}">Изменить этапы</button></div>
+ if(!EDS.has(u)||!can("steps_edit"))return `<div class="pipe"><div class="pipe-h"><h4>Этапы решения</h4>${can("steps_edit")?`<button data-eds="${u}">Изменить этапы</button>`:""}</div>
   <div class="segs">${sp.map(x=>`<div class="sg ${x.pct>=100?"d":""} ${x.locked?"l":""} ${cur&&cur.i===x.i?"cur":""}"><div class="b"><i style="width:${x.pct}%"></i></div><div class="n">${esc(x.n)}</div><div class="m">${esc(x.who||"—")}, ${fN(+x.dur)} сут, ${x.pct}%</div><div class="m">${fD(x.S)}–${fD(x.F)}</div></div>`).join("")}</div></div>`;
  return `<div class="steps"><div class="pipe-h"><h4>Этапы решения</h4><button data-eds="${u}">Готово</button></div>
  ${sp.map(x=>`<div class="stp ${x.pct>=100?"d":x.pct>0?"w":""} ${x.locked?"l":""}" style="--p:${x.pct}%">
@@ -1399,43 +1443,43 @@ function stepsHTML(u){const sp=stepPlan(u),cur=sp.find(x=>!x.locked&&x.pct<100);
  <div class="src">Столбцы: этап, исполнитель, сут, %. Следующий этап открывается, когда предыдущий на 100%.</div></div>`}
 function commentsHTML(u){const c=(S.tasks[u]&&S.tasks[u].cm)||[];
  return `<div class="cm"><h4>Комментарии${c.length?" ("+c.length+")":""}</h4>
-  ${c.map((x,k)=>`<div class="cmi"><div class="w"><b>${esc(x.who||"—")}</b>, ${fDT(new Date(x.at))}</div>${esc(x.t).replace(/\n/g,"<br>")}<button class="del" data-cmdel="${u}:${k}" title="Удалить">×</button></div>`).join("")}
-  <div class="cmadd"><textarea placeholder="Написать комментарий…" data-cmin="${u}" rows="1"></textarea><button class="btn" data-cmadd="${u}">Добавить</button></div></div>`}
+  ${c.map((x,k)=>`<div class="cmi"><div class="w"><b>${esc(x.who||"—")}</b>, ${fDT(new Date(x.at))}</div>${esc(x.t).replace(/\n/g,"<br>")}${isAdmin()||(can("comment")&&x.who===S.me)?`<button class="del" data-cmdel="${u}:${k}" title="Удалить">×</button>`:""}</div>`).join("")}
+  ${!can("comment")?"":`<div class="cmadd"><textarea placeholder="Написать комментарий…" data-cmin="${u}" rows="1"></textarea><button class="btn" data-cmadd="${u}">Добавить</button></div>`}</div>`}
 function issueFields(u){const i=S.issues[u],t=byId[u];
- if(PHONE()){const F=(l,v)=>`<div class="fld"><label>${l}</label><div class="tv">${esc(v)||"—"}</div></div>`;
+ if(PHONE()||!can("issue_edit")){const F=(l,v)=>`<div class="fld"><label>${l}</label><div class="tv">${esc(v)||"—"}</div></div>`;
   return F("Проблема",i.problem)+F("Решение, что нужно и от кого",i.solution)+`<div class="frow">${F("Ответственный за решение",i.who||t.resp)}${F("Срок решения",i.due?fD(D(i.due)):"")}${F("Влияние на план, сут",+i.impact?String(+i.impact):"не оценено")}</div>`}
  return `<div class="fld"><label>Проблема</label><textarea class="ed prob" rows="1" data-iss="${u}:problem" placeholder="Что случилось">${esc(i.problem)}</textarea></div>
   <div class="fld"><label>Решение, что нужно и от кого</label><textarea class="ed sol" rows="1" data-iss="${u}:solution" placeholder="Что делаем">${esc(i.solution)}</textarea></div>
   <div class="frow">
-   <div class="fld"><label>Ответственный за решение</label><input class="ed" list="dlPeople" data-iss="${u}:who" value="${esc(i.who)}" placeholder="${esc(t.resp||"—")}"></div>
+   <div class="fld"><label>Ответственный за решение</label>${pickHTML(`data-iss="${u}:who"`,i.who,t.resp||"—")}</div>
    <div class="fld"><label>Срок решения</label><input class="ed" type="date" data-iss="${u}:due" value="${esc(i.due)}"></div>
-   <div class="fld"><label>Влияние на план, сут</label><input class="ed" type="number" min="0" step="0.5" data-iss="${u}:impact" value="${+i.impact||""}" placeholder="0"></div></div>`}
+   <div class="fld"><label>Влияние на план, сут</label><input class="ed" type="number" min="0" step="0.5" data-iss="${u}:impact" value="${+i.impact||""}" placeholder="не оценено"></div></div>`}
 function cardHTML(u){const i=S.issues[u],t=byId[u],f=FC[u],done=i.status==="решён";
  const late=f.F>f.F0?` <span class="late">прогноз ${fD(f.F)}</span>`:"";
  return `<article class="card ${i.gd&&!done?"gd":""} ${done?"done":""} ${litId===u?"lit":""}" id="card-${u}">
   <div class="c-head"><div class="c-title"><div class="blk">${esc(BK[BOF[u]].title)}, операция №${t.id}</div><h3>${esc(t.name)}</h3>
-    <div class="c-meta"><span>${fD(f.S0)}–${fD(f.F0)}${late}</span><span>Готовность <b>${Math.round(pct(u))}%</b></span>${t.resp?`<span>Отв. по Project <b>${esc(t.resp)}</b></span>`:""}</div></div>
-   <div class="c-acts">
+    <div class="c-meta"><span>${fD(f.S0)}–${fD(f.F0)}${late}</span><span>Готовность <b>${Math.round(pct(u))}%</b></span>${t.resp?`<span>Отв. по графику <b>${esc(t.resp)}</b></span>`:""}</div></div>
+   <div class="c-acts">${!can("issue_edit")?`${i.gd?'<span class="tag-gd">решение ГД</span>':""}<span class="st-ro">${esc(i.status)}</span>`:`
     <button class="gdt ${i.gd?"on":""}" data-gd="${u}" title="Пометка «нужно решение ГД» поднимает вопрос наверх и подсвечивает его ярче">${i.gd?I.flagF:I.flag} Нужно решение ГД</button>
-    <div class="seg">${["открыт","в работе","решён"].map(v=>`<button class="${i.status===v?"on "+(v==="решён"?"g":v==="открыт"?"r":""):""}" data-ist="${u}:${v}">${v[0].toUpperCase()+v.slice(1)}</button>`).join("")}</div>
+    <div class="seg">${["открыт","в работе","решён"].map(v=>`<button class="${i.status===v?"on "+(v==="решён"?"g":v==="открыт"?"r":""):""}" data-ist="${u}:${v}">${v[0].toUpperCase()+v.slice(1)}</button>`).join("")}</div>`}
     <button class="btn ghost" data-goto="${u}">Показать в графике</button></div></div>
-  <div class="c-body"><div class="c-left">${issueFields(u)}${isP(u)?stepsHTML(u):`<button class="addstep" data-stepadd="${u}">+ добавить этапы решения</button>`}
-    ${t.note&&t.note.trim()!==(i.problem||"").trim()?`<div class="src">Примечание в Project: <q>${esc(t.note)}</q></div>`:""}
+  <div class="c-body"><div class="c-left">${issueFields(u)}${isP(u)?stepsHTML(u):can("steps_edit")?`<button class="addstep" data-stepadd="${u}">+ добавить этапы решения</button>`:""}
+    ${t.note&&t.note.trim()!==(i.problem||"").trim()?`<div class="src">Примечание к операции: <q>${esc(t.note)}</q></div>`:""}
     <div class="upd">${updText(u)}</div></div>
    <div class="c-right">${commentsHTML(u)}</div></div></article>`}
 function goneHTML(u){const i=S.issues[u];
- return `<article class="card done" id="card-${u}"><div class="c-head"><div class="c-title"><div class="blk">Операции нет в текущем плане Project</div><h3>${esc(i.gone.name)}</h3>
+ return `<article class="card done" id="card-${u}"><div class="c-head"><div class="c-title"><div class="blk">Операции нет в текущем плане</div><h3>${esc(i.gone.name)}</h3>
   <div class="c-meta"><span>Удалена из плана ${fDT(new Date(i.gone.at))}</span></div></div>
-  <div class="c-acts"><button class="btn ghost" data-issdel="${u}">Убрать вопрос</button></div></div>
+  <div class="c-acts">${can("issue_edit")?`<button class="btn ghost" data-issdel="${u}">Убрать вопрос</button>`:""}</div></div>
   <div class="c-body"><div class="c-left"><div class="fld"><label>Проблема</label><div>${esc(i.problem||"—")}</div></div>
    ${i.solution?`<div class="fld"><label>Решение</label><div>${esc(i.solution)}</div></div>`:""}
    <div class="upd">${updText(u)}</div></div><div class="c-right">${commentsHTML(u)}</div></div></article>`}
 function renderIss(){compute();
  const all=issList(false),op=all.filter(u=>openIss(u)&&passF(u)),ar=all.filter(u=>!openIss(u));
- $("#tab-iss").innerHTML=`<div class="iss-top"><h2>Проблемные вопросы</h2><p>Каждый вопрос привязан к операции графика. Отметить операцию можно здесь или флажком в строке графика.</p><span class="sp"></span>${innerWidth<760||issList(true).length<2?"":`<button class="btn" data-act="ordopen" title="Изменить порядок вопросов перетаскиванием">Редактирование</button>`}<button class="btn red" data-act="addiss">+ Проблемный вопрос</button></div>
+ $("#tab-iss").innerHTML=`<div class="iss-top"><h2>Проблемные вопросы</h2><p>Каждый вопрос привязан к операции графика. Отметить операцию можно здесь или флажком в строке графика.</p><span class="sp"></span>${innerWidth<760||issList(true).length<2||!can("issue_order")?"":`<button class="btn" data-act="ordopen" title="Изменить порядок вопросов перетаскиванием">Порядок</button>`}${can("issue_edit")?`<button class="btn red" data-act="addiss">+ Проблемный вопрос</button>`:""}</div>
   ${filtersHTML()}
   <div class="cards">${op.length?op.map(cardHTML).join(""):`<div class="empty">${fActive()?"Под фильтр ничего не попало":"Открытых проблемных вопросов нет. Отметьте операцию флажком в графике или кнопкой выше."}</div>`}</div>
-  ${(()=>{const g=goneList();return g.length?`<details class="arch" open><summary>Операций нет в плане Project (${g.length})</summary><div class="cards">${g.map(goneHTML).join("")}</div></details>`:""})()}
+  ${(()=>{const g=goneList();return g.length?`<details class="arch" open><summary>Операций нет в текущем плане (${g.length})</summary><div class="cards">${g.map(goneHTML).join("")}</div></details>`:""})()}
   ${ar.length?`<details class="arch"><summary>Решённые (${ar.length})</summary><div class="cards">${ar.map(cardHTML).join("")}</div></details>`:""}`;
  litId=null;growAll($("#tab-iss"))}
 
@@ -1546,12 +1590,12 @@ function renderGnt(keep){if(PHONE()&&!LAND())return renderFeed();compute();
   else{const se=shifted?Math.max(+f.S,+f.F0):+f.F;
    if(se>+f.S)bars+=`<div class="bar" style="left:${L}px;width:${Math.max(3,dd(f.S,new Date(se))*pxd)}px;--bt:color-mix(in srgb,${cc} 28%,var(--surface));--bf:${cc}"><i style="width:${Math.min(100,p*dur/Math.max(.01,dd(f.S,new Date(se))))}%"></i></div>`;
    if(shifted)bars+=`<div class="hat ${se===+f.S?"full":""}" style="left:${x(new Date(se))}px;width:${Math.max(3,dd(new Date(se),f.F)*pxd)}px;--bf:${cc}"></div>`}
-  let lag="";if(r.p){const l=dd(FC[r.p].F,f.F);if(l>.05)lag=`<b>+${fN(l)} к плану</b>`}
+  let lag="";if(r.p){const l=dd(FC[r.p].F,f.F);if(l>.05)lag=`<b>+${fN(l)} сут к утв. плану</b>`}
   const L0=UI.showImp&&S.lastImport,o0=L0&&(S.lastImport.old||{})[u];
   const lab=`<div class="blab" style="left:${x(f.F)+8}px">${ob?`<span style="color:var(--ochre)">было ${fD(D(ob.s))}–${fD(D(ob.f))} →</span>`:""}${L0&&LX(S.lastImport,"renamed").includes(u)&&o0?`<span style="color:var(--ochre)">было «${esc(o0.name)}»</span>`:""}${L0&&LX(S.lastImport,"respC").includes(u)&&o0?`<span style="color:var(--ochre)">отв. было: ${esc(o0.resp||"—")}</span>`:""}${fD(f.F)}${lag}${iss?`<span class="pr">${esc((iss.problem||"проблемный вопрос").split(/[.;(]/)[0])}</span>`:""}</div>`;
-  const icons=`${iss?`<span class="ic r" title="Проблемный вопрос">${I.flagF}</span>`:PHONE()?"":`<button class="fl" data-flag="${u}" title="Отметить как проблемный вопрос">${I.flag}</button>`}${ncm?`<span class="ic" title="Комментарии">${I.cm}${ncm}</span>`:""}`;
+  const icons=`${iss?`<span class="ic r" title="Проблемный вопрос">${I.flagF}</span>`:PHONE()||!can("issue_edit")?"":`<button class="fl" data-flag="${u}" title="Отметить как проблемный вопрос">${I.flag}</button>`}${ncm?`<span class="ic" title="Комментарии">${I.cm}${ncm}</span>`:""}`;
   const tw=isP(u)?`<button class="tw ${S.open[u]?"o":""}" data-tw="${u}" title="Этапы решения">▸</button>`:"";
-  const pcc=isP(u)||PHONE()?`<span class="pc ${p>=100?"d":""}">${p}<small>%</small></span>`:`<span class="pc ${p>=100?"d":""}"><input type="number" min="0" max="100" step="5" value="${p}" data-pct="${u}"><small>%</small></span>`;
+  const pcc=isP(u)||PHONE()||!can("pct_edit")?`<span class="pc ${p>=100?"d":""}">${p}<small>%</small></span>`:`<span class="pc ${p>=100?"d":""}"><input type="number" min="0" max="100" step="5" value="${p}" data-pct="${u}"><small>%</small></span>`;
   R+=`<div class="row ${iss?"prob":""} ${UI.sel===u?"sel":""} ${impOf(u)}" data-id="${u}" id="r-${u}"><div class="lc"><span class="num">${t.id}</span><span class="nm">${tw}${ED?`<input class="ed nmi" data-ed="${u}:name" value="${esc(t.name)}" spellcheck="false">`:`<span class="t">${esc(t.name)}</span>`}${impBadges(u)}${icons}${ED?rowActs(u):""}</span>${cmp?"":ED?editCells(u,t,f):`<span class="rp" title="${esc(t.resp)}">${esc(t.resp)}</span><span class="dt">${fD(f.S)}</span><span class="dt ${shifted?"l":""}">${fD(f.F)}${shifted?`<small>+${fN(dd(f.F0,f.F))}</small>`:""}</span>`}${pcc}</div><div class="tc">${bars}${lab}</div></div>`;
   geo[u]={ri,L,R:x(f.F)}});
  let links="";const RH=[];let y=0;rows.forEach(r=>{const h=r.k==="blk"?48:42;RH.push([y,h]);y+=h});
@@ -1570,7 +1614,7 @@ function renderGnt(keep){if(PHONE()&&!LAND())return renderFeed();compute();
    ${pairSel.length?`<label class="tgl"><input type="checkbox" data-opt="plan" ${UI.plan?"checked":""}><span></span>План тенью</label>`:""}
    ${narrow||(SITE&&!siteCan("plan_edit"))?"":`<label class="tgl"><input type="checkbox" data-opt="edit" ${UI.edit?"checked":""}><span></span>Редактирование</label>`}
    ${ED?"":`<label class="tgl"><input type="checkbox" data-opt="compact" ${UI.compact?"checked":""}><span></span>Краткая таблица</label>`}
-   ${impCount(L)?`<button class="chip imp ${UI.showImp?"on":""}" data-act="showimp" title="Показать в графике, что изменилось при последней загрузке из Project">Изменения импорта<b>${impCount(L)}</b></button>`:""}
+   ${recentImp(L)?`<button class="chip imp ${UI.showImp?"on":""}" data-act="showimp" title="Показать в графике, что изменилось при последней загрузке из Project">Изменения импорта<b>${impCount(L)}</b></button>`:""}
   </div>${filtersHTML()}`}
   <div class="gcard"><div class="gw" id="gw" style="--lw:${lw}px;--W:${W}px;--cols:${cols}"><div class="gin">
    <div class="gbg">${bg}</div>
@@ -1578,7 +1622,7 @@ function renderGnt(keep){if(PHONE()&&!LAND())return renderFeed();compute();
    ${rows.length?R:`<div class="empty" style="margin:30px;position:sticky;left:30px;width:520px">Под фильтр ничего не попало</div>`}
    <svg class="links" width="${W}" height="${y}"><defs><marker id="ar" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8z" fill="var(--ink)"/></marker></defs>${links}</svg>
   </div></div>
-  <div class="gleg"><span><i class="s" style="background:var(--work)"></i>в работе</span><span><i class="s" style="background:var(--green)"></i>выполнено</span><span><i class="s" style="background:var(--ochre)"></i>срок по Project прошёл</span><span><i class="s" style="background:var(--red)"></i>проблемный вопрос</span><span><i class="s" style="box-shadow:inset 0 0 0 1.5px var(--work)"></i>не начато</span><span><i class="s" style="background:repeating-linear-gradient(-45deg,var(--ink3) 0 2px,transparent 2px 5px)"></i>прогнозный сдвиг</span>${pairSel.length&&UI.plan?`<span><i class="s" style="background:var(--ghost)"></i>план</span>`:""}<span><i class="s" style="width:2px;background:var(--ink)"></i>сегодня</span><span style="margin-left:auto">Клик по строке — подробности, связи и комментарии</span></div></div>
+  <div class="gleg"><span><i class="s" style="background:var(--work)"></i>в работе</span><span><i class="s" style="background:var(--green)"></i>выполнено</span><span><i class="s" style="background:var(--ochre)"></i>срок прошёл</span><span><i class="s" style="background:var(--red)"></i>проблемный вопрос</span><span><i class="s" style="box-shadow:inset 0 0 0 1.5px var(--work)"></i>не начато</span><span><i class="s" style="background:repeating-linear-gradient(-45deg,var(--ink3) 0 2px,transparent 2px 5px)"></i>прогнозный сдвиг</span>${pairSel.length&&UI.plan?`<span><i class="s" style="background:var(--ghost)"></i>план</span>`:""}<span><i class="s" style="width:2px;background:var(--ink)"></i>сегодня</span><span style="margin-left:auto">Клик по строке — подробности, связи и комментарии</span></div></div>
   ${pairSel.map(cmpHTML).join("")}`;
  const gw=$("#gw");
  if(keep===true){gw.scrollLeft=sl;gw.scrollTop=stp}else gw.scrollLeft=Math.max(0,x(TODAY)-(gw.clientWidth-lw)*.3);
@@ -1589,7 +1633,7 @@ function rowActs(u){const ids=BK[BOF[u]].ids,ix=ids.indexOf(u),pu=ix>0?ids[ix-1]
  return `<span class="ra"><button data-addop="${pu}:${u}" title="Вставить операцию выше">${I.up}</button><button data-addop="${u}:${nu}" title="Вставить операцию ниже">${I.dn}</button><button data-delop="${u}" title="Удалить операцию">${I.x}</button></span>`}
 function editCells(u,t,f){const fld=(k,v)=>isP(u)?`<span class="dt" title="Считается по этапам решения">${fD(k==="s"?f.S:f.F)}</span>`
   :`<span class="dt e"><input class="ed" data-ed="${u}:${k}" value="${fmtDT(v)}" spellcheck="false"></span>`;
- return `<span class="rp" title="${esc(t.resp)}">${esc(t.resp)}</span>${fld("s",t.S0)}${fld("f",t.F0)}<span class="dt e"><input class="ed" data-ed="${u}:pred" value="${esc(fmtPreds(t.pred,noOf))}" placeholder="—" spellcheck="false"></span>`}
+ return `<span class="rp e">${pickHTML(`data-ed="${u}:resp"`,t.resp,"—")}</span>${fld("s",t.S0)}${fld("f",t.F0)}<span class="dt e"><input class="ed" data-ed="${u}:pred" value="${esc(fmtPreds(t.pred,noOf))}" placeholder="—" spellcheck="false"></span>`}
 function cmpHTML(b){let tp=0,tf=0;
  const rows=b.merge.map(({p,f})=>{const a=p?FC[p]:null,z=f?FC[f]:null,da=a?dd(a.S,a.F):null,db=z?dd(z.S,z.F):null;if(da!=null)tp+=da;if(db!=null)tf+=db;const dl=da!=null&&db!=null?db-da:null;
   return `<tr><td>${esc(byId[f||p].name)}${!p?' <span class="x">вне плана</span>':""}${!f?' <span class="x">нет в факте</span>':""}</td><td class="r">${a?fD(a.S):""}</td><td class="r">${a?fD(a.F):""}</td><td class="r">${da!=null?fN(da):""}</td><td class="r">${z?fD(z.S):""}</td><td class="r">${z?fD(z.F):""}</td><td class="r">${db!=null?fN(db):""}</td><td class="r ${dl>.05?"plus":dl<-.05?"minus":""}">${dl==null?"":(dl>0?"+":"")+fN(dl)}</td><td class="r">${f?Math.round(pct(f))+"%":""}</td></tr>`}).join("");
@@ -1604,16 +1648,17 @@ function openDrawer(u){UI.sel=u;const t=byId[u],f=FC[u],i=S.issues[u],iss=openIs
  <div class="dr-b">
   <dl class="kv">
    ${canEdit(u)?`<dt>Название</dt><dd><input class="ed" data-ed="${u}:name" value="${esc(t.name)}" spellcheck="false"></dd>`:""}
-   <dt>Ответственный</dt><dd>${esc(t.resp||"—")}</dd>
-   ${canEdit(u)&&!isP(u)?`<dt>Начало</dt><dd><input class="ed" data-ed="${u}:s" value="${fmtDT(t.S0)}" spellcheck="false"></dd><dt>Окончание</dt><dd><input class="ed" data-ed="${u}:f" value="${fmtDT(t.F0)}" spellcheck="false"></dd><dt>После операций</dt><dd><input class="ed" data-ed="${u}:pred" value="${esc(fmtPreds(t.pred,noOf))}" placeholder="72; 73+0,5" spellcheck="false"></dd>`:`<dt>${canEdit(u)?"План":"По Project"}</dt><dd>${fDH(f.S0)} — ${fDH(f.F0)}</dd>`}
+   <dt>Ответственный</dt><dd>${canEdit(u)?pickHTML(`data-ed="${u}:resp"`,t.resp,"не назначен"):esc(t.resp||"—")}</dd>
+   ${canEdit(u)&&!isP(u)?`<dt>Начало</dt><dd><input class="ed" data-ed="${u}:s" value="${fmtDT(t.S0)}" spellcheck="false"></dd><dt>Окончание</dt><dd><input class="ed" data-ed="${u}:f" value="${fmtDT(t.F0)}" spellcheck="false"></dd><dt>После операций</dt><dd><input class="ed" data-ed="${u}:pred" value="${esc(fmtPreds(t.pred,noOf))}" placeholder="72; 73+0,5" spellcheck="false"></dd>`:`<dt>По графику</dt><dd>${fDH(f.S0)} — ${fDH(f.F0)}</dd>`}
    ${shifted||+f.S!==+f.S0?`<dt>Прогноз</dt><dd><span class="l">${fDH(f.S)} — ${fDH(f.F)}</span></dd>`:""}
    ${pl?`<dt>План</dt><dd>${fD(FC[pl].S)} — ${fD(FC[pl].F)}</dd>`:""}
    ${t.pred.length&&!(canEdit(u)&&!isP(u))?`<dt>После операций</dt><dd>${fmtPreds(t.pred,noOf).replace(/; /g,", ")||"—"}</dd>`:""}
-   ${t.note?`<dt>Примечание Project</dt><dd>${esc(t.note)}</dd>`:""}</dl>
+   ${t.note?`<dt>Примечание</dt><dd>${esc(t.note)}</dd>`:""}</dl>
+  ${lateHint(u)}
   ${PHONE()?ctxHTML(u):""}
-  <div class="dr-sec"><h4>Готовность</h4>${isP(u)?`<div class="pctrl"><span style="flex:1;color:var(--ink3);font-size:13px">Считается по этапам решения</span><output>${p}%</output></div>`:PHONE()?`<div class="pctrl"><output>${p}%</output></div>`:`<div class="pctrl"><input type="range" min="0" max="100" step="5" value="${p}" data-pctr="${u}"><output id="pout">${p}%</output></div>`}<div class="upd">${updText(u)}</div></div>
-  ${iss?`<div class="dr-sec"><h4>Проблемный вопрос</h4><div class="pbox">${issueFields(u)}<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="gdt ${i.gd?"on":""}" data-gd="${u}">${i.gd?I.flagF:I.flag} Нужно решение ГД</button>${PHONE()?`<div class="seg">${["открыт","в работе","решён"].map(v=>`<button class="${i.status===v?"on "+(v==="решён"?"g":v==="открыт"?"r":""):""}" data-ist="${u}:${v}">${v[0].toUpperCase()+v.slice(1)}</button>`).join("")}</div>`:`<button class="btn" data-ist="${u}:решён">Решено</button><button class="btn ghost" data-go-iss="${u}">Открыть в списке</button>`}</div></div></div>`
-   :`<div class="dr-sec"><button class="btn red" data-flag="${u}" style="justify-self:start">${I.flag} Отметить как проблемный вопрос</button>${i&&i.status==="решён"?`<div class="src">Был проблемный вопрос, решён: <q>${esc(i.problem)}</q></div>`:""}</div>`}
+  <div class="dr-sec"><h4>Готовность</h4>${isP(u)?`<div class="pctrl"><span style="flex:1;color:var(--ink3);font-size:13px">Считается по этапам решения</span><output>${p}%</output></div>`:PHONE()||!can("pct_edit")?`<div class="pctrl"><output>${p}%</output></div>`:`<div class="pctrl"><input type="range" min="0" max="100" step="5" value="${p}" data-pctr="${u}"><output id="pout">${p}%</output></div>`}${!isP(u)&&p<100&&can("pct_edit")&&!PLANIDS.has(u)?`<button class="btn ghost" data-done="${u}" title="${can("plan_edit")?"Готовность 100 % и фактическое окончание — сейчас":"Готовность 100 %"}">Выполнено сегодня</button>`:""}<div class="upd">${updText(u)}</div></div>
+  ${iss?`<div class="dr-sec"><h4>Проблемный вопрос</h4><div class="pbox">${issueFields(u)}${!can("issue_edit")?"":`<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="gdt ${i.gd?"on":""}" data-gd="${u}">${i.gd?I.flagF:I.flag} Нужно решение ГД</button>${PHONE()?`<div class="seg">${["открыт","в работе","решён"].map(v=>`<button class="${i.status===v?"on "+(v==="решён"?"g":v==="открыт"?"r":""):""}" data-ist="${u}:${v}">${v[0].toUpperCase()+v.slice(1)}</button>`).join("")}</div>`:`<button class="btn" data-ist="${u}:решён">Решено</button><button class="btn ghost" data-go-iss="${u}">Открыть в списке</button>`}</div>`}</div></div>`
+   :`<div class="dr-sec">${can("issue_edit")?`<button class="btn red" data-flag="${u}" style="justify-self:start">${I.flag} Отметить как проблемный вопрос</button>`:""}${i&&i.status==="решён"?`<div class="src">Был проблемный вопрос, решён: <q>${esc(i.problem)}</q></div>`:""}</div>`}
   ${isP(u)?`<div class="dr-sec">${stepsHTML(u)}</div>`:""}
   <div class="dr-sec">${commentsHTML(u)}</div></div>`;
  $("#drawer").classList.add("on");$("#dback").classList.add("on");$("#drawer").setAttribute("aria-hidden","false");growAll($("#drawer"));
@@ -1723,6 +1768,20 @@ function applyPlan(ops){ops.forEach(o=>{const t=byId[o.uid];if(!t)return;t.s=str
  if(o.constraint!=null)t.constraint=strOf(o.constraint);else delete t.constraint});
  renumber(DATA.tasks);syncSums(DATA.tasks);buildModel()}
 const blockEnd=u=>{const b=BK[BOF[u]];return b&&b.main!=null&&FC[b.main]?+FC[b.main].F0:null};
+/* «Выполнено сегодня» (DECISIONS 06.10): Паша ведёт факт одним нажатием — 100 % и фактическое окончание «сейчас»
+   (с пересчётом последователей). Без права на структуру плана (ГД) — только 100 %. Один шаг отмены. */
+function doneToday(u){const t=byId[u];if(!t)return;need(()=>{
+ const was=Math.round(pct(u)),T0=T(u);T0.pct=100;T0.pctAt=new Date().toISOString();T0.pctBy=S.me;
+ const lg={act:"edit",uid:u,name:t.name,field:"готовность",from:was+"%",to:"100% (выполнено сегодня)"};
+ const now=new Date();now.setMinutes(0,0,0);
+ if(can("plan_edit")&&!PLANIDS.has(u)&&+now>+t.S0&&Math.abs(+now-+t.F0)>=36e5){const res=editFinish(planOps(),u,+now);
+  if(!res.error)return commitPlan(res,u,[lg,{act:"edit",uid:u,name:t.name,field:"окончание",from:fmtDT(+t.F0),to:fmtDT(+now)}])}
+ LOG(lg);touch(u);save();rerender()})}
+/* Подсказка в панели: почему прогноз операции позже графика — просрочена или сдвинута предшественниками. */
+function lateHint(u){const t=byId[u],f=FC[u];if(!f||isP(u)||pct(u)>=100||PLANIDS.has(u))return"";const l=dd(f.F0,f.F);if(l<=.05)return"";
+ const own=+f.F0<+NOW;
+ return `<div class="hint-late">${own?`Просрочена: по графику окончание ${fDH(f.F0)}, прогноз ${fDH(f.F)} (+${fN(l)} сут).${can("pct_edit")?" Обновите процент"+(can("plan_edit")?" или окончание":"")+".":""}`
+  :`Прогноз сдвинут предшествующими операциями: +${fN(l)} сут, окончание ${fDH(f.F)}.`}</div>`}
 function commitPlan(res,u,lg){const e0=blockEnd(u);applyPlan(res.ops);compute();
  [].concat(lg||[]).forEach(LOG);
  const n0=res.changed.filter(x=>x!==u).length,e1=blockEnd(u),b=BK[BOF[u]];
@@ -1740,6 +1799,8 @@ let EARLY=null;
 function editField(el){const[us,f]=el.dataset.ed.split(":"),u=+us,t=byId[u];if(!t||!canEdit(u))return;const v=el.value;
  if(f==="name"){const n=v.replace(/\s+/g," ").trim();if(!n){el.value=t.name;return}if(n===t.name)return;
   return need(()=>{LOG({act:"edit",uid:u,name:t.name,field:"название",from:t.name,to:n});t.name=n;touch(u);save();buildModel();rerender()})}
+ if(f==="resp"){const n=v.replace(/\s+/g," ").trim();if(n===(t.resp||""))return;
+  return need(()=>{LOG({act:"edit",uid:u,name:t.name,field:"ответственный",from:t.resp||"",to:n});t.resp=n;touch(u);save();rerender()})}
  if(f==="s"||f==="f"){const cur=+(f==="s"?t.S0:t.F0),ms=parseDT(v,cur);
   if(ms==null)return fieldErr(el,"Дата вида 22.09.26 12:00");
   if(ms===cur){el.value=fmtDT(cur);return}
@@ -1826,7 +1887,7 @@ function logRows(){const q=LGF.q.trim().toLowerCase(),rows=[...S.log].reverse().
   out+=`<div class="lg-row ${go?"go":""}" ${go?`data-lgo="${e.uid}"`:""}><span class="tm">${p2(d.getHours())}:${p2(d.getMinutes())}</span><span class="wh">${esc(e.who||"—")}</span><span class="tx">${esc(logText(e))}</span></div>`});
  return out}
 function openLog(){LGF={who:"",q:""};const who=[...new Set(S.log.map(e=>e.who||""))].sort((a,b)=>a.localeCompare(b,"ru"));
- openModal(`<h3>История изменений</h3><p>Кто, когда и что менял. Записи едут в файле вместе с «Сохранить файл».</p>
+ openModal(`<h3>История изменений</h3><p>Кто, когда и что менял.</p>
   <div class="lg-bar"><select id="lgw" data-lgw><option value="">Все люди</option>${who.map(x=>`<option value="${esc(x)}">${esc(x||"—")}</option>`).join("")}</select><input id="lgq" class="srch" placeholder="Поиск по операции или тексту" autocomplete="off"></div>
   <div class="lg-list" id="lgl">${logRows()}</div>
   <div class="mfoot lg-foot"><span class="m">Записей: ${S.log.length}${S.log.length>=LOG_MAX?" (ранние удалены)":""}</span><span class="sp"></span><span id="lgc"><button class="btn ghost" data-act="lgclear">Очистить журнал</button></span><button class="btn pri" data-act="mclose">Закрыть</button></div>`);
@@ -1863,12 +1924,12 @@ function renderTab(keep){renderMe();paintDirty();const n=issList(true).length;$(
  if(LAND())renderGnt(keep);else if(UI.tab==="sum")renderSum();else if(UI.tab==="iss")renderIss();else renderGnt(keep)}
 const rerender=()=>{renderTab(true);refreshDrawer()};
 function askFile(){const f=$("#fx");f.onchange=()=>{const file=f.files[0];if(file)readFile(file);f.value=""};f.click()}
-function readFile(file){const r=new FileReader();r.onload=()=>{const t=String(r.result);
+function readFile(file){if(!(can("import")&&can("plan_edit")))return toast("Загружать план из Project вам недоступно");const r=new FileReader();r.onload=()=>{const t=String(r.result);
  if(/\.xml$/i.test(file.name))importXML(t,file.name);
  else openModal(`<h3>Непонятный файл</h3><p>Нужен XML из Project: Файл → Сохранить как → тип «Формат XML».</p><div class="mfoot"><button class="btn pri" data-act="mclose">Понятно</button></div>`)};
  r.readAsText(file,"utf-8")}
 
-document.addEventListener("click",e=>{if(!e.target.closest(".more"))$("#menu").hidden=true;const el=e.target.closest("[data-act],[data-tab],[data-flag],[data-goto],[data-go-iss],[data-gd],[data-ist],[data-cmadd],[data-cmdel],[data-stepadd],[data-stepdel],[data-issdel],[data-tw],[data-eds],[data-blkt],[data-scale],[data-fs],[data-fb],[data-fr],[data-me],[data-pick],[data-cfv],[data-addop],[data-delop],[data-lgo]");
+document.addEventListener("click",e=>{if(!e.target.closest(".more"))$("#menu").hidden=true;const el=e.target.closest("[data-act],[data-tab],[data-done],[data-flag],[data-goto],[data-go-iss],[data-gd],[data-ist],[data-cmadd],[data-cmdel],[data-stepadd],[data-stepdel],[data-issdel],[data-tw],[data-eds],[data-blkt],[data-scale],[data-fs],[data-fb],[data-fr],[data-me],[data-pick],[data-cfv],[data-addop],[data-delop],[data-lgo]");
  if(el){const a=el.dataset;
   if(a.tab)return go(a.tab);
   if(a.lgo){closeModal();return goto(+a.lgo)}
@@ -1876,6 +1937,7 @@ document.addEventListener("click",e=>{if(!e.target.closest(".more"))$("#menu").h
   if(a.delop){e.stopPropagation();return delOp(+a.delop)}
   if(a.flag){e.stopPropagation();return flag(+a.flag)}
   if(a.goto)return goto(+a.goto);
+  if(a.done)return doneToday(+a.done);
   if(a.goIss){closeDrawer();go("iss");return requestAnimationFrame(()=>{const c=$("#card-"+a.goIss);if(c){c.scrollIntoView({behavior:"smooth",block:"center"});c.classList.add("lit")}})}
   if(a.gd)return need(()=>{const i=S.issues[a.gd];LOG({act:"issue",uid:+a.gd,name:byId[a.gd].name,field:"решение ГД",from:i.gd?"да":"нет",to:i.gd?"нет":"да"});i.gd=!i.gd;touchIss(+a.gd);save();rerender()});
   if(a.ist)return need(()=>{const[u,v]=a.ist.split(":"),was=S.issues[u].status;LOG({act:"issue",uid:+u,name:byId[u].name,field:"статус",from:was,to:v});S.issues[u].status=v;
@@ -1884,10 +1946,10 @@ document.addEventListener("click",e=>{if(!e.target.closest(".more"))$("#menu").h
   if(a.cmadd)return need(()=>{const ta=$(`[data-cmin="${a.cmadd}"]`,el.closest(".cm")),v=ta.value.trim();if(!v)return ta.focus();
    LOG({act:"comment",uid:+a.cmadd,name:byId[a.cmadd].name,to:trunc(v,120)});
    (T(a.cmadd).cm=T(a.cmadd).cm||[]).push({who:S.me,at:new Date().toISOString(),t:v,...(SITE?{ck:newKey()}:{})});touch(+a.cmadd);save();rerender()});
-  if(a.cmdel){const[u,k]=a.cmdel.split(":");if(confirm("Удалить комментарий?")){LOG({act:"comment",uid:+u,name:byId[u].name,t:"комментарий удалён"});S.tasks[u].cm.splice(+k,1);save();rerender()}return}
+  if(a.cmdel){const[u,k]=a.cmdel.split(":");{LOG({act:"comment",uid:+u,name:byId[u].name,t:"комментарий удалён"});S.tasks[u].cm.splice(+k,1);save();rerender()}return}
   if(a.stepadd)return need(()=>{const u=+a.stepadd;S.steps[u]=S.steps[u]||{items:[]};LOG({act:"edit",uid:u,name:byId[u].name,field:"этапы",to:"добавлен этап"});S.steps[u].items.push({n:"Новый этап",who:"",dur:1,pct:0});EDS.add(u);touchSteps(u);save();rerender()});
-  if(a.stepdel){const[u,k]=a.stepdel.split(":");if(confirm("Удалить этап?"))need(()=>{LOG({act:"edit",uid:+u,name:byId[u].name,field:"этапы",to:"удалён этап «"+S.steps[u].items[+k].n+"»"});S.steps[u].items.splice(+k,1);touchSteps(+u);save();rerender()});return}
-  if(a.issdel){if(confirm("Убрать вопрос по удалённой операции?"))need(()=>{LOG({act:"issue",uid:+a.issdel,name:(S.issues[a.issdel].gone||{}).name||"",field:"вопрос",to:"убран из списка"});delete S.issues[a.issdel];S.order=S.order.filter(x=>x!==+a.issdel);save();rerender()});return}
+  if(a.stepdel){const[u,k]=a.stepdel.split(":");need(()=>{LOG({act:"edit",uid:+u,name:byId[u].name,field:"этапы",to:"удалён этап «"+S.steps[u].items[+k].n+"»"});S.steps[u].items.splice(+k,1);touchSteps(+u);save();rerender()});return}
+  if(a.issdel){need(()=>{LOG({act:"issue",uid:+a.issdel,name:(S.issues[a.issdel].gone||{}).name||"",field:"вопрос",to:"убран из списка"});delete S.issues[a.issdel];S.order=S.order.filter(x=>x!==+a.issdel);save();rerender()});return}
   if(a.eds){const u=+a.eds;EDS.has(u)?EDS.delete(u):EDS.add(u);return rerender()}
   if(a.tw){e.stopPropagation();S.open[a.tw]=!S.open[a.tw];return renderGnt(true)}
   if(a.blkt){const k=a.blkt,b=UI.blocks;UI.blocks=b.includes(k)?(b.length>1?b.filter(x=>x!==k):b):[...b,k];
@@ -1942,6 +2004,7 @@ function impInfoModal(){const L=S.lastImport;if(!L)return;
   <div class="dlist">${items||`<div class="empty" style="margin:6px">Изменений не было</div>`}</div>
   <div class="mfoot"><button class="btn ghost" data-act="mclose">Закрыть</button><button class="btn pri" data-act="showimp">${UI.showImp?"Снять подсветку":"Показать в графике"}</button></div>`)}
 document.addEventListener("change",e=>{const a=e.target.dataset;
+ if(a.pick!==undefined&&!pickOk(e.target))return;
  if(a.lgw!==undefined){LGF.who=e.target.value;$("#lgl").innerHTML=logRows();return}
  if(a.ed)return editField(e.target);
  if(a.opt==="edit"){UI.edit=e.target.checked;return rerender()}
@@ -1973,7 +2036,7 @@ document.addEventListener("mousemove",e=>{const tc=e.target.closest(".row .tc"),
  if(r.dataset.tipPlan){const u=+r.dataset.tipPlan,f=FC[u];h=`<b>${esc(byId[u].name)}</b><br><span class="m">По плану: ${fD(f.S)}–${fD(f.F)}. В факте эта операция не выполнялась.</span>`}
  else if(r.classList.contains("stp"))h=`<b>${esc(r.querySelector(".t").textContent)}</b><br><span class="m">Этап решения: ${esc(byId[+r.dataset.id].name)}</span>`;
  else{const u=+r.dataset.id,t=byId[u],f=FC[u],iss=openIss(u);
-  h=`<b>${esc(t.name)}</b><br>${fDH(f.S)} — ${fDH(f.F)}, ${fN(dd(f.S,f.F))} сут, ${Math.round(pct(u))}%`+(+f.F>+f.F0+36e5?`<br><span class="m">По Project окончание ${fDH(f.F0)}</span>`:"")+(t.resp?`<br>Ответственный: ${esc(t.resp)}`:"")+(t.note?`<br><span class="m">${esc(t.note)}</span>`:"")+(iss?`<br><b style="color:#ffb3aa">Проблема: ${esc(iss.problem||"не описана")}</b>`:"")+`<br><span class="m">${updText(u)}</span>`}
+  h=`<b>${esc(t.name)}</b><br>${fDH(f.S)} — ${fDH(f.F)}, ${fN(dd(f.S,f.F))} сут, ${Math.round(pct(u))}%`+(+f.F>+f.F0+36e5?`<br><span class="m">По графику окончание ${fDH(f.F0)}</span>`:"")+(t.resp?`<br>Ответственный: ${esc(t.resp)}`:"")+(t.note?`<br><span class="m">${esc(t.note)}</span>`:"")+(iss?`<br><b style="color:#ffb3aa">Проблема: ${esc(iss.problem||"не описана")}</b>`:"")+`<br><span class="m">${updText(u)}</span>`}
  tip.innerHTML=h;tip.style.display="block";tip.style.left=Math.min(e.clientX+16,innerWidth-380)+"px";tip.style.top=Math.min(e.clientY+16,innerHeight-tip.offsetHeight-10)+"px"});
 /* перетаскивание файлов */
 let dragN=0;
@@ -1986,15 +2049,18 @@ addEventListener("beforeunload",e=>{if(SITE?SYNC&&(SYNC.busy()||SYNC.pending()):
 /* ================== печать A3 ================== */
 let PRINT=false;
 function buildPrint(){compute();PRINT=true;const keep=UI.tab;UI.tab="sum";renderSum();const sum=$("#tab-sum").innerHTML;UI.tab=keep;PRINT=false;
- $("#print").innerHTML=`<div class="pr-h"><h1>Статус проекта ГДТ</h1><div>на ${TODAY.getDate()} ${MONG[TODAY.getMonth()]} ${TODAY.getFullYear()} г., данные Project от ${fDT(D(DATA.saved))}</div></div>${sum}`;
+ $("#print").innerHTML=`<div class="pr-h"><h1>Статус проекта ГДТ</h1><div>на ${TODAY.getDate()} ${MONG[TODAY.getMonth()]} ${TODAY.getFullYear()} г.</div></div>${sum}`;
  renderTab(true)}
 addEventListener("beforeprint",buildPrint);
 $("#printBtn").onclick=()=>{buildPrint();window.print()};
 
 /* ================== старт ================== */
+/* Сведения о последней загрузке из Project — только тому, кто загружает (planner/admin), и неделю после загрузки
+   (аудит 06.10, BACKLOG 1): через месяц «изменений при загрузке: 43» ни о чём не говорит. */
+const recentImp=L=>!!(impCount(L)&&L.at&&Date.now()-Date.parse(L.at)<7*DAY&&(!SITE||siteCan("import")));
 function asofHTML(){const L=S.lastImport;
- return `Казанское НГКМ, на <b>${TODAY.getDate()} ${MONG[TODAY.getMonth()]}, ${WD[TODAY.getDay()]}</b>. Данные Project от ${fDT(D(DATA.saved))}`+
-  (impCount(L)?` · <button class="srcline" data-act="impinfo">изменений при загрузке: ${impCount(L)}</button>`:"")}
+ return `Казанское НГКМ, на <b>${TODAY.getDate()} ${MONG[TODAY.getMonth()]}, ${WD[TODAY.getDay()]}</b>`+
+  (recentImp(L)?` · <button class="srcline" data-act="impinfo">загрузка из Project ${fD(new Date(L.at))}: изменений ${impCount(L)}</button>`:"")}
 const setTop=()=>document.documentElement.style.setProperty('--toph',$('.top').offsetHeight+'px');setTop();addEventListener('resize',setTop);paintMode();
 /* Запуск: версия-файл — сразу; сайт — после входа и загрузки из базы (siteApply в src/site.js). */
 function boot(){buildModel();initState();
@@ -2037,7 +2103,7 @@ function siteApply(L,remote){
  if(BOOTED&&busyUI())return false;
  const x=fromRows(L),open=S.open||{};
  DATA=x.DATA;S={...blankState(),...x.S,open,me:ME_.name,dirty:false};
- if(!BOOTED){BOOTED=true;boot();renderMe();return true}
+ if(!BOOTED){BOOTED=true;boot();renderMe();$('[data-act="impx"]').hidden=!(siteCan("import")&&siteCan("plan_edit"));return true}
  buildModel();
  if(remote){HIST=makeHistory(snapNow);UNDO_D.length=0;REDO_D.length=0;toast.hot=false}   // чужая правка: отмена не должна её затереть
  else HIST.rebase();
