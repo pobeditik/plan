@@ -188,13 +188,15 @@ textarea.ed{line-height:1.45}
 /* этапы закупки */
 .steps{display:grid;gap:4px}
 .steps h4{margin:0 0 4px;font-size:13px;font-weight:600;color:var(--ink2)}
-.stp{display:grid;grid-template-columns:18px 1fr 100px 50px 56px 22px;gap:8px;align-items:center;font-size:13px;padding:5px 0;border-bottom:1px solid var(--rule)}
+.stp{display:grid;grid-template-columns:18px 1fr 120px 54px 76px 22px;gap:8px;align-items:center;font-size:13px;padding:5px 0;border-bottom:1px solid var(--rule)}
 .stp .dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--ink3)}
 .stp.d .dot{background:var(--green);border-color:var(--green)}
 .stp.w .dot{background:conic-gradient(var(--ink2) var(--p),transparent 0);border-color:var(--ink2)}
 .stp.l{opacity:.55}
-.stp input{width:100%;border:1px solid transparent;background:transparent;border-radius:6px;padding:3px 5px}
-.stp input:hover{border-color:var(--rule)}
+.stp input{width:100%;border:1px solid var(--rule2);background:var(--surface);border-radius:6px;padding:4px 6px;min-height:30px}
+.stp input:hover{border-color:var(--ink3)}
+.stp input:disabled{background:transparent;border-color:var(--rule)}
+.stp.sh{font-size:11.5px;font-weight:600;color:var(--ink3);padding:0 0 2px;border-bottom:1px solid var(--rule2)}.stp.sh span:nth-child(4),.stp.sh span:nth-child(5){text-align:right}
 .stp input:focus{outline:none;border-color:var(--ink3);background:var(--raised)}
 .stp input[type=number]{text-align:right}
 .stp .x{border:0;background:none;color:var(--ink3);font-size:16px;line-height:1;padding:0}
@@ -254,6 +256,11 @@ textarea.ed{line-height:1.45}
 .row.prob .lc{background:color-mix(in srgb,var(--red) 8%,var(--surface));box-shadow:inset 4px 0 0 var(--red)}
 .row.prob .tc{background:color-mix(in srgb,var(--red) 5%,transparent)}
 .row.flash .lc,.row.flash .tc{animation:flash 1.6s var(--out)}
+.row.hot .lc,.row.hot .tc{background:var(--ochre-t)!important}.row.hot .lc{box-shadow:inset 6px 0 0 var(--ochre)!important}
+.row.hot{outline:2px solid var(--ochre);outline-offset:-2px;position:relative;z-index:2;animation:hotin .9s var(--out)}
+.row.hot .bar{box-shadow:0 0 0 2px var(--ink),0 0 14px 2px color-mix(in srgb,var(--ochre) 70%,transparent)}
+@keyframes hotin{0%,40%{outline-color:var(--ink)}}
+.fi.hot{outline:2px solid var(--ochre);background:var(--ochre-t)}
 @keyframes flash{0%,30%{background:color-mix(in srgb,var(--ink) 18%,var(--surface))}}
 .row.blk{--rh:48px}
 .row.blk .lc{background:var(--raised);border-bottom:1px solid var(--rule2)}
@@ -1093,7 +1100,8 @@ function toRows(DATA, S) {
       at: i.at || null, by_name: i.by || ''
     };
   });
-  const steps = Object.entries(st.steps || {}).map(([u, x]) => ({ uid: +u, items: x.items || [], at: x.at || null, by_name: x.by || '' }));
+  // items копируются: иначе снимок «что в базе» в sync и текущее состояние делят один массив — правка этапа на месте не видна diffRows (16.10)
+  const steps = Object.entries(st.steps || {}).map(([u, x]) => ({ uid: +u, items: (x.items || []).map(i => ({ ...i })), at: x.at || null, by_name: x.by || '' }));
   const log = (st.log || []).map(l => ({
     at: l.at, who: l.who || '', act: l.act, uid: l.uid ?? null, name: l.name ?? null, field: l.field ?? null,
     from_v: l.from === undefined ? null : l.from, to_v: l.to === undefined ? null : l.to, t: l.t ?? null,
@@ -1681,12 +1689,13 @@ function progSheet(R,ed){const SW=1520,SH=1030,LW=330,TW=SW-LW,HEAD=96,SC=46,LEG
  const all=R.filter(r=>r.S&&r.F),pS=R[0].S,pF=R[0].F;
  const lo=Math.min(...all.map(r=>+r.S),...all.filter(r=>r.plan&&r.plan[0]).map(r=>+r.plan[0])),hi=Math.max(...all.map(r=>+r.F),...all.filter(r=>r.plan&&r.plan[1]).map(r=>+r.plan[1]),+TODAY);
  const a0=new Date(lo-14*DAY),a1=new Date(hi+16*DAY),px=TW/dd(a0,a1),X=d=>dd(a0,d)*px;
- const HB={proj:58,br:48,fld:48,pad:42,dpm:42,work:42},tot=R.reduce((s,r)=>s+HB[r.kind],0),k=Math.min(1.2,(SH-HEAD-SC-LEG)/tot);
+ const RB=R.filter(r=>r.kind!=="proj");   // строку всего проекта не показываем (16.10): сроки и так видны по бригадам; её итог — в шапке
+ const HB={proj:58,br:48,fld:48,pad:42,dpm:42,work:42},tot=RB.reduce((s,r)=>s+HB[r.kind],0),k=Math.min(1.2,(SH-HEAD-SC-LEG)/tot);
  let sc="",bg="";for(let m=new Date(a0.getFullYear(),a0.getMonth(),1);+m<+a1;){const n=new Date(m.getFullYear(),m.getMonth()+1,1),a=+m<+a0?a0:m,b=+n>+a1?a1:n;
   if(X(b)-X(a)>80)sc+=`<div class="mn" style="left:${X(a).toFixed(1)}px;width:${(X(b)-X(a)).toFixed(1)}px">${PMON[m.getMonth()]} ${m.getFullYear()}</div>`;
   if(+m>=+a0)bg+=`<div class="mo" style="left:${X(m).toFixed(1)}px"></div>`;m=n}
  for(let q=new Date(+a0);+q<+a1;q=new Date(+q+7*DAY)){sc+=`<div class="dy" style="left:${X(q).toFixed(1)}px">${q.getDate()}</div>`;bg+=`<div class="wk" style="left:${X(q).toFixed(1)}px"></div>`}
- const body=R.map(r=>{const h=Math.round(HB[r.kind]*k),bh=Math.round((r.kind==="proj"?20:r.kind==="br"||r.kind==="fld"?18:16)*Math.min(1,k+.1)),top=h-bh-Math.round(6*k);   // подпись над полосой (17 px) должна влезть в строку
+ const body=RB.map(r=>{const h=Math.round(HB[r.kind]*k),bh=Math.round((r.kind==="proj"?20:r.kind==="br"||r.kind==="fld"?18:16)*Math.min(1,k+.1)),top=h-bh-Math.round(6*k);   // подпись над полосой (17 px) должна влезть в строку
   if(!r.S||!r.F)return `<div class="pr ${r.kind}${ed?" pe":""}" style="height:${h}px" ${ed?`data-pu="${r.uid}"`:""}><div class="lc"><span class="nm">${esc(r.name)}</span><span class="pc"></span></div><div class="tc"></div></div>`;
   const x=X(r.S),w=Math.max(3,X(r.F)-x),st=!r.sum&&r.pct>=100?" done":!r.sum&&r.pct>0?" cur":"";
   const inner=st===" cur"?`<i style="width:${r.pct}%"></i><span>${r.pct}%</span>`:(!r.sum&&w>48?`<span>${pdur(r.S,r.F)} сут</span>`:"");
@@ -1794,15 +1803,16 @@ function stepsHTML(u){const sp=stepPlan(u),cur=sp.find(x=>!x.locked&&x.pct<100);
  if(!EDS.has(u)||!can("steps_edit"))return `<div class="pipe"><div class="pipe-h"><h4>Этапы решения</h4>${can("steps_edit")?`<button data-eds="${u}">Изменить этапы</button>`:""}</div>
   <div class="segs">${sp.map(x=>`<div class="sg ${x.pct>=100?"d":""} ${x.locked?"l":""} ${cur&&cur.i===x.i?"cur":""}"><div class="b"><i style="width:${x.pct}%"></i></div><div class="n">${esc(x.n)}</div><div class="m">${esc(x.who||"—")}, ${fN(+x.dur)} сут, ${x.pct}%</div><div class="m">${fD(x.S)}–${fD(x.F)}</div></div>`).join("")}</div></div>`;
  return `<div class="steps"><div class="pipe-h"><h4>Этапы решения</h4><button data-eds="${u}">Готово</button></div>
+ ${sp.length?`<div class="stp sh"><span></span><span>Этап</span><span>Исполнитель</span><span>Сут</span><span>Готово, %</span><span></span></div>`:""}
  ${sp.map(x=>`<div class="stp ${x.pct>=100?"d":x.pct>0?"w":""} ${x.locked?"l":""}" style="--p:${x.pct}%">
   <span class="dot"></span>
-  <input value="${esc(x.n)}" data-step="${u}:${x.i}:n" title="Название этапа">
-  <input value="${esc(x.who)}" data-step="${u}:${x.i}:who" title="Исполнитель">
+  <input value="${esc(x.n)}" data-step="${u}:${x.i}:n" title="Название этапа" placeholder="Что сделать">
+  <input value="${esc(x.who)}" data-step="${u}:${x.i}:who" title="Исполнитель" placeholder="Кто">
   <input type="number" min="0.5" step="0.5" value="${x.dur}" data-step="${u}:${x.i}:dur" title="Длительность, сут">
   <input type="number" min="0" max="100" step="10" value="${x.raw}" data-step="${u}:${x.i}:pct" ${x.locked?'disabled title="Сначала завершите предыдущий этап"':'title="Готовность, %"'}>
   <button class="x" data-stepdel="${u}:${x.i}" title="Удалить этап">×</button></div>`).join("")}
  <button class="addstep" data-stepadd="${u}">+ этап</button>
- <div class="src">Столбцы: этап, исполнитель, сут, %. Следующий этап открывается, когда предыдущий на 100%.</div></div>`}
+ <div class="src">Следующий этап открывается, когда предыдущий на 100%. Изменение сохраняется, когда уходите из поля (Tab, Enter или щелчок мимо).</div></div>`}
 function commentsHTML(u){const c=(S.tasks[u]&&S.tasks[u].cm)||[];
  return `<div class="cm"><h4>Комментарии${c.length?" ("+c.length+")":""}</h4>
   ${c.map((x,k)=>`<div class="cmi"><div class="w"><b>${esc(x.who||"—")}</b>, ${fDT(new Date(x.at))}</div>${esc(x.t).replace(/\n/g,"<br>")}${isAdmin()||(can("comment")&&x.who===S.me)?`<button class="del" data-cmdel="${u}:${k}" title="Удалить">×</button>`:""}</div>`).join("")}
@@ -1953,7 +1963,7 @@ function renderFeed(){compute();const y=scrollY;
    h+=`<div class="fh"><h3>${esc(b.title)}</h3><span class="fhp">${Math.round(blockPct(b.ids))}%</span>${f?`<div class="fhs">${fD(f.S)} – ${fD(f.F)}${b.sub?" · "+esc(b.sub):""}</div>`:""}</div>`;return}
   if(r.k!=="task")return;
   const u=r.id,t=byId[u],f=FC[u],s=stat(u),p=Math.round(pct(u)),shifted=+f.F>+f.F0+36e5,iss=openIss(u),ncm=((S.tasks[u]||{}).cm||[]).length;
-  h+=`<button class="fi ${iss?"prob":""} ${UI.sel===u?"sel":""}" data-id="${u}" id="r-${u}" style="--c:${ST_[s].c}">
+  h+=`<button class="fi ${iss?"prob":""} ${UI.sel===u?"sel":""} ${UI.hot===u?"hot":""}" data-id="${u}" id="r-${u}" style="--c:${ST_[s].c}">
    <span class="ft">${iss?I.flagF:""}${esc(t.name)}</span><span class="fq ${p>=100?"d":""}">${p}%</span>
    <span class="fm">№${t.id} · ${fD(f.S)} – ${fD(f.F)}${shifted?` <b>+${fN(dd(f.F0,f.F))} сут</b>`:""}${t.resp?" · "+esc(t.resp):""}${ncm?` · ${I.cm}${ncm}`:""}</span>
    ${miniBar(u,RG[bk])}</button>`});
@@ -2048,7 +2058,7 @@ function renderGnt(keep){if(PORT())return renderFeed();compute();
   const icons=`${iss?`<span class="ic r" title="Проблемный вопрос">${I.flagF}</span>`:PHONE()||!can("issue_edit")?"":`<button class="fl" data-flag="${u}" title="Отметить как проблемный вопрос">${I.flag}</button>`}${ncm?`<span class="ic" title="Комментарии">${I.cm}${ncm}</span>`:""}`;
   const tw=isP(u)?`<button class="tw ${S.open[u]?"o":""}" data-tw="${u}" title="Этапы решения">▸</button>`:"";
   const pcc=isP(u)||PHONE()||!can("pct_edit")?`<span class="pc ${p>=100?"d":""}">${p}<small>%</small></span>`:`<span class="pc ${p>=100?"d":""}"><input type="number" min="0" max="100" step="5" value="${p}" data-pct="${u}"><small>%</small></span>`;
-  R+=`<div class="row ${iss?"prob":""} ${UI.sel===u?"sel":""} ${impOf(u)}" data-id="${u}" id="r-${u}"><div class="lc"><span class="num">${t.id}</span><span class="nm">${tw}${ED?`<input class="ed nmi" data-ed="${u}:name" value="${esc(t.name)}" spellcheck="false">`:`<span class="t">${esc(t.name)}</span>`}${impBadges(u)}${icons}${ED?rowActs(u):""}</span>${cmp?"":ED?editCells(u,t,f):`<span class="rp" title="${esc(t.resp)}">${esc(t.resp)}</span><span class="dt">${fD(f.S)}</span><span class="dt ${shifted?"l":""}">${fD(f.F)}${shifted?`<small>+${fN(dd(f.F0,f.F))}</small>`:""}</span>`}${pcc}</div><div class="tc">${bars}${lab}</div></div>`;
+  R+=`<div class="row ${iss?"prob":""} ${UI.sel===u?"sel":""} ${UI.hot===u?"hot":""} ${impOf(u)}" data-id="${u}" id="r-${u}"><div class="lc"><span class="num">${t.id}</span><span class="nm">${tw}${ED?`<input class="ed nmi" data-ed="${u}:name" value="${esc(t.name)}" spellcheck="false">`:`<span class="t">${esc(t.name)}</span>`}${impBadges(u)}${icons}${ED?rowActs(u):""}</span>${cmp?"":ED?editCells(u,t,f):`<span class="rp" title="${esc(t.resp)}">${esc(t.resp)}</span><span class="dt">${fD(f.S)}</span><span class="dt ${shifted?"l":""}">${fD(f.F)}${shifted?`<small>+${fN(dd(f.F0,f.F))}</small>`:""}</span>`}${pcc}</div><div class="tc">${bars}${lab}</div></div>`;
   geo[u]={ri,L,R:x(f.F)}});
  let links="";const RH=[];let y=0;rows.forEach(r=>{const h=r.k==="blk"?48:42;RH.push([y,h]);y+=h});
  if(UI.sel&&geo[UI.sel]){const t=byId[UI.sel],g=geo[UI.sel],succ=ORDER.filter(i=>byId[i].pred.some(q=>q.uid===UI.sel)&&geo[i]);
@@ -2143,7 +2153,7 @@ function approvePlan(){const b=BK[APPR],basis=(($("#apb")||{}).value||"").replac
 /* ================== ПАНЕЛЬ ДЕТАЛЕЙ ================== */
 /* предшественники списком под полем: номер, название, сдвиг; клик — к той операции */
 const predList=t=>t.pred.filter(p=>byId[p.uid]).length?`<div class="pl2">${t.pred.filter(p=>byId[p.uid]).map(p=>`<button class="cx2" data-id="${p.uid}">№${noOf(p.uid)} ${esc(byId[p.uid].name)}${p.lag?` <em>${p.lag>0?"+":"−"}${fmtLag(p.lag)} сут</em>`:""}</button>`).join("")}</div>`:"";
-function openDrawer(u){closeHist();UI.sel=u;const t=byId[u],f=FC[u],i=S.issues[u],iss=openIss(u),p=Math.round(pct(u)),pl=PAIROF[u],shifted=+f.F>+f.F0+36e5;
+function openDrawer(u){closeHist();if(UI.hot!==u){const o=UI.hot;UI.hot=null;if(o){const r=$("#r-"+o);if(r)r.classList.remove("hot")}}UI.sel=u;const t=byId[u],f=FC[u],i=S.issues[u],iss=openIss(u),p=Math.round(pct(u)),pl=PAIROF[u],shifted=+f.F>+f.F0+36e5;
  $("#drawer").innerHTML=`<div class="dr-h"><div style="flex:1"><div class="blk">${esc(BK[BOF[u]].title)}, операция №${t.id}</div><h3>${esc(t.name)}</h3></div><button class="dr-x" data-act="dclose" title="Закрыть">×</button></div>
  <div class="dr-b">
   <dl class="kv">
@@ -2164,7 +2174,7 @@ function openDrawer(u){closeHist();UI.sel=u;const t=byId[u],f=FC[u],i=S.issues[u
   <div class="dr-sec">${commentsHTML(u)}</div></div>`;
  $("#drawer").classList.add("on");$("#dback").classList.add("on");$("#drawer").setAttribute("aria-hidden","false");growAll($("#drawer"));
  if(UI.tab==="gnt")renderGnt(true)}
-function closeDrawer(){$("#drawer").style.transform="";$("#dback").classList.remove("on");$("#drawer").classList.remove("on");$("#drawer").setAttribute("aria-hidden","true");const had=UI.sel;UI.sel=null;if(had&&UI.tab==="gnt")renderGnt(true)}
+function closeDrawer(){if(UI.hot){const r=$("#r-"+UI.hot);if(r)r.classList.remove("hot");UI.hot=null}$("#drawer").style.transform="";$("#dback").classList.remove("on");$("#drawer").classList.remove("on");$("#drawer").setAttribute("aria-hidden","true");const had=UI.sel;UI.sel=null;if(had&&UI.tab==="gnt")renderGnt(true)}
 function refreshDrawer(){if(UI.sel&&$("#drawer").classList.contains("on")){const sc=$(".dr-b")?$(".dr-b").scrollTop:0,s=UI.sel;openDrawer(s);if($(".dr-b"))$(".dr-b").scrollTop=sc}}
 
 /* ================== модальные ================== */
@@ -2394,10 +2404,11 @@ function flag(u){need(()=>{const cur=S.issues[u];
  LOG({act:"issue",uid:u,name:byId[u].name,field:"вопрос",to:"отмечен как проблемный"});
  S.order=bumpTop(S.order,u);touchIss(u);save();litId=u;toast("Операция отмечена как проблемный вопрос");closeDrawer();go("iss",false);
  requestAnimationFrame(()=>{const c=$("#card-"+u);if(c){c.scrollIntoView({behavior:"smooth",block:"center"});const ta=$(`[data-iss="${u}:problem"]`,c);if(ta&&!ta.value)setTimeout(()=>ta.focus(),350)}})})}
-function goto(u){const k=BOF[u];if(k&&!UI.blocks.includes(k))UI.blocks=[k];UI.sel=u;go("gnt",false);
+/* «Показать в графике»: строка горит (UI.hot), пока открыта её панель; закрыли панель или открыли другую — гаснет (16.10) */
+function goto(u){const k=BOF[u];if(k&&!UI.blocks.includes(k))UI.blocks=[k];UI.sel=u;UI.hot=u;go("gnt",false);
  requestAnimationFrame(()=>{const r=$("#r-"+u),gw=$("#gw");if(PHONE()&&!LAND()&&r){r.scrollIntoView({block:"center"});openDrawer(u);return}if(!r||!gw)return;gw.scrollTop=Math.max(0,r.offsetTop-gw.clientHeight/2);
   if(geoCache)gw.scrollLeft=Math.max(0,geoCache.x(FC[u].S)-(gw.clientWidth-geoCache.lw)*.3);
-  r.classList.add("flash");openDrawer(u)})}
+  openDrawer(u)})}
 function go(tab,push=true){UI.tab=tab;saveUI();$$("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.tab===tab));
  $$("section.tab").forEach(s=>s.classList.toggle("on",s.id==="tab-"+tab));if(push)history.replaceState(null,"","#"+tab);renderTab()}
 function renderTab(keep){renderMe();paintDirty();const n=issList(true).length;$("#cntI").textContent=n;$("#cntI").classList.toggle("z",!n);
@@ -2519,7 +2530,7 @@ document.addEventListener("change",e=>{const a=e.target.dataset;
   if(k==="impact"||k==="due"||UI.tab!=="iss")rerender();else{const el=$("#card-"+u+" .upd");if(el)el.textContent=updText(+u)}})}
  if(a.step){const[u,k,f]=a.step.split(":");return need(()=>{let v=e.target.value;
   if(f==="dur")v=Math.max(.5,+v||1);
-  if(f==="pct"){v=Math.max(0,Math.min(100,Math.round(+v||0)));if(v<100)for(let j=+k+1;j<ST(u).length;j++)ST(u)[j].pct=0}
+  if(f==="pct")v=Math.max(0,Math.min(100,Math.round(+v||0)));   // проценты следующих этапов не обнуляем (16.10): закрытые этапы и так считаются 0 (stepPlan)
   LOG({act:"edit",uid:+u,name:byId[u].name,field:"этап "+(+k+1)+": "+STF[f],from:trunc(ST(u)[k][f],80),to:trunc(v,80)});
   ST(u)[k][f]=v;touchSteps(+u);save();rerender()})}});
 document.addEventListener("input",e=>{if(e.target.id==="lgq"){LGF.q=e.target.value;$("#lgl").innerHTML=logRows()}
