@@ -708,6 +708,13 @@ body.dragging,body.dragging *{cursor:grabbing!important}
 .lg-row .tx em{font-style:normal;color:var(--ink3)}
 .lg-row.sh .tx{color:var(--ochre);font-weight:600}
 .lg-row.go{cursor:pointer}.lg-row.go:hover{background:var(--sunk)}
+.lg-row .la{display:inline-flex;gap:2px;margin-left:8px;opacity:0;transition:opacity .12s}
+.lg-row:hover .la,.lg-row .la:focus-within,body.ph .lg-row .la{opacity:1}
+.lgb{border:0;background:none;color:var(--ink3);font-size:15px;line-height:1;width:24px;height:24px;border-radius:6px;cursor:pointer}
+.lgb:hover{background:var(--raised);color:var(--ink)}.lgb[data-lgdel]:hover{color:var(--red)}
+.lg-row.cf{background:var(--sunk)}
+.lg-cf{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px;font-size:13px;color:var(--ink)}
+.lg-cf span{flex:1 1 180px}.lg-cf .btn{padding:5px 12px;font-size:13px}
 .lg-foot{display:flex;align-items:center;gap:8px;padding:10px 18px;border-top:1px solid var(--rule);font-size:12.5px;color:var(--ink3)}
 .lg-foot .sp{flex:1}
 body.hist main{margin-right:min(420px,94vw)}
@@ -1045,6 +1052,19 @@ function logPush(log,e,noMerge){const out=(log||[]).slice(),last=out[out.length-
  if(!noMerge&&last&&e.field&&(e.act==="edit"||e.act==="issue")&&last.act===e.act&&last.uid===e.uid&&last.field===e.field&&(last.who||"")===(e.who||"")&&Date.parse(e.at)-Date.parse(last.at)<=LOG_MERGE_MS){
   const m={...last,to:e.to,at:e.at};if(m.from===m.to)out.pop();else out[out.length-1]=m;return out}
  out.push(e);return out.length>LOG_MAX?out.slice(out.length-LOG_MAX):out}
+/* отмена правки из истории (16.10, DECISIONS «Удаление истории»): отменить можно только последнюю правку поля — после
+   её отмены (запись уходит) последней становится предыдущая. Значение «было» должно быть полным (не обрезанным «…»). */
+const REV_EDIT=["название","ответственный","примечание","готовность","начало","окончание","программа: название"],
+ REV_ISS=["проблема","решение","ответственный","срок","влияние, сут","статус","решение ГД"],
+ REV_STEP=/^этап \d+: (название|ответственный|срок, сут|готовность)$/;
+const logFieldKey=e=>e&&(e.act==="edit"||e.act==="issue")&&e.uid!=null&&e.field?e.act+"|"+e.uid+"|"+e.field:null;
+function logRevertable(e){if(!logFieldKey(e)||e.from===undefined||e.from===null)return false;
+ if(typeof e.from==="string"&&e.from.endsWith("…"))return false;
+ return e.act==="edit"?REV_EDIT.includes(e.field)||REV_STEP.test(e.field):REV_ISS.includes(e.field)}
+/* номера записей журнала, у которых есть «отменить»: последняя по своему полю и отменяемая */
+function logRevertSet(log){const seen=new Set(),out=new Set();
+ for(let i=(log||[]).length-1;i>=0;i--){const k=logFieldKey(log[i]);if(!k||seen.has(k))continue;seen.add(k);if(logRevertable(log[i]))out.add(i)}
+ return out}
 /* запись → строка без разметки (окно журнала и текст «отменено: …») */
 function logText(e){const q=e.name?"«"+e.name+"»":"",dv=v=>typeof v==="string"&&/^\d{4}-\d\d-\d\d$/.test(v)?v.slice(8)+"."+v.slice(5,7)+"."+v.slice(2,4):v,ft=(a,b)=>(a=dv(a),b=dv(b),a!=null&&a!==""?a+" → "+(b===""||b==null?"—":b):(b??""));
  switch(e.act){
@@ -1061,7 +1081,7 @@ function logText(e){const q=e.name?"«"+e.name+"»":"",dv=v=>typeof v==="string"
   case"clear":return"журнал очищен";
   default:return e.t||""}}
 
-if(typeof module!=="undefined")module.exports={STATE_V,newFileId,blankState,issueOrder,migrateState,UNDO_MAX,makeHistory,orderedIssues,bumpTop,moveIssue,firstSentence,issueLabel,LOG_MAX,LOG_MERGE_MS,logPush,logText};
+if(typeof module!=="undefined")module.exports={STATE_V,newFileId,blankState,issueOrder,migrateState,UNDO_MAX,makeHistory,orderedIssues,bumpTop,moveIssue,firstSentence,issueLabel,LOG_MAX,LOG_MERGE_MS,logPush,logText,logFieldKey,logRevertable,logRevertSet};
 
 /* ================== файл ↔ строки базы ==================
    Чистые функции без DOM и сети: план v2 (DATA) и состояние v4 (S) версии-файла ↔ строки таблиц supabase/schema.sql.
@@ -2362,13 +2382,45 @@ function doDelOp(u){need(()=>{const t=byId[u];if(!t)return;const res=deleteOp(pl
    Вместо окна: график и вопросы видны рядом. Записи по дням (день прилипает), фильтр по человеку и блоку, поиск;
    клик по записи — переход к операции. Чужая правка приходит — список обновляется сам. */
 let LGF={who:"",q:"",blk:""};
-function logRows(){const q=LGF.q.trim().toLowerCase(),rows=[...S.log].reverse().filter(e=>(!LGF.who||(e.who||"")===LGF.who)&&(!LGF.blk||(e.uid&&BOF[e.uid]===LGF.blk))&&(!q||(logText(e)+" "+(e.who||"")).toLowerCase().includes(q)));
+/* удалить запись / отменить правку (16.10, DECISIONS «Удаление истории»): × — удалить запись насовсем (всем, кто правит);
+   ↶ — только у последней правки поля (logRevertSet): вернуть «было» и убрать запись, затем ↶ появляется у предыдущей.
+   Нажатие — сначала подтверждение в самой строке (LGC). */
+let LGC=null;
+const lgCan=()=>SITE?siteWriter():true;
+const lgId=(e,i)=>(i??S.log.indexOf(e))+"|"+e.at;
+const lgGet=id=>{const[i,at]=String(id).split("|"),e=S.log[+i];return e&&e.at===at?e:null};
+function revertEntry(e){const u=e.uid,t=byId[u],f=e.field,v=e.from;
+ if(e.act==="issue"){const i=S.issues[u];if(!i)return"вопроса уже нет";
+  if(f==="статус")i.status=v;else if(f==="решение ГД")i.gd=v==="да";
+  else{const k=Object.keys(ISSF).find(k=>ISSF[k]===f);if(!k)return"поле неизвестно";i[k]=k==="impact"?(+v||0):v}
+  touchIss(u);return null}
+ if(!t)return"операции уже нет";
+ const m=f.match(/^этап (\d+): (.+)$/);
+ if(m){const it=ST(u)[+m[1]-1],k=Object.keys(STF).find(k=>STF[k]===m[2]);if(!it||!k)return"этапа уже нет";it[k]=k==="dur"||k==="pct"?+v:v;touchSteps(u);return null}
+ if(f==="название"||f==="программа: название"){t.name=v;touch(u);return null}
+ if(f==="ответственный"){t.resp=v;touch(u);return null}
+ if(f==="примечание"){t.note=v;touch(u);return null}
+ if(f==="готовность"){const p=parseInt(v,10);if(isNaN(p))return"значение не прочитано";const x=T(u);x.pct=p;x.pctAt=new Date().toISOString();x.pctBy=S.me;touch(u);return null}
+ if(f==="начало"||f==="окончание"){const cur=+(f==="начало"?t.S0:t.F0),ms=parseDT(v,cur);if(ms==null)return"дата не прочитана";
+  if(ms!==cur){const res=f==="начало"?editStart(planOps(),u,ms):editFinish(planOps(),u,ms);if(res.error)return"дату не вернуть: операция связана с другими";applyPlan(res.ops)}
+  touch(u);return null}
+ return"эту правку отменить нельзя"}
+function lgDo(id,kind){const e=lgGet(id);LGC=null;if(!e){refreshHist();return toast("Запись уже изменилась — откройте историю заново")}
+ need(()=>{let msg="Запись удалена";
+  if(kind==="rev"){const err=revertEntry(e);if(err){refreshHist();return toast("Не отменено: "+err)}
+   const i=S.log.indexOf(e),nx=S.log[i+1];   // сдвиг цепочки, записанный вместе с правкой даты, — тоже убрать
+   if(nx&&nx.act==="shift"&&Math.abs(Date.parse(nx.at)-Date.parse(e.at))<5000&&(e.field==="начало"||e.field==="окончание"))S.log.splice(i+1,1);
+   msg="Правка отменена: "+e.field+" — снова «"+trunc(e.from,60)+"»"}
+  S.log.splice(S.log.indexOf(e),1);buildModel();save();rerender();refreshHist();toast(msg)})}
+function logRows(){const q=LGF.q.trim().toLowerCase(),rv=logRevertSet(S.log),ok=lgCan(),IX=new Map(S.log.map((e,i)=>[e,i])),rows=[...S.log].reverse().filter(e=>(!LGF.who||(e.who||"")===LGF.who)&&(!LGF.blk||(e.uid&&BOF[e.uid]===LGF.blk))&&(!q||(logText(e)+" "+(e.who||"")).toLowerCase().includes(q)));
  if(!rows.length)return `<div class="empty" style="margin:14px">${S.log.length?"Под фильтр ничего не попало":"Записей пока нет."}</div>`;
  let day="",out="";
  rows.forEach(e=>{const d=new Date(e.at),k=d.toDateString();
   if(k!==day){day=k;out+=`<div class="lg-day">${d.getDate()} ${MONG[d.getMonth()]}, ${WD[d.getDay()]}</div>`}
   const go=e.uid&&byId[e.uid]&&BOF[e.uid]!=null;
-  out+=`<div class="lg-row ${go?"go":""} ${e.act==="shift"?"sh":""}" ${go?`data-lgo="${e.uid}"`:""}><span class="wh">${esc(e.who||"—")}</span><span class="tm">${p2(d.getHours())}:${p2(d.getMinutes())}</span><span class="tx">${go?`<em>№${byId[e.uid].id}</em> `:""}${esc(logText(e))}</span></div>`});
+  const id=lgId(e,IX.get(e)),r=rv.has(IX.get(e)),cf=LGC&&LGC.id===id?LGC.kind:null;
+  const acts=ok?`<span class="la">${r?`<button class="lgb" data-lgrev="${esc(id)}" title="Отменить эту правку — вернуть «${esc(trunc(e.from,40))}»">↶</button>`:""}<button class="lgb" data-lgdel="${esc(id)}" title="Удалить запись из истории">×</button></span>`:"";
+  out+=`<div class="lg-row ${go?"go":""} ${e.act==="shift"?"sh":""} ${cf?"cf":""}" ${go&&!cf?`data-lgo="${e.uid}"`:""}><span class="wh">${esc(e.who||"—")}</span><span class="tm">${p2(d.getHours())}:${p2(d.getMinutes())}${acts}</span><span class="tx">${go?`<em>№${byId[e.uid].id}</em> `:""}${esc(logText(e))}</span>${cf?`<div class="lg-cf"><span>${cf==="rev"?`Вернуть «${esc(trunc(e.from,60))}» и убрать запись?`:"Удалить запись из истории насовсем?"}</span><button class="btn ${cf==="rev"?"pri":"red"}" data-lgok="${esc(id)}">${cf==="rev"?"Отменить правку":"Удалить"}</button><button class="btn ghost" data-lgx>Нет</button></div>`:""}</div>`});
  return out}
 const histOn=()=>$("#hist").classList.contains("on");
 function openLog(){if(histOn())return closeHist();closeDrawer();$("#menu").hidden=true;LGF={who:"",q:"",blk:""};
@@ -2378,7 +2430,7 @@ function openLog(){if(histOn())return closeHist();closeDrawer();$("#menu").hidde
    ${bl.length>1?`<select data-lgb class="fsel"><option value="">Все блоки</option>${bl.map(b=>`<option value="${b.key}">${esc(b.title)}</option>`).join("")}</select>`:""}
    <input id="lgq" class="srch" placeholder="Поиск по операции или тексту" autocomplete="off"></div>
   <div class="lg-list" id="lgl">${logRows()}</div>
-  <div class="lg-foot"><span class="m" id="lgn">Записей: ${S.log.length}${S.log.length>=LOG_MAX?" (ранние удалены)":""}</span><span class="sp"></span>${can("log_clear")?`<span id="lgc"><button class="btn ghost" data-act="lgclear">Очистить журнал</button></span>`:""}</div>`;
+  <div class="lg-foot"><span class="m" id="lgn">Записей: ${S.log.length}${S.log.length>=LOG_MAX?" (ранние удалены)":""}</span><span class="sp"></span>${lgCan()?`<span class="m">↶ — отменить правку, × — удалить запись</span>`:""}</div>`;
  $("#hist").classList.add("on");$("#hist").setAttribute("aria-hidden","false");document.body.classList.add("hist");if(UI.tab==="gnt")renderGnt(true)}
 function closeHist(){if(!histOn())return;$("#hist").classList.remove("on");$("#hist").setAttribute("aria-hidden","true");document.body.classList.remove("hist");if(UI.tab==="gnt")renderGnt(true)}
 function refreshHist(){if(!histOn())return;const l=$("#lgl"),sc=l.scrollTop;l.innerHTML=logRows();l.scrollTop=sc;const n=$("#lgn");if(n)n.textContent="Записей: "+S.log.length}
@@ -2423,7 +2475,7 @@ function readFile(file){const r=new FileReader();
  else openModal(`<h3>Непонятный файл</h3><p>Нужен XML из Project: Файл → Сохранить как → тип «Формат XML».</p><div class="mfoot"><button class="btn pri" data-act="mclose">Понятно</button></div>`)};
  r.readAsText(file,"utf-8")}
 
-document.addEventListener("click",e=>{if(!e.target.closest(".more"))$("#menu").hidden=true;if(UI.pop&&!e.target.closest(".pop")){UI.pop=null;$$(".popb").forEach(x=>x.hidden=true);$$('[data-act="pop"]').forEach(x=>x.classList.remove("on"))}const el=e.target.closest("[data-act],[data-tab],[data-pu],[data-approve],[data-padd],[data-pdel],[data-itog],[data-ifl],[data-ifr],[data-done],[data-flag],[data-goto],[data-go-iss],[data-gd],[data-ist],[data-cmadd],[data-cmdel],[data-stepadd],[data-stepdel],[data-issdel],[data-tw],[data-eds],[data-blkt],[data-scale],[data-fs],[data-fb],[data-fr],[data-me],[data-pick],[data-cfv],[data-addop],[data-delop],[data-lgo]");
+document.addEventListener("click",e=>{if(!e.target.closest(".more"))$("#menu").hidden=true;if(UI.pop&&!e.target.closest(".pop")){UI.pop=null;$$(".popb").forEach(x=>x.hidden=true);$$('[data-act="pop"]').forEach(x=>x.classList.remove("on"))}const el=e.target.closest("[data-act],[data-tab],[data-pu],[data-approve],[data-padd],[data-pdel],[data-itog],[data-ifl],[data-ifr],[data-done],[data-flag],[data-goto],[data-go-iss],[data-gd],[data-ist],[data-cmadd],[data-cmdel],[data-stepadd],[data-stepdel],[data-issdel],[data-tw],[data-eds],[data-blkt],[data-scale],[data-fs],[data-fb],[data-fr],[data-me],[data-pick],[data-cfv],[data-addop],[data-delop],[data-lgo],[data-lgdel],[data-lgrev],[data-lgok],[data-lgx]");
  if(el){const a=el.dataset;
   if(a.tab)return go(a.tab);
   if(a.pu)return progEdit(+a.pu);
@@ -2433,6 +2485,9 @@ document.addEventListener("click",e=>{if(!e.target.closest(".more"))$("#menu").h
   if(a.itog){if(e.target.closest("[data-igrip]"))return;const u=+a.itog;IOPEN.has(u)?IOPEN.delete(u):IOPEN.add(u);return renderIss()}
   if(a.ifl!==undefined){UI.ifl.late=!UI.ifl.late;return renderIss()}
   if(a.ifr!==undefined){UI.ifl={who:"",blk:"",late:false};return renderIss()}
+  if(a.lgdel!==undefined||a.lgrev!==undefined){LGC={id:a.lgdel??a.lgrev,kind:a.lgdel!==undefined?"del":"rev"};return refreshHist()}
+  if(a.lgok!==undefined)return lgDo(a.lgok,LGC&&LGC.kind);
+  if(a.lgx!==undefined){LGC=null;return refreshHist()}
   if(a.lgo){closeHist();return goto(+a.lgo)}
   if(a.addop!==undefined){e.stopPropagation();const[x,y]=a.addop.split(":");return addOp(x?+x:null,y?+y:null)}
   if(a.delop){e.stopPropagation();return delOp(+a.delop)}
