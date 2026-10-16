@@ -776,6 +776,7 @@ body.hist main{margin-right:min(420px,94vw)}
 .pwrap{position:relative;overflow:hidden;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.08),0 8px 30px -12px rgba(0,0,0,.18)}
 .pzoom{width:1520px;transform-origin:0 0}
 .modal.wide{width:min(760px,94vw)}
+.modal{position:relative}.modal .mx{position:absolute;top:14px;right:14px}.modal .mx+h3{padding-right:60px}
 .pform{display:grid;gap:12px;padding:4px 20px 6px}.pform label{display:grid;gap:4px;font-size:12.5px;color:var(--ink3)}
 .pform .ed{margin-left:0;width:100%;border-color:var(--rule2);background:var(--surface);font-size:14px;color:var(--ink)}
 .pform select.ed{padding:7px 9px}.pform p{padding:0}
@@ -1673,7 +1674,7 @@ function progRows(){const rows=progSubtree(DATA.tasks);if(!rows.length)return nu
  return progCompute(rows,D,(u,part)=>{const b=BLOCKS.find(x=>x.main===u);if(!b)return null;
   const ids=progPart(b.ids,i=>byId[i].name,part).filter(i=>FC[i]);if(!ids.length)return null;
   return{S:new Date(Math.min(...ids.map(i=>+FC[i].S))),F:new Date(Math.max(...ids.map(i=>+FC[i].F))),pct:Math.round(blockPct(ids))}})}
-const pfd=d=>p2(d.getDate())+"."+p2(d.getMonth()+1)+"."+p2(d.getFullYear()%100);
+const pfd=d=>!d?"—":p2(d.getDate())+"."+p2(d.getMonth()+1)+"."+p2(d.getFullYear()%100);
 const pdur=(a,b)=>{const v=Math.round(dd(a,b)*10)/10;return String(v).replace(".",",")};
 const PMON=["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
 function progSheet(R,ed){const SW=1520,SH=1030,LW=330,TW=SW-LW,HEAD=96,SC=46,LEG=44;
@@ -1686,7 +1687,7 @@ function progSheet(R,ed){const SW=1520,SH=1030,LW=330,TW=SW-LW,HEAD=96,SC=46,LEG
   if(+m>=+a0)bg+=`<div class="mo" style="left:${X(m).toFixed(1)}px"></div>`;m=n}
  for(let q=new Date(+a0);+q<+a1;q=new Date(+q+7*DAY)){sc+=`<div class="dy" style="left:${X(q).toFixed(1)}px">${q.getDate()}</div>`;bg+=`<div class="wk" style="left:${X(q).toFixed(1)}px"></div>`}
  const body=R.map(r=>{const h=Math.round(HB[r.kind]*k),bh=Math.round((r.kind==="proj"?20:r.kind==="br"||r.kind==="fld"?18:16)*Math.min(1,k+.1)),top=h-bh-Math.round(6*k);   // подпись над полосой (17 px) должна влезть в строку
-  if(!r.S||!r.F)return `<div class="pr ${r.kind}" style="height:${h}px"><div class="lc"><span class="nm">${esc(r.name)}</span><span class="pc"></span></div><div class="tc"></div></div>`;
+  if(!r.S||!r.F)return `<div class="pr ${r.kind}${ed?" pe":""}" style="height:${h}px" ${ed?`data-pu="${r.uid}"`:""}><div class="lc"><span class="nm">${esc(r.name)}</span><span class="pc"></span></div><div class="tc"></div></div>`;
   const x=X(r.S),w=Math.max(3,X(r.F)-x),st=!r.sum&&r.pct>=100?" done":!r.sum&&r.pct>0?" cur":"";
   const inner=st===" cur"?`<i style="width:${r.pct}%"></i><span>${r.pct}%</span>`:(!r.sum&&w>48?`<span>${pdur(r.S,r.F)} сут</span>`:"");
   const pl=r.plan&&r.plan[0]&&r.plan[1]?`<div class="pln" style="left:${X(r.plan[0]).toFixed(1)}px;width:${Math.max(2,X(r.plan[1])-X(r.plan[0])).toFixed(1)}px;top:${top+bh+3}px"></div>`:"";
@@ -1704,13 +1705,14 @@ function renderSum(){const R=progRows();if(!R)return renderSumOld();
  const ed=editing()&&can("plan_edit"),W=($("#tab-sum").clientWidth||1200),k=Math.min(1,W/1520);
  $("#tab-sum").innerHTML=`<div class="ptools">${can("plan_edit")&&!PHONE()?`<label class="tgl"><input type="checkbox" data-opt="edit" ${UI.edit?"checked":""}><span></span>Правка</label>${ed?`<span class="m">Нажмите на строку, чтобы изменить даты, название или добавить строку</span>`:""}`:""}<span class="sp"></span><button class="btn" data-act="print">Печать A3</button></div>
   <div class="pwrap" style="height:${Math.ceil(1030*k)}px"><div class="pzoom" style="transform:scale(${k})">${progSheet(R,ed)}</div></div>`}
-/* правка строки программы — окно */
+/* правка строки программы — окно; × в углу — закрыть без сохранения (16.10, просьба пользователя) */
+const PMX=`<button class="dr-x mx" data-act="mclose" title="Закрыть без сохранения" aria-label="Закрыть">×</button>`;
 let PEU=null;
 function progEdit(u){const R=progRows(),r=R&&R.find(x=>x.uid===u),t=byId[u];if(!r||!t||!(editing()&&can("plan_edit")))return;PEU=u;
  const opts=BLOCKS.filter(b=>b.main!=null).map(b=>[["работы","работы"],["дпм","ДПМ"],["всё","целиком"]].map(([p,l])=>`<option value="${b.main} ${p}" ${r.note.link===b.main&&(r.note.part||"всё")===p?"selected":""}>${esc(b.title)} — ${l}</option>`).join("")).join("");
- openModal(`<h3>${esc(t.name)}</h3><div class="pform">
+ openModal(`${PMX}<h3>${esc(t.name)}</h3><div class="pform">
   <label>Название<input class="ed" id="pfN" value="${esc(t.name)}" autocomplete="off"></label>
-  ${r.sum||r.depth===0?"":`<div class="frow2"><label>Начало<input class="ed" id="pfS" value="${fmtDT(+r.S)}"></label><label>Окончание<input class="ed" id="pfF" value="${fmtDT(+r.F)}"></label>${r.linked?"":`<label>Готовность, %<input class="ed" id="pfP" type="number" min="0" max="100" step="5" value="${r.pct}"></label>`}</div>
+  ${r.sum||r.depth===0?"":`<div class="frow2"><label>Начало<input class="ed" id="pfS" value="${r.S?fmtDT(+r.S):""}" placeholder="22.10.26 12:00"></label><label>Окончание<input class="ed" id="pfF" value="${r.F?fmtDT(+r.F):""}" placeholder="22.10.26 12:00"></label>${r.linked?"":`<label>Готовность, %<input class="ed" id="pfP" type="number" min="0" max="100" step="5" value="${r.pct}"></label>`}</div>
   <label>Связь с операциями графика<select class="ed" id="pfL"><option value="">нет — свои даты</option>${opts}</select></label>
   <p class="m">${r.linked?"Даты считаются из операций: новое начало сдвигает их, новое окончание удлиняет последнюю операцию.":"Строка идёт за предыдущей в бригаде, но не раньше своего начала."}</p>`}</div>
   <div class="mfoot">${r.depth?`<button class="btn ghost" data-act="pdel" style="color:var(--red)">Удалить${r.sum?" вместе со строками":""}</button>`:""}<span class="sp"></span>
@@ -1735,7 +1737,7 @@ function progSave(){const u=PEU,t=byId[u],R=progRows(),r=R&&R.find(x=>x.uid===u)
     const last=ids[ids.length-1];
     if(fv!==+r.F){res=editFinish(ops,last,+byId[last].F0+(fv-+r.F));if(res.error)return toast("Окончание раньше начала последней операции");ops=res.ops;ch=ch.concat(res.changed)}
     if(ch.length)return commitPlan({ops,changed:[...new Set(ch)]},ids[0],{act:"edit",uid:u,name:t.name,field:"программа: сроки",from:pfd(r.S)+"–"+pfd(r.F),to:pfd(new Date(sv))+"–"+pfd(new Date(fv))})}
-   else{if(sv!==+r.S||fv!==+r.F){LOG({act:"edit",uid:u,name:t.name,field:"программа: сроки",from:pfd(r.S)+"–"+pfd(r.F),to:pfd(new Date(sv))+"–"+pfd(new Date(fv))});t.s=strOf(sv);t.f=strOf(fv)}
+   else{if(sv!==+r.S||fv!==+r.F||r.linked||!t.s||!t.f){LOG({act:"edit",uid:u,name:t.name,field:"программа: сроки",from:pfd(r.S)+"–"+pfd(r.F),to:pfd(new Date(sv))+"–"+pfd(new Date(fv))});t.s=strOf(sv);t.f=strOf(fv)}
     if(pc!=null){const p=Math.max(0,Math.min(100,Math.round(+pc||0)));if(p!==(+t.pct||0)){LOG({act:"edit",uid:u,name:t.name,field:"готовность",from:(+t.pct||0)+"%",to:p+"%"});t.pct=p}}}}
   syncSums(DATA.tasks);buildModel();save();rerender()})}
 /* + строка ниже: ДПМ или работа — рядом с выбранной (у сводной — последней внутри); куст и месторождение — после
@@ -1760,7 +1762,7 @@ function progPackage(text){if(!isAdmin())return toast("Загружать пак
  if(!p||p.type!=="gdt-program"||!Array.isArray(p.rows)||!p.rows.length||p.rows[0].depth!==0)return toast("Это не пакет программы работ");
  const miss=[];p.rows.forEach(r=>{if(r.link&&!BLOCKS.some(b=>b.title===r.link.title&&b.main!=null))miss.push(r.link.title)});
  const old=progSubtree(DATA.tasks).length;PPKG=p;
- openModal(`<h3>Программа работ из пакета</h3><p>${esc(p.source||"")}. Было строк программы: <b>${old}</b>, станет: <b>${p.rows.length}</b>. Детальный план и операции не меняются.</p>
+ openModal(`${PMX}<h3>Программа работ из пакета</h3><p>${esc(p.source||"")}. Было строк программы: <b>${old}</b>, станет: <b>${p.rows.length}</b>. Детальный план и операции не меняются.</p>
   <div class="dlist">${p.rows.map(r=>`<div class="di" style="grid-template-columns:1fr auto"><span style="padding-left:${r.depth*16}px;${r.sum?"font-weight:600":""}">${esc(r.name)}${r.link?` <span class="m">← ${esc(r.link.title)}, ${esc(r.link.part)}</span>`:""}</span><span class="m">${r.s?pfd(D(r.s))+" — "+pfd(D(r.f)):""}</span></div>`).join("")}</div>
   ${miss.length?`<p style="color:var(--red)">Не найдены блоки: ${esc([...new Set(miss)].join(", "))} — эти строки будут со своими датами.</p>`:""}
   <div class="mfoot"><button class="btn ghost" data-act="mclose">Отмена</button><button class="btn pri" data-act="pkgok">Записать</button></div>`);$("#modal").classList.add("wide")}
