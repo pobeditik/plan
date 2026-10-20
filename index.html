@@ -11,7 +11,7 @@
 :root{
  --paper:#ECE8E1;--surface:#F7F4EF;--raised:#FBF9F6;--sunk:#E3DDD3;
  --rule:#DDD6CA;--rule2:#C9BFAF;
- --ink:#3A3633;--ink2:#655D55;--ink3:#948A7F;
+ --ink:#3A3633;--ink2:#655D55;--ink3:#72695F;
  --red:#CE1B2C;--red-t:#F6DEDB;--red-w:#FBEDEB;
  --green:#538234;--green2:#97AD7F;--green-t:#E3EADB;
  --ochre:#A5701C;--ochre-t:#F2E4C8;
@@ -744,7 +744,7 @@ body.hist main{margin-right:min(420px,94vw)}
 .row>.lc>.dt.e{padding:0 3px}.row .lc .dt.e .ed{padding:4px 4px}
 
 /* ---------- программа работ: лист A3 (Сводка и печать, 16.10) — белый лист как у офиса, всё внутри .psheet ---------- */
-.psheet{--p-ink:#2B2826;--p-ink2:#5E5750;--p-ink3:#948A80;--p-rule:#ECE8E2;--p-rule2:#D2CABE;--p-gz:#0B6DB7;--p-gzt:#EEF5FC;--p-green:#4F8A2E;--p-green2:#A8C690;--p-plan:#7A726A;--p-dpm:#B07A1F;--p-red:#CE1B2C;--p-ghost:#C9C1B5;
+.psheet{--p-ink:#2B2826;--p-ink2:#5E5750;--p-ink3:#766C62;--p-rule:#ECE8E2;--p-rule2:#D2CABE;--p-gz:#0B6DB7;--p-gzt:#EEF5FC;--p-green:#4F8A2E;--p-green2:#A8C690;--p-plan:#7A726A;--p-dpm:#B07A1F;--p-red:#CE1B2C;--p-ghost:#C9C1B5;
  width:1520px;height:1030px;position:relative;overflow:hidden;background:#fff;color:var(--p-ink);font:14px/1.2 "Golos Text",Arial,sans-serif;font-variant-numeric:tabular-nums;text-align:left}
 .psheet *{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .psheet .ph{height:96px;padding:22px 28px 0;display:flex;align-items:flex-start}
@@ -787,7 +787,7 @@ body.hist main{margin-right:min(420px,94vw)}
 .psheet .pleg{position:absolute;left:0;right:0;bottom:0;height:44px;padding:0 28px;display:flex;gap:26px;align-items:center;font-size:13px;color:var(--p-ink2);border-top:1px solid var(--p-rule2)}
 .psheet .pleg span{display:inline-flex;align-items:center;gap:8px;white-space:nowrap}.psheet .pleg i{width:26px;height:12px;border-radius:3px;display:inline-block}
 .ptools{display:flex;align-items:center;gap:14px;margin:0 0 12px;min-height:34px}.ptools .m{font-size:13px;color:var(--ink3)}.ptools .sp{flex:1}
-.pwrap{position:relative;overflow:hidden;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.08),0 8px 30px -12px rgba(0,0,0,.18)}
+.pwrap{position:relative;overflow:hidden;overflow-x:auto;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.08),0 8px 30px -12px rgba(0,0,0,.18)}
 .pzoom{width:1520px;transform-origin:0 0}
 .modal.wide{width:min(760px,94vw)}
 .modal{position:relative}.modal .mx{position:absolute;top:14px;right:14px}.modal .mx+h3{padding-right:60px}
@@ -1576,7 +1576,7 @@ function restoreSnap(str){const x=JSON.parse(str),keep={me:S.me,log:S.log,rev:S.
  UI.blocks=UI.blocks.filter(k=>BK[k]);if(!UI.blocks.length){const b=BLOCKS.find(y=>y.def&&y.kind!=="misc")||BLOCKS[0];if(b)UI.blocks=[b.key]}
  if(!S.lastImport)UI.showImp=false;
  if(UI.sel&&!byId[UI.sel])closeDrawer();$("#asof").innerHTML=asofHTML();rerender();if(SITE)SYNC.run()}
-function undo(){toast.hot=false;if(!HIST)return;const s=HIST.undo();if(s===null)return toast(SITE?"Отменять нечего: после обновления страницы или правки другого человека отмена начинается заново":"Отменять нечего");restoreSnap(s);const d=UNDO_D.pop()||"действие";REDO_D.push(d);logNow({act:"undo",t:d});toast("Отменено: "+d,{l:"Вернуть",a:"redo"})}
+function undo(){toast.hot=false;if(!HIST)return;const s=HIST.undo();if(s===null)return toast(SITE?"Ctrl+Z тут уже нечего отменять (после обновления страницы или чужой правки). Свою правку можно отменить в Истории — кнопка ↶":"Отменять нечего");restoreSnap(s);const d=UNDO_D.pop()||"действие";REDO_D.push(d);logNow({act:"undo",t:d});toast("Отменено: "+d,{l:"Вернуть",a:"redo"})}
 function redo(){toast.hot=false;if(!HIST)return;const s=HIST.redo();if(s===null)return toast("Возвращать нечего");restoreSnap(s);const d=REDO_D.pop()||"действие";UNDO_D.push(d);logNow({act:"redo",t:d});toast("Возвращено: "+d,{l:"Отменить",a:"undo"})}
 /* Поля-тексты растут по содержимому скриптом: CSS field-sizing есть не во всех Chrome. */
 const grow=el=>{if(!el.offsetParent)return;el.style.height="auto";el.style.height=(el.scrollHeight+el.offsetHeight-el.clientHeight)+"px"};
@@ -1731,9 +1731,9 @@ function progSheet(R,ed){const SW=1520,SH=1030,LW=330,TW=SW-LW,HEAD=96,SC=46,LEG
   <div class="pbg">${bg}<div class="tdy" style="left:${X(TODAY).toFixed(1)}px"></div></div><div class="pbody">${body}</div></div>
   <div class="pleg"><span><i style="background:var(--p-green)"></i>выполнено</span><span><i style="background:var(--p-green2)"></i>осталось</span><span><i style="background:var(--p-plan)"></i>работы</span><span><i style="background:var(--p-dpm)"></i>ДПМ — демонтаж, передвижка, монтаж</span>${hasPlan?`<span><i style="height:3px;background:var(--p-ghost)"></i>согласованный срок</span>`:""}<span><i style="width:3px;height:16px;background:var(--p-red)"></i>сегодня ${p2(TODAY.getDate())}.${p2(TODAY.getMonth()+1)}.${TODAY.getFullYear()}</span></div></div>`}
 function renderSum(){const R=progRows();if(!R)return renderSumOld();
- const ed=editing()&&can("plan_edit"),W=($("#tab-sum").clientWidth||1200),k=Math.min(1,W/1520);
- $("#tab-sum").innerHTML=`<div class="ptools">${can("plan_edit")&&!PHONE()?`<label class="tgl"><input type="checkbox" data-opt="edit" ${UI.edit?"checked":""}><span></span>Правка</label>${ed?`<span class="m">Нажмите на строку, чтобы изменить даты, название или добавить строку</span>`:""}`:""}<span class="sp"></span><button class="btn" data-act="print">Печать A3</button></div>
-  <div class="pwrap" style="height:${Math.ceil(1030*k)}px"><div class="pzoom" style="transform:scale(${k})">${progSheet(R,ed)}</div></div>`}
+ const ed=editing()&&can("plan_edit"),W=($("#tab-sum").clientWidth||1200),k=PHONE()?Math.max(.5,Math.min(1,W/1520)):Math.min(1,W/1520);   // телефон: не мельче 50 %, лист листается вбок (20.10)
+ $("#tab-sum").innerHTML=`<div class="ptools">${can("plan_edit")&&!PHONE()?`<label class="tgl"><input type="checkbox" data-opt="edit" ${UI.edit?"checked":""}><span></span>Правка</label>${ed?`<span class="m">Нажмите на строку, чтобы изменить даты, название или добавить строку</span>`:""}`:""}<span class="sp"></span>${PHONE()?`<span class="m">Лист листается вбок</span>`:`<button class="btn" data-act="print">Печать A3</button>`}</div>
+  <div class="pwrap" style="height:${Math.ceil(1030*k)+(PHONE()?14:0)}px"><div style="width:${Math.ceil(1520*k)}px;height:${Math.ceil(1030*k)}px"><div class="pzoom" style="transform:scale(${k})">${progSheet(R,ed)}</div></div></div>`}
 /* правка строки программы — окно; × в углу — закрыть без сохранения (16.10, просьба пользователя) */
 const PMX=`<button class="dr-x mx" data-act="mclose" title="Закрыть без сохранения" aria-label="Закрыть">×</button>`;
 let PEU=null;
@@ -1844,7 +1844,7 @@ function issueFields(u){const i=S.issues[u],t=byId[u];
   <div class="fld"><label>Решение, что нужно и от кого</label><textarea class="ed sol" rows="1" data-iss="${u}:solution" placeholder="Что делаем">${esc(i.solution)}</textarea></div>
   <div class="frow">
    <div class="fld"><label>Ответственный за решение</label>${pickHTML(`data-iss="${u}:who"`,i.who,t.resp||"—")}</div>
-   <div class="fld"><label>Срок решения</label><input class="ed" type="date" data-iss="${u}:due" value="${esc(i.due)}"></div>
+   <div class="fld"><label>Срок решения</label><input class="ed" data-iss="${u}:due" value="${i.due?esc(fD(D(i.due))+"."+i.due.slice(2,4)):""}" placeholder="ДД.ММ.ГГ" inputmode="numeric" autocomplete="off"></div>
    <div class="fld"><label>Влияние на план, сут</label><input class="ed" type="number" min="0" step="0.5" data-iss="${u}:impact" value="${+i.impact||""}" placeholder="не оценено"></div></div>`}
 function cardHTML(u){const i=S.issues[u],t=byId[u],f=FC[u],done=i.status==="решён";
  const late=f.F>f.F0?` <span class="late">прогноз ${fD(f.F)}</span>`:"";
@@ -2579,7 +2579,9 @@ document.addEventListener("change",e=>{const a=e.target.dataset;
  if(a.opt){UI[a.opt]=e.target.checked;saveUI();return renderGnt(a.opt!=="compact")}
  if(a.pct||a.pctr){const u=+(a.pct||a.pctr),v=Math.max(0,Math.min(100,Math.round(+e.target.value||0)));
   return need(()=>{const t=T(u);LOG({act:"edit",uid:u,name:byId[u].name,field:"готовность",from:Math.round(pct(u))+"%",to:v+"%"});t.pct=v;t.pctAt=new Date().toISOString();t.pctBy=S.me;touch(u);save();rerender()})}
- if(a.iss){const[u,k]=a.iss.split(":");return need(()=>{let v=e.target.value;v=k==="impact"?Math.max(0,+v||0):v.trim();
+ if(a.iss){const[u,k]=a.iss.split(":");let dv=null;
+  if(k==="due"){const x=e.target.value.trim();if(x){const ms=parseDT(x,+TODAY);if(ms==null){e.target.value=S.issues[u].due?fD(D(S.issues[u].due))+"."+S.issues[u].due.slice(2,4):"";return toast("Срок — дата вида 25.10.26")}dv=strOf(ms).slice(0,10)}else dv=""}   // срок — ДД.ММ.ГГ (20.10), хранится ГГГГ-ММ-ДД
+  return need(()=>{let v=dv!=null?dv:e.target.value;v=k==="impact"?Math.max(0,+v||0):String(v).trim();
   if(String(S.issues[u][k]??"")===String(v))return;   // поле не изменилось (повторное change после выбора из списка) — не пишем
   LOG({act:"issue",uid:+u,name:byId[u].name,field:ISSF[k],from:trunc(S.issues[u][k]),to:trunc(v)});S.issues[u][k]=v;touchIss(+u);save();
   if(k==="impact"||k==="due"||UI.tab!=="iss")rerender();else{const el=$("#card-"+u+" .upd");if(el)el.textContent=updText(+u)}})}
