@@ -787,7 +787,7 @@ body.hist main{margin-right:min(420px,94vw)}
 .psheet .pleg{position:absolute;left:0;right:0;bottom:0;height:44px;padding:0 28px;display:flex;gap:26px;align-items:center;font-size:13px;color:var(--p-ink2);border-top:1px solid var(--p-rule2)}
 .psheet .pleg span{display:inline-flex;align-items:center;gap:8px;white-space:nowrap}.psheet .pleg i{width:26px;height:12px;border-radius:3px;display:inline-block}
 .ptools{display:flex;align-items:center;gap:14px;margin:0 0 12px;min-height:34px}.ptools .m{font-size:13px;color:var(--ink3)}.ptools .sp{flex:1}
-.pwrap{position:relative;overflow:hidden;overflow-x:auto;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.08),0 8px 30px -12px rgba(0,0,0,.18)}
+.pwrap{position:relative;overflow:hidden;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.08),0 8px 30px -12px rgba(0,0,0,.18)}
 .pzoom{width:1520px;transform-origin:0 0}
 .modal.wide{width:min(760px,94vw)}
 .modal{position:relative}.modal .mx{position:absolute;top:14px;right:14px}.modal .mx+h3{padding-right:60px}
@@ -1731,9 +1731,9 @@ function progSheet(R,ed){const SW=1520,SH=1030,LW=330,TW=SW-LW,HEAD=96,SC=46,LEG
   <div class="pbg">${bg}<div class="tdy" style="left:${X(TODAY).toFixed(1)}px"></div></div><div class="pbody">${body}</div></div>
   <div class="pleg"><span><i style="background:var(--p-green)"></i>выполнено</span><span><i style="background:var(--p-green2)"></i>осталось</span><span><i style="background:var(--p-plan)"></i>работы</span><span><i style="background:var(--p-dpm)"></i>ДПМ — демонтаж, передвижка, монтаж</span>${hasPlan?`<span><i style="height:3px;background:var(--p-ghost)"></i>согласованный срок</span>`:""}<span><i style="width:3px;height:16px;background:var(--p-red)"></i>сегодня ${p2(TODAY.getDate())}.${p2(TODAY.getMonth()+1)}.${TODAY.getFullYear()}</span></div></div>`}
 function renderSum(){const R=progRows();if(!R)return renderSumOld();
- const ed=editing()&&can("plan_edit"),W=($("#tab-sum").clientWidth||1200),k=PHONE()?Math.max(.5,Math.min(1,W/1520)):Math.min(1,W/1520);   // телефон: не мельче 50 %, лист листается вбок (20.10)
- $("#tab-sum").innerHTML=`<div class="ptools">${can("plan_edit")&&!PHONE()?`<label class="tgl"><input type="checkbox" data-opt="edit" ${UI.edit?"checked":""}><span></span>Правка</label>${ed?`<span class="m">Нажмите на строку, чтобы изменить даты, название или добавить строку</span>`:""}`:""}<span class="sp"></span>${PHONE()?`<span class="m">Лист листается вбок</span>`:`<button class="btn" data-act="print">Печать A3</button>`}</div>
-  <div class="pwrap" style="height:${Math.ceil(1030*k)+(PHONE()?14:0)}px"><div style="width:${Math.ceil(1520*k)}px;height:${Math.ceil(1030*k)}px"><div class="pzoom" style="transform:scale(${k})">${progSheet(R,ed)}</div></div></div>`}
+ const ed=editing()&&can("plan_edit"),W=($("#tab-sum").clientWidth||1200),k=Math.min(1,W/1520);   // лист целиком по ширине; крупнее — пальцами (пользователь 20.10)
+ $("#tab-sum").innerHTML=`<div class="ptools">${can("plan_edit")&&!PHONE()?`<label class="tgl"><input type="checkbox" data-opt="edit" ${UI.edit?"checked":""}><span></span>Правка</label>${ed?`<span class="m">Нажмите на строку, чтобы изменить даты, название или добавить строку</span>`:""}`:""}<span class="sp"></span><button class="btn" data-act="print">Печать A3</button></div>
+  <div class="pwrap" style="height:${Math.ceil(1030*k)}px"><div class="pzoom" style="transform:scale(${k})">${progSheet(R,ed)}</div></div>`}
 /* правка строки программы — окно; × в углу — закрыть без сохранения (16.10, просьба пользователя) */
 const PMX=`<button class="dr-x mx" data-act="mclose" title="Закрыть без сохранения" aria-label="Закрыть">×</button>`;
 let PEU=null;
