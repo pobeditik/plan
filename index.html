@@ -701,24 +701,24 @@ body.dragging,body.dragging *{cursor:grabbing!important}
 .lg-bar .srch:focus{outline:none;border-color:var(--ink)}
 .lg-list{flex:1;overflow:auto;padding:0 0 12px;overscroll-behavior:contain}
 .lg-day{position:sticky;top:0;z-index:1;padding:10px 18px 6px;font-size:12px;font-weight:700;color:var(--ink2);background:color-mix(in srgb,var(--raised) 94%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--rule)}
-.lg-row{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:9px 18px;border-bottom:1px solid color-mix(in srgb,var(--rule) 60%,transparent);font-size:13.5px}
+.lg-row{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:2px 6px;padding:9px 12px 9px 18px;border-bottom:1px solid color-mix(in srgb,var(--rule) 60%,transparent);font-size:13.5px}
 .lg-row .wh{font-weight:650}
 .lg-row .tm{color:var(--ink3);font-size:12px;font-variant-numeric:tabular-nums}
-.lg-row .tx{grid-column:1/-1;color:var(--ink2);line-height:1.4}
+.lg-row .tx{grid-column:1/-1;color:var(--ink2);line-height:1.4;padding-right:6px}
 .lg-row .tx em{font-style:normal;color:var(--ink3)}
 .lg-row.sh .tx{color:var(--ochre);font-weight:600}
 .lg-row.go{cursor:pointer}.lg-row.go:hover{background:var(--sunk)}
-.lg-row .la{display:inline-flex;gap:4px;margin-left:8px;align-items:center}
+.lg-row.rv{box-shadow:inset 3px 0 0 var(--ink)}
+.lg-row.rv .tx{color:var(--ink)}
+.lg-rvb{grid-column:1/-1;margin-top:5px}
 .lg-row .lgb{opacity:0;transition:opacity .12s}.lg-row:hover .lgb,.lg-row .lgb:focus-visible,body.ph .lg-row .lgb{opacity:1}
-.lgu{border:1px solid var(--ink3);background:var(--raised);color:var(--ink);border-radius:7px;padding:2px 9px;font-size:12.5px;font-weight:650;cursor:pointer;white-space:nowrap}
+.lgu{border:1px solid var(--ink3);background:var(--raised);color:var(--ink);border-radius:7px;padding:3px 10px;font-size:12.5px;font-weight:650;cursor:pointer;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
 .lgu:hover{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 .lgb{border:0;background:none;color:var(--ink3);font-size:15px;line-height:1;width:24px;height:24px;border-radius:6px;cursor:pointer}
 .lgb:hover{background:var(--raised);color:var(--ink)}.lgb[data-lgdel]:hover{color:var(--red)}
 .lg-row.cf{background:var(--sunk)}
 .lg-cf{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px;font-size:13px;color:var(--ink)}
 .lg-cf span{flex:1 1 180px}.lg-cf .btn{padding:5px 12px;font-size:13px}
-.lg-foot{display:flex;align-items:center;gap:8px;padding:10px 18px;border-top:1px solid var(--rule);font-size:12.5px;color:var(--ink3)}
-.lg-foot .sp{flex:1}
 body.hist main{margin-right:min(420px,94vw)}
 .menu .m-ph{display:none}
 @media (max-width:760px){.menu .m-ph{display:block}body.hist main{margin-right:0}}
@@ -2466,8 +2466,8 @@ function logRows(){const q=LGF.q.trim().toLowerCase(),rv=logRevertSet(S.log),ok=
   if(k!==day){day=k;out+=`<div class="lg-day">${d.getDate()} ${MONG[d.getMonth()]}, ${WD[d.getDay()]}</div>`}
   const go=e.uid&&byId[e.uid]&&BOF[e.uid]!=null;
   const id=lgId(e,IX.get(e)),r=rv.has(IX.get(e)),cf=LGC&&LGC.id===id?LGC.kind:null;
-  const acts=ok?`<span class="la">${r?`<button class="lgu" data-lgrev="${esc(id)}" title="Вернуть как было: «${esc(trunc(e.from,40))}»">↶ Отменить</button>`:""}<button class="lgb" data-lgdel="${esc(id)}" title="Убрать запись из истории (сама правка останется)">×</button></span>`:"";
-  out+=`<div class="lg-row ${go?"go":""} ${e.act==="shift"?"sh":""} ${cf?"cf":""}" ${go&&!cf?`data-lgo="${e.uid}"`:""}><span class="wh">${esc(e.who||"—")}</span><span class="tm">${p2(d.getHours())}:${p2(d.getMinutes())}${acts}</span><span class="tx">${go?`<em>№${byId[e.uid].id}</em> `:""}${esc(logText(e))}</span>${cf?`<div class="lg-cf"><span>${cf==="rev"?`Вернуть как было — «${esc(trunc(e.from,60))}»?`:"Убрать запись из истории? Сама правка останется."}</span><button class="btn ${cf==="rev"?"pri":"red"}" data-lgok="${esc(id)}">${cf==="rev"?"Отменить правку":"Удалить"}</button><button class="btn ghost" data-lgx>Нет</button></div>`:""}</div>`});
+  const fv=e.from===""||e.from==null?"—":/^\d{4}-\d\d-\d\d$/.test(e.from)?e.from.slice(8)+"."+e.from.slice(5,7)+"."+e.from.slice(2,4):String(e.from);
+  out+=`<div class="lg-row ${go?"go":""} ${e.act==="shift"?"sh":""} ${r&&ok?"rv":""} ${cf?"cf":""}" ${go&&!cf?`data-lgo="${e.uid}"`:""}><span class="wh">${esc(e.who||"—")}</span><span class="tm">${p2(d.getHours())}:${p2(d.getMinutes())}</span>${ok?`<button class="lgb" data-lgdel="${esc(id)}" title="Убрать запись из истории (сама правка останется)">×</button>`:""}<span class="tx">${go?`<em>№${byId[e.uid].id}</em> `:""}${esc(logText(e))}</span>${r&&ok&&!cf?`<div class="lg-rvb"><button class="lgu" data-lgrev="${esc(id)}" title="Отменить эту правку">${fv==="—"?"↶ Отменить — было пусто":`↶ Вернуть «${esc(trunc(fv,32))}»`}</button></div>`:""}${cf?`<div class="lg-cf"><span>${cf==="rev"?`Вернуть как было — «${esc(trunc(fv,60))}»?`:"Убрать запись из истории? Сама правка останется."}</span><button class="btn ${cf==="rev"?"pri":"red"}" data-lgok="${esc(id)}">${cf==="rev"?"Отменить правку":"Удалить"}</button><button class="btn ghost" data-lgx>Нет</button></div>`:""}</div>`});
  return out}
 const histOn=()=>$("#hist").classList.contains("on");
 function openLog(){if(histOn())return closeHist();closeDrawer();$("#menu").hidden=true;LGF={who:"",q:"",blk:""};
@@ -2476,11 +2476,10 @@ function openLog(){if(histOn())return closeHist();closeDrawer();$("#menu").hidde
   <div class="lg-bar"><select id="lgw" data-lgw class="fsel"><option value="">Все люди</option>${who.map(x=>`<option value="${esc(x)}">${esc(x||"—")}</option>`).join("")}</select>
    ${bl.length>1?`<select data-lgb class="fsel"><option value="">Все блоки</option>${bl.map(b=>`<option value="${b.key}">${esc(b.title)}</option>`).join("")}</select>`:""}
    <input id="lgq" class="srch" placeholder="Поиск по операции или тексту" autocomplete="off"></div>
-  <div class="lg-list" id="lgl">${logRows()}</div>
-  <div class="lg-foot"><span class="m" id="lgn">Записей: ${S.log.length}${S.log.length>=LOG_MAX?" (ранние удалены)":""}</span><span class="sp"></span>${lgCan()?`<span class="m">«Отменить» — вернуть как было; × — только убрать запись</span>`:""}</div>`;
+  <div class="lg-list" id="lgl">${logRows()}</div>`;
  $("#hist").classList.add("on");$("#hist").setAttribute("aria-hidden","false");document.body.classList.add("hist");if(UI.tab==="gnt")renderGnt(true)}
 function closeHist(){if(!histOn())return;$("#hist").classList.remove("on");$("#hist").setAttribute("aria-hidden","true");document.body.classList.remove("hist");if(UI.tab==="gnt")renderGnt(true)}
-function refreshHist(){if(!histOn())return;const l=$("#lgl"),sc=l.scrollTop;l.innerHTML=logRows();l.scrollTop=sc;const n=$("#lgn");if(n)n.textContent="Записей: "+S.log.length}
+function refreshHist(){if(!histOn())return;const l=$("#lgl"),sc=l.scrollTop;l.innerHTML=logRows();l.scrollTop=sc}
 function clearLog(){need(()=>{S.log=[];logNow({act:"clear"});S.dirty=true;paintDirty();closeHist();openLog();if(SITE)SYNC.run()})}
 
 /* ================== ЭКСПОРТ ФАЙЛА ================== */
