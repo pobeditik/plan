@@ -786,7 +786,7 @@ body.hist main{margin-right:min(420px,94vw)}
 .psheet .pb{position:absolute;z-index:2;border-radius:4px;overflow:hidden;background:var(--p-plan)}
 .psheet .pb.proj{background:var(--p-gz)}.psheet .pb.br{background:var(--p-gz)}.psheet .pb.fld{background:var(--p-ink)}.psheet .pb.pad{background:#9B9188}
 .psheet .pb.dpm{background:var(--p-dpm)}.psheet .pb.done{background:var(--p-green)}
-.psheet .pb.late{background:var(--p-late)}.psheet .pb.cur b{position:absolute;top:0;bottom:0;background:var(--p-late)}.psheet .pb.late i{position:absolute;left:0;top:0;bottom:0;background:var(--p-green)}.psheet .pb.cur i{position:absolute;left:0;top:0;bottom:0;background:var(--p-green)}
+.psheet .pb.late{background:var(--p-late)}.psheet .plag{margin-left:8px;color:#B4531F;font-weight:700}.psheet .pb b{position:absolute;top:0;bottom:0;background:var(--p-late)}.psheet .pb.late i{position:absolute;left:0;top:0;bottom:0;background:var(--p-green)}.psheet .pb.cur i{position:absolute;left:0;top:0;bottom:0;background:var(--p-green)}
 .psheet .pb span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;white-space:nowrap;text-shadow:0 0 2px rgba(0,0,0,.55),0 0 1px rgba(0,0,0,.4)}
 .psheet .pln{position:absolute;z-index:1;height:3px;border-radius:2px;background:var(--p-ghost)}
 .psheet .pn{position:absolute;z-index:4;font-size:13.5px;line-height:16px;font-weight:600;white-space:nowrap}
@@ -1747,29 +1747,36 @@ function progSheet(R,ed){const SW=1520,SH=1030,LW=330,TW=SW-LW,HEAD=96,SC=46,LEG
   if(X(b)-X(a)>80)sc+=`<div class="mn" style="left:${X(a).toFixed(1)}px;width:${(X(b)-X(a)).toFixed(1)}px">${PMON[m.getMonth()]} ${m.getFullYear()}</div>`;
   if(+m>=+a0)bg+=`<div class="mo" style="left:${X(m).toFixed(1)}px"></div>`;m=n}
  for(let q=new Date(+a0);+q<+a1;q=new Date(+q+7*DAY)){sc+=`<div class="dy" style="left:${X(q).toFixed(1)}px">${q.getDate()}</div>`;bg+=`<div class="wk" style="left:${X(q).toFixed(1)}px"></div>`}
- let yAcc=0,LATE=false;const POS={};   // положение полос — для стрелок связей строк в «Правке» (20.10)
+ let yAcc=0,LATE=false,LAGS=false;const POS={};   // положение полос — для стрелок связей строк в «Правке» (20.10)
  const nmH=r=>`<span class="nm">${ed&&r.linked?`<i class="plk" title="Даты и готовность — из операций графика"><svg viewBox="0 0 16 16" width="13" height="13"><path d="M6.5 9.5l3-3M7 4.5l1.2-1.2a2.5 2.5 0 013.5 3.5L10.5 8M9 11.5l-1.2 1.2a2.5 2.5 0 01-3.5-3.5L5.5 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></i>`:""}${esc(r.name)}</span>`;
  const body=RB.map(r=>{const h=Math.round(HB[r.kind]*k),bh=Math.round((r.kind==="proj"?20:r.kind==="br"||r.kind==="fld"?18:16)*Math.min(1,k+.1)),top=h-bh-Math.round(6*k);   // подпись над полосой (17 px) должна влезть в строку
   const y0=yAcc;yAcc+=h;
   if(!r.S||!r.F)return `<div class="pr ${r.kind}${ed?" pe":""}" style="height:${h}px" ${ed?`data-pu="${r.uid}"`:""}><div class="lc">${nmH(r)}<span class="pc"></span></div><div class="tc"></div></div>`;
   const x=X(r.S),w=Math.max(3,X(r.F)-x);POS[r.uid]={x,w,y0,rh:h,bt:y0+top,bb:y0+top+bh};
-  /* заливка (20.10, как в Project): остальная полоса — цвет работ (серый / ДПМ), как у будущих строк; зелёное — по готовности; рыжее — отставание: от конца зелёного до линии сегодня
-     (если больше суток) или, когда срок уже прошёл, вся невыполненная часть. Опережение — зелёное за линией. Число — готовность. */
+  /* заливка (20.10, Паша): зелёное — готовность, но не дальше линии сегодня; рыжее — отставание: от конца зелёного до
+     сегодня (готовность меньше прошедшего срока) и у идущей работы — часть полосы позже согласованного срока; срок прошёл,
+     а не 100 % — недоделанное рыжим. Будущие строки — без заливки, отставание у них — числом «+N сут» у конца полосы. */
   const late=!r.sum&&r.pct<100&&+r.F<+TODAY,st=!r.sum&&r.pct>=100?" done":late?" late":!r.sum&&r.pct>0?" cur":"";
-  const tn=Math.max(0,Math.min(100,dd(r.S,TODAY)/Math.max(1e-9,dd(r.S,r.F))*100)),lagD=(tn-r.pct)/100*dd(r.S,r.F),lag=st===" cur"&&lagD>1;
-  if(late||lag)LATE=true;
-  const inner=st===" cur"||st===" late"?`<i style="width:${r.pct}%"></i>${lag?`<b style="left:${r.pct}%;width:${(tn-r.pct).toFixed(1)}%"></b>`:""}<span>${r.pct}%</span>`:(!r.sum&&w>48?`<span>${pdur(r.S,r.F)} сут</span>`:"");
+  const tf=Math.max(0,Math.min(100,dd(r.S,TODAY)/Math.max(1e-9,dd(r.S,r.F))*100)),run=!r.sum&&!late&&r.pct<100&&+r.S<=+TODAY;
+  const gp=st===" cur"?Math.min(r.pct,tf):r.pct,dur=dd(r.S,r.F),seg=[];
+  if(run&&(tf-gp)/100*dur>=1)seg.push([gp,tf]);   // отстаём от сегодняшнего дня
+  const ag=run&&r.plan&&r.plan[1]&&+r.F>+r.plan[1]+DAY?Math.max(tf,Math.min(100,dd(r.S,r.plan[1])/Math.max(1e-9,dur)*100)):null;
+  if(ag!=null)seg.push([ag,100]);   // идёт сейчас и кончится позже согласованного срока
+  const lagD=!r.sum&&r.pct<100&&r.plan&&r.plan[1]?dd(r.plan[1],r.F):0,lagT=lagD>=0.5?`<b class="plag">+${pdur(0,lagD*DAY)} сут</b>`:"";
+  if(late||seg.length)LATE=true;if(lagT)LAGS=true;
+  const lb=st===" cur"||st===" late"?`<span>${r.pct}%</span>`:(!r.sum&&w>48?`<span>${pdur(r.S,r.F)} сут</span>`:"");
+  const inner=(st===" cur"||st===" late"?`<i style="width:${gp.toFixed(1)}%"></i>`:"")+seg.map(([a,z])=>`<b style="left:${a.toFixed(1)}%;width:${(z-a).toFixed(1)}%"></b>`).join("")+lb;
   const pl=r.plan&&r.plan[0]&&r.plan[1]?`<div class="pln" style="left:${X(r.plan[0]).toFixed(1)}px;width:${Math.max(2,X(r.plan[1])-X(r.plan[0])).toFixed(1)}px;top:${top+bh+3}px"></div>`:"";
   return `<div class="pr ${r.kind}${ed?" pe":""}" style="height:${h}px" ${ed?`data-pu="${r.uid}"`:""}><div class="lc">${nmH(r)}<span class="pc">${pdur(r.S,r.F)}<small>сут</small></span></div>
    <div class="tc"><div class="pb ${r.kind}${st}" style="left:${x.toFixed(1)}px;width:${w.toFixed(1)}px;top:${top}px;height:${bh}px">${inner}</div>${pl}
    <div class="pn ${r.kind}" style="left:${x.toFixed(1)}px;top:${top-17}px">${esc(r.name)}</div>
-   <div class="pd" style="left:${(x-6).toFixed(1)}px;top:${top}px;line-height:${bh}px;transform:translateX(-100%)">${pfd(r.S)}</div><div class="pd" style="left:${(x+w+6).toFixed(1)}px;top:${top}px;line-height:${bh}px">${pfd(r.F)}</div></div></div>`}).join("");
+   <div class="pd" style="left:${(x-6).toFixed(1)}px;top:${top}px;line-height:${bh}px;transform:translateX(-100%)">${pfd(r.S)}</div><div class="pd" style="left:${(x+w+6).toFixed(1)}px;top:${top}px;line-height:${bh}px">${pfd(r.F)}${lagT}</div></div></div>`}).join("");
  const hasPlan=R.some(r=>r.plan),fields=R.filter(r=>r.kind==="fld").map(r=>r.name);
  return `<div class="psheet"><div class="ph"><div><h1><b>ГДТ</b> — план работ до конца проекта</h1><p>${esc(R[0].name)}${fields.length?" · "+esc(fields.join(", ")):""} · <b>${pfd(pS)} — ${pfd(pF)}</b></p></div><span class="sp"></span>
   <div class="kp"><div class="big">${Math.round(dd(pS,pF))} сут</div><div class="cap">окончание проекта ${pfd(pF)}</div></div></div>
   <div class="pgt"><div class="psc"><div class="lh"><span>Работы</span><span>Длит.</span></div><div class="tl">${sc}</div></div>
   <div class="pbg">${bg}<div class="tdy" style="left:${X(TODAY).toFixed(1)}px"></div></div><div class="pbody">${body}${ed?plinks(RB,POS,yAcc):""}</div></div>
-  <div class="pleg"><span><i style="background:var(--p-green)"></i>выполнено</span><span><i style="background:var(--p-plan)"></i>работы</span><span><i style="background:var(--p-dpm)"></i>ДПМ — демонтаж, передвижка, монтаж</span>${LATE?`<span><i style="background:var(--p-late)"></i>отставание</span>`:""}${hasPlan?`<span><i style="height:3px;background:var(--p-ghost)"></i>согласованный срок</span>`:""}<span><i style="width:3px;height:16px;background:var(--p-red)"></i>сегодня ${p2(TODAY.getDate())}.${p2(TODAY.getMonth()+1)}.${TODAY.getFullYear()}</span></div></div>`}
+  <div class="pleg"><span><i style="background:var(--p-green)"></i>выполнено</span><span><i style="background:var(--p-plan)"></i>работы</span><span><i style="background:var(--p-dpm)"></i>ДПМ — демонтаж, передвижка, монтаж</span>${LAGS?`<span><b class="plag" style="margin:0">+N сут</b>позже согласованного срока</span>`:""}${LATE?`<span><i style="background:var(--p-late)"></i>отставание</span>`:""}${hasPlan?`<span><i style="height:3px;background:var(--p-ghost)"></i>согласованный срок</span>`:""}<span><i style="width:3px;height:16px;background:var(--p-red)"></i>сегодня ${p2(TODAY.getDate())}.${p2(TODAY.getMonth()+1)}.${TODAY.getFullYear()}</span></div></div>`}
 /* стрелки «идёт после» между полосами строк — только в «Правке»: видно, какая строка за какой (20.10) */
 function plinks(RB,POS,H){let d="";const f=v=>v.toFixed(1);RB.forEach(r=>{if(r.sum||r.linked||r.pred==null)return;const a=POS[r.pred],b=POS[r.uid];if(!a||!b)return;
   /* (20.10) линия не пересекает подписи: от конца той полосы — по вертикали вдоль её правого края, по границе строк — к началу
