@@ -604,6 +604,7 @@ body.land .dr-h{padding-top:12px;touch-action:auto}
 .me .who i{font-style:normal;font-size:10px;color:var(--ink3)}
 .mrole{padding:8px 12px 10px;margin-bottom:4px;border-bottom:1px solid var(--rule);font-size:12.5px;color:var(--ink3)}
 .mrole[hidden]{display:none}
+.msb{padding-bottom:4px;margin-bottom:4px;border-bottom:1px solid var(--rule)}.msb[hidden]{display:none}.menu .msb button.on{font-weight:600}
 #outBtn{color:var(--red)}
 @media (max-width:760px){
  .top-in{padding:0 14px;min-height:50px;gap:10px;align-items:center}
@@ -824,7 +825,7 @@ body.hist main{margin-right:min(420px,94vw)}
   <div class="hbtns">
    <button class="btn ghost ico" data-act="log" title="История изменений"><svg viewBox="0 0 16 16"><path d="M8 4.5V8l2.5 1.5M2.5 8a5.5 5.5 0 1 0 1.7-4M2.5 2.5v3h3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
    <div class="more"><span class="me" id="me"></span>
-    <div class="menu" id="menu" hidden><div class="mrole" id="mrole" hidden></div><button data-act="log" class="m-ph">История изменений</button><button data-act="copy" id="copyBtn" hidden title="Файл со снимком данных — открывается без интернета и без входа">Скачать копию</button><button data-act="print" id="printBtn" title="Лист программы работ на A3">Печать A3</button><button data-act="impx" title="В Project: Файл → Сохранить как → XML">Обновить план из Project (XML)…</button><button data-act="logout" id="outBtn" hidden>Выйти</button></div></div>
+    <div class="menu" id="menu" hidden><div class="mrole" id="mrole" hidden></div><div class="msb" id="sbBox" hidden></div><button data-act="log" class="m-ph">История изменений</button><button data-act="copy" id="copyBtn" hidden title="Файл со снимком данных — открывается без интернета и без входа">Скачать копию</button><button data-act="print" id="printBtn" title="Лист программы работ на A3">Печать A3</button><button data-act="impx" title="В Project: Файл → Сохранить как → XML">Обновить план из Project (XML)…</button><button data-act="logout" id="outBtn" hidden>Выйти</button></div></div>
    <button class="btn pri ico" id="saveBtn" data-act="export" title="Сохранить файл со всеми правками"><span class="dot" id="dot"></span><svg viewBox="0 0 16 16"><path d="M8 11V3m0 8 3-3m-3 3L5 8M2.5 13.5h11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Сохранить файл</span></button>
   </div>
  </div>
@@ -1264,7 +1265,8 @@ function makeDb(createClient, url = SB_URL, key = SB_KEY) {
       if (!p || !p.length) return null;
       const perms = chk(await sb.from('permissions').select('action,admin,planner,manager,viewer'));
       const can = Object.fromEntries(perms.map(r => [r.action, !!r[p[0].role]]));
-      return { uid: s.user.id, email: s.user.email, name: p[0].name || s.user.email, role: p[0].role, can };
+      // perms — вся таблица прав: песочнице, чтобы «смотреть как» другая роль (src/site.js)
+      return { uid: s.user.id, email: s.user.email, name: p[0].name || s.user.email, role: p[0].role, can, perms };
     },
     // Все данные плана — строками таблиц (src/dbmap.js, fromRows).
     async load() {
@@ -1637,10 +1639,13 @@ function filtersHTML(){const f=UI.flt;
 
 /* ================== кто вносит правку ================== */
 /* Шапка в одну строку (прогон 2): на сайте имя — кнопка меню (роль, копия, печать, Project, выход); в версии-файле — «⋯» */
-const ROLE_T={admin:"администратор",planner:"ведёт план",manager:"руководитель",viewer:"просмотр"};
+const ROLE_T={admin:"администратор",planner:"ведёт план",manager:"руководитель",viewer:"просмотр",sandbox:"песочница"};
 const DOTS=`<svg viewBox="0 0 16 16"><path d="M3 8h.01M8 8h.01M13 8h.01" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>`;
 function renderMe(){if(SITE){$("#me").innerHTML=`<button class="who" data-act="more" title="Меню">${esc(S.me)}<i>▾</i></button>`;
-  const r=$("#mrole");r.hidden=false;r.textContent=S.me+(ME_&&ROLE_T[ME_.role]?" · "+ROLE_T[ME_.role]:"");$("#outBtn").hidden=false;return}
+  const r=$("#mrole");r.hidden=false;r.textContent=S.me+(ME_&&ROLE_T[ME_.role]?" · "+ROLE_T[ME_.role]:"");$("#outBtn").hidden=false;
+  const sb=$("#sbBox");sb.hidden=!sandbox();if(sandbox()){r.textContent="Песочница: правки только на этой странице, в базу не уходят. Смотреть как:";
+   sb.innerHTML=SB_ROLES.map(x=>`<button data-sbr="${x}"${x===ME_.view?' class="on"':""}>${x===ME_.view?"✓ ":""}${ROLE_T[x]}</button>`).join("")+`<button data-act="sbreset">Сбросить песочницу</button>`}
+  return}
  $("#me").innerHTML=(S.me?`Правки от имени: <button data-act="me">${esc(S.me)}</button>`:`<button data-act="me">Представиться</button>`)+`<button class="btn ghost ico" data-act="more" title="Ещё">${DOTS}</button>`}
 let meCb=null;
 let meSel="";   // выбранная в окне фамилия; вписать своё нельзя — только выбрать из списка
@@ -1651,7 +1656,7 @@ function askMe(cb){meCb=cb||null;meSel=S.me||ME.get();openModal(`<h3>Кто вн
 /* Права в интерфейсе (аудит 06.10, В1/В2): чего человеку нельзя — показываем текстом, а не полем. Проверяет всё
    равно база; здесь — чтобы не обещать того, что не сохранится. В версии-файле можно всё. */
 const can=a=>!SITE||siteCan(a);
-const isAdmin=()=>!SITE||(ME_&&ME_.role==="admin");
+const isAdmin=()=>!SITE||siteRole()==="admin";
 /* ================== выбор человека ==================
    Ответственный операции и вопроса — из списка людей проекта с поиском по буквам (аудит 06.10, В3: «Сол» больше не
    сохранится). Новая фамилия — только явным пунктом «+ Новый: …». Уйти из поля с чем-то не из списка — значение вернётся. */
@@ -2633,7 +2638,7 @@ function readFile(file){const r=new FileReader();
  else openModal(`<h3>Непонятный файл</h3><p>Нужен XML из Project: Файл → Сохранить как → тип «Формат XML».</p><div class="mfoot"><button class="btn pri" data-act="mclose">Понятно</button></div>`)};
  r.readAsText(file,"utf-8")}
 
-document.addEventListener("click",e=>{if(!e.target.closest(".more"))$("#menu").hidden=true;if(UI.pop&&!e.target.closest(".pop")){UI.pop=null;$$(".popb").forEach(x=>x.hidden=true);$$('[data-act="pop"]').forEach(x=>x.classList.remove("on"))}const el=e.target.closest("[data-act],[data-tab],[data-pu],[data-approve],[data-padd],[data-pdel],[data-itog],[data-ifl],[data-ifr],[data-done],[data-flag],[data-goto],[data-go-iss],[data-gd],[data-ist],[data-cmadd],[data-cmdel],[data-stepadd],[data-stepdel],[data-issdel],[data-tw],[data-eds],[data-blkt],[data-scale],[data-fs],[data-fb],[data-fr],[data-me],[data-pick],[data-cfv],[data-addop],[data-delop],[data-lgo],[data-lgdel],[data-lgrev],[data-lgok],[data-lgx]");
+document.addEventListener("click",e=>{if(!e.target.closest(".more"))$("#menu").hidden=true;if(UI.pop&&!e.target.closest(".pop")){UI.pop=null;$$(".popb").forEach(x=>x.hidden=true);$$('[data-act="pop"]').forEach(x=>x.classList.remove("on"))}const el=e.target.closest("[data-act],[data-tab],[data-pu],[data-approve],[data-padd],[data-pdel],[data-itog],[data-ifl],[data-ifr],[data-done],[data-flag],[data-goto],[data-go-iss],[data-gd],[data-ist],[data-cmadd],[data-cmdel],[data-stepadd],[data-stepdel],[data-issdel],[data-tw],[data-eds],[data-blkt],[data-scale],[data-fs],[data-fb],[data-fr],[data-me],[data-pick],[data-cfv],[data-addop],[data-delop],[data-lgo],[data-lgdel],[data-lgrev],[data-lgok],[data-lgx],[data-sbr]");
  if(el){const a=el.dataset;
   if(a.tab)return go(a.tab);
   if(a.pu)return progEdit(+a.pu);
@@ -2674,10 +2679,12 @@ document.addEventListener("click",e=>{if(!e.target.closest(".more"))$("#menu").h
   if(a.fr!==undefined){UI.flt={who:"",st:[],open:false,prob:false,crit:false,hz:0};saveUI();return renderTab(true)}
   if(a.me){meSel=a.me;$$(".names .chip").forEach(c=>c.classList.toggle("on",c.dataset.me===meSel));$('[data-act="meok"]').disabled=false;return}
   if(a.pick){closeModal();return flag(+a.pick)}
+  if(a.sbr){$("#menu").hidden=true;return sbSwitch(a.sbr)}
   if(a.cfv){[...el.parentElement.children].forEach(b=>b.classList.remove("on"));el.classList.add("on");return}
   switch(a.act){
    case"me":return askMe();
    case"logout":$("#menu").hidden=true;return siteLogout();
+   case"sbreset":$("#menu").hidden=true;return sbReset();
    case"meok":{const v=meSel;if(!v)return;S.me=v;ME.set(v);const cb=meCb;meCb=null;$("#scrim").classList.remove("on");renderMe();if(cb)cb();return}
    case"mclose":return closeModal();
    case"dclose":return closeDrawer();
@@ -2855,6 +2862,21 @@ const DB=SITE?makeDb(typeof makeMockSupabase==="function"?MOCK_SB.createClient:s
 let ME_=null,SYNC=null,BOOTED=false,WAIT=false,rtOff=null,rtT=null;
 const siteCan=a=>!!(ME_&&ME_.can[a]);
 const siteWriter=()=>!!ME_&&Object.entries(ME_.can).some(([k,v])=>v&&k!=="log_clear");
+/* Песочница (роль sandbox, supabase/tools/add_sandbox.sql): план читается из базы один раз при входе, правки остаются
+   только на этой странице — сайт их не отправляет, а база от этой роли запись и не примет. F5 или «Сбросить
+   песочницу» — снова как в базе. В браузере ничего не хранится (правило 3). «Смотреть как» — права выбранной роли
+   из таблицы permissions; чужие правки во время пробы не подтягиваются (чтобы не стереть пробные). */
+const SB_ROLES=["planner","manager","viewer","admin"];
+const sandbox=()=>!!ME_&&ME_.role==="sandbox";
+const siteRole=()=>ME_?(sandbox()?ME_.view:ME_.role):"";
+function sbView(r){ME_.view=r;ME_.can=Object.fromEntries(ME_.perms.map(x=>[x.action,!!x[r]]))}
+function makeSandboxSync(db,o){let L0=null;const copy=()=>JSON.parse(JSON.stringify(L0));
+ return{async start(){L0=await db.load();o.apply(copy(),true)},run:()=>Promise.resolve(),busy:()=>false,pending:()=>false,
+  reset(){o.apply(copy(),true)}}}
+function sbSwitch(r){sbView(r);if(!siteCan("plan_edit"))UI.edit=false;impBtn();renderMe();rerender();toast("Смотрите как: "+ROLE_T[r])}
+function sbReset(){if(!confirm("Сбросить песочницу? Ваши пробные правки пропадут, план снова будет как в базе."))return;
+ SYNC.reset();toast("Песочница сброшена — план как в базе")}
+function impBtn(){const b=$('[data-act="impx"]');b.hidden=siteRole()!=="admin";b.textContent="Загрузить пакет от Claude…";b.title="Пакет программы работ (.json), который готовит Claude из файла Project"}
 const newKey=()=>crypto.randomUUID?crypto.randomUUID():"10000000-1000-4000-8000-100000000000".replace(/[018]/g,c=>(c^crypto.getRandomValues(new Uint8Array(1))[0]&15>>c/4).toString(16));
 /* Человек печатает или открыто окно — картину базы показываем после (иначе перерисовка съест ввод). */
 const busyUI=()=>$("#scrim").classList.contains("on")||!!document.activeElement&&document.activeElement.matches("main input,main textarea,main select,#drawer input,#drawer textarea,#drawer select");
@@ -2865,7 +2887,7 @@ function siteApply(L,remote){
  if(BOOTED&&busyUI())return false;
  const x=fromRows(L),open=S.open||{};
  DATA=x.DATA;S={...blankState(),...x.S,open,me:ME_.name,dirty:false};
- if(!BOOTED){BOOTED=true;boot();renderMe();{const b=$('[data-act="impx"]');b.hidden=ME_.role!=="admin";b.textContent="Загрузить пакет от Claude…";b.title="Пакет программы работ (.json), который готовит Claude из файла Project"}return true}
+ if(!BOOTED){BOOTED=true;boot();renderMe();impBtn();return true}
  buildModel();
  if(remote){HIST=makeHistory(snapNow);UNDO_D.length=0;REDO_D.length=0;UNDO_L.length=0;REDO_L.length=0;toast.hot=false}   // чужая правка: отмена не должна её затереть
  else HIST.rebase();
@@ -2892,6 +2914,8 @@ function hideLogin(){const w=$("#login");if(w)w.hidden=true}
 async function afterLogin(){
  ME_=await DB.me();
  if(!ME_){await DB.signOut();return showLogin("У вас ещё нет роли — администратору: Table Editor → profiles → role")}
+ if(sandbox()){sbView("planner");SYNC=makeSandboxSync(DB,{apply:siteApply});await SYNC.start();hideLogin();
+  return toast("Песочница: правки остаются на этой странице, в базу не уходят")}
  SYNC=makeSync(DB,{rows:siteRows,apply:siteApply,later:()=>{WAIT=true},error:siteError,noOrd:()=>!siteCan("issue_order")});
  await SYNC.start();hideLogin();live()}
 async function siteLogout(){if(SYNC&&(SYNC.busy()||SYNC.pending()))return toast("Подождите: правки ещё сохраняются");
