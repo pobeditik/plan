@@ -2804,8 +2804,9 @@ function go(tab,push=true){UI.tab=tab;saveUI();$$("#tabs button").forEach(b=>b.c
 function renderTab(keep){renderMe();paintDirty();const n=issList(true).length;$("#cntI").textContent=n;$("#cntI").classList.toggle("z",!n);
  if(LAND())renderGnt(keep);else if(UI.tab==="sum")renderSum();else if(UI.tab==="iss")renderIss();else renderGnt(keep)}
 const rerender=()=>{renderTab(true);refreshDrawer();refreshHist()};
-setInterval(()=>{if(DATA&&dayTick()){buildModel();rerender()}},60000);   // линия «сегодня» сама переходит на новый день
-document.addEventListener("visibilitychange",()=>{if(!document.hidden&&DATA&&dayTick()){buildModel();rerender()}});
+const newDay=()=>{if(DATA&&dayTick()){buildModel();$("#asof").innerHTML=asofHTML();rerender()}};
+setInterval(newDay,60000);   // линия «сегодня» сама переходит на новый день
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)newDay()});
 function askFile(){const f=$("#fx");f.onchange=()=>{const file=f.files[0];if(file)readFile(file);f.value=""};f.click()}
 function readFile(file){const r=new FileReader();
  if(/\.json$/i.test(file.name)){r.onload=()=>progPackage(String(r.result));return r.readAsText(file,"utf-8")}
