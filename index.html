@@ -748,7 +748,7 @@ body.hist main{margin-right:min(420px,94vw)}
 .row>.lc>.dt.e{padding:0 3px}.row .lc .dt.e .ed{padding:4px 4px}
 
 /* ---------- программа работ: лист A3 (Сводка и печать, 16.10) — белый лист как у офиса, всё внутри .psheet ---------- */
-.psheet{--p-ink:#2B2826;--p-ink2:#5E5750;--p-ink3:#766C62;--p-rule:#ECE8E2;--p-rule2:#D2CABE;--p-gz:#0B6DB7;--p-gzt:#EEF5FC;--p-green:#4F8A2E;--p-green2:#A8C690;--p-plan:#7A726A;--p-dpm:#B07A1F;--p-red:#CE1B2C;--p-late:#E9B97A;--p-ghost:#C9C1B5;
+.psheet{--p-ink:#2B2826;--p-ink2:#5E5750;--p-ink3:#766C62;--p-rule:#ECE8E2;--p-rule2:#D2CABE;--p-gz:#0B6DB7;--p-gzt:#EEF5FC;--p-green:#4F8A2E;--p-green2:#A8C690;--p-plan:#7A726A;--p-dpm:#B07A1F;--p-red:#CE1B2C;--p-own:#C2362B;--p-late:#E9B97A;--p-ghost:#C9C1B5;
  width:1520px;height:1030px;position:relative;overflow:hidden;background:#fff;color:var(--p-ink);font:14px/1.2 "Golos Text",Arial,sans-serif;font-variant-numeric:tabular-nums;text-align:left}
 .psheet *{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .psheet .ph{height:96px;padding:22px 28px 0;display:flex;align-items:flex-start}
@@ -788,7 +788,7 @@ body.hist main{margin-right:min(420px,94vw)}
 .psheet .pb{position:absolute;z-index:2;border-radius:4px;overflow:hidden;background:var(--p-plan)}
 .psheet .pb.proj{background:var(--p-gz)}.psheet .pb.br{background:var(--p-gz)}.psheet .pb.fld{background:var(--p-ink)}.psheet .pb.pad{background:#9B9188}
 .psheet .pb.dpm{background:var(--p-dpm)}.psheet .pb.done{background:var(--p-green)}
-.psheet .pb.late{background:var(--p-late)}.psheet .plag{margin-left:8px;color:#B4531F;font-weight:700}.psheet .pov{display:inline-block;width:15px;height:15px;margin-right:6px;border-radius:50%;background:#B4531F;color:#fff;font:700 11px/15px var(--font,inherit);text-align:center;font-style:normal;vertical-align:1px}.psheet .pb b{position:absolute;top:0;bottom:0;background:var(--p-late)}.psheet .pb b.fut,.psheet .pleg i.fut{background:repeating-linear-gradient(135deg,var(--p-late) 0 4px,#F7E6CC 4px 8px)}.psheet .pb.late i{position:absolute;left:0;top:0;bottom:0;background:var(--p-green)}.psheet .pb.cur i{position:absolute;left:0;top:0;bottom:0;background:var(--p-green)}
+.psheet .plag{margin-left:8px;color:#B4531F;font-weight:700}.psheet .pov{display:inline-block;width:15px;height:15px;margin-right:6px;border-radius:50%;background:#B4531F;color:#fff;font:700 11px/15px var(--font,inherit);text-align:center;font-style:normal;vertical-align:1px}.psheet .pb i{position:absolute;left:0;top:0;bottom:0;background:var(--p-green)}.psheet .pb b{position:absolute;top:0;bottom:0;background:var(--p-own)}
 .psheet .pb span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;white-space:nowrap;text-shadow:0 0 2px rgba(0,0,0,.55),0 0 1px rgba(0,0,0,.4)}
 .psheet .pln{position:absolute;z-index:1;height:3px;border-radius:2px;background:var(--p-ghost)}
 .psheet .pn{position:absolute;z-index:4;font-size:13.5px;line-height:16px;font-weight:600;white-space:nowrap}
@@ -809,6 +809,32 @@ body.hist main{margin-right:min(420px,94vw)}
  #print.pa3{padding:0}
  #print.pa3 .psheet{zoom:.97}
 }
+
+/* ---------- лист для ГД (28.10): просмотр и печать A3 — .ps1 ---------- */
+.ps1{--q-ink:#1F1D1B;--q-mute:#7A736B;--q-line:#E4DFD8;--q-done:#4E8A5B;--q-ahead:#D9D4CD;--q-own:#C2362B;--q-carry:#EDB9B1;--q-base:#8A847C;
+ width:1520px;box-sizing:border-box;padding:30px 44px 22px;background:#fff;color:var(--q-ink);font-family:"Golos Text",system-ui,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.ps1 *{box-sizing:border-box}
+.ps1-e{padding:60px;color:var(--q-mute);font-size:16px}
+.ps1-hd{display:flex;justify-content:space-between;align-items:baseline;gap:20px;border-bottom:1.5px solid var(--q-ink);padding-bottom:12px}
+.ps1-hd h1{margin:0;font-size:26px;font-weight:700;letter-spacing:-.01em}.ps1-sub{color:var(--q-mute);font-size:14px}.ps1-sub b{color:var(--q-ink)}
+.ps1-band{display:grid;grid-template-columns:340px 1fr 1fr;gap:0 44px;padding:20px 0 18px;border-bottom:1px solid var(--q-line)}
+.ps1-lab{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--q-mute);margin-bottom:8px}
+.ps1-big{font-size:60px;font-weight:700;letter-spacing:-.02em;line-height:1}
+.ps1-big2{font-size:17px;font-weight:600;margin-top:8px}
+.ps1-note{font-size:13.5px;color:var(--q-mute);line-height:1.45;margin-top:8px}
+.ps1-why{border-collapse:collapse;width:100%;font-size:14.5px;line-height:1.35}
+.ps1-why td{padding:4px 0;vertical-align:top}.ps1-why td.v{text-align:right;font-weight:700;white-space:nowrap;padding-left:14px;font-variant-numeric:tabular-nums}
+.ps1-why td.w{font-weight:600;white-space:nowrap;padding-right:12px}.ps1-why .g{color:var(--q-mute)}
+.ps1-why tr.t td{border-top:1px solid var(--q-ink);padding-top:6px}
+.ps1-do{margin:0;padding:0;list-style:none;counter-reset:d;font-size:14.5px;line-height:1.38}
+.ps1-do li{counter-increment:d;position:relative;padding-left:24px;margin-bottom:9px}
+.ps1-do li:before{content:counter(d);position:absolute;left:0;top:0;font-weight:700;color:var(--q-own)}
+.ps1-do b{font-weight:600}.ps1-r{color:var(--q-own);font-weight:700;white-space:nowrap}.ps1-m{color:var(--q-mute)}
+.ps1 svg text{font-family:inherit}.ps1 svg text.h{paint-order:stroke;stroke:#fff;stroke-width:6px;stroke-linejoin:round}
+svg.ps1-g{display:block;margin-top:14px}
+.ps1-ft{display:flex;justify-content:space-between;gap:30px;font-size:12.5px;color:var(--q-mute);border-top:1px solid var(--q-line);padding-top:10px;margin-top:4px}
+.ps1-lg{display:flex;gap:20px;align-items:center;white-space:nowrap}.ps1-lg i{display:inline-block;vertical-align:middle;margin-right:6px}
+.ps1-ftr{text-align:right;max-width:430px}
 
 </style>
 </head>
@@ -1068,7 +1094,7 @@ const REV_EDIT=["название","ответственный","примеча�
  REV_ISS=["проблема","решение","ответственный","срок","влияние, сут","статус","решение ГД"],
  REV_STEP=/^этап \d+: (название|ответственный|срок, сут|готовность)$/;
 const logFieldKey=e=>e&&(e.act==="edit"||e.act==="issue")&&e.uid!=null&&e.field?e.act+"|"+e.uid+"|"+e.field:null;
-const REV_SNAP=/^программа: (сроки|откуда даты|идёт после|готовность|не раньше)$/;   // правки листа программы — со снимком строки в t (20.10)
+const REV_SNAP=/^программа: (сроки|откуда даты|идёт после|готовность|не раньше|бригада)$/;   // правки листа программы — со снимком строки в t (20.10)
 function logRevertable(e){if(logFieldKey(e)&&REV_SNAP.test(e.field))return typeof e.t==="string"&&e.t[0]==="{";
  if(!logFieldKey(e)||e.from===undefined||e.from===null)return false;
  if(typeof e.from==="string"&&e.from.endsWith("…"))return false;
@@ -1386,16 +1412,17 @@ if (typeof module !== 'undefined') {
    Чистые функции: тесты — tests/unit/program.test.js. */
 const PROG_TAG="#программа";
 const isProgRoot=t=>!!t&&!!t.sum&&String(t.note||"").split("\n").some(l=>l.trim()===PROG_TAG);
-function progNote(note){const o={agreed:null,link:null,part:null,root:false,after:undefined,lag:0,snet:null};   // after: undefined — после предыдущей строки бригады (по умолчанию), null — ни после чего, число — uid строки; lag — пауза после неё, сут (точность — минута)
+function progNote(note){const o={agreed:null,link:null,part:null,root:false,after:undefined,lag:0,snet:null,other:false};   // after: undefined — после предыдущей строки бригады (по умолчанию), null — ни после чего, число — uid строки; lag — пауза после неё, сут (точность — минута)
  String(note||"").split("\n").forEach(l=>{l=l.trim();let m;
   if(l===PROG_TAG)o.root=true;
   else if((m=l.match(/^согласовано:\s*(\S+)\s+—\s+(\S+)$/)))o.agreed=[m[1],m[2]];
   else if((m=l.match(/^связь:\s*(\d+)\s+(дпм|работы|всё)$/))){o.link=+m[1];o.part=m[2]}
   else if((m=l.match(/^после:\s*(\d+|—)$/)))o.after=m[1]==="—"?null:+m[1];
   else if((m=l.match(/^пауза:\s*(\d+(?:\.\d+)?)$/)))o.lag=+m[1];
-  else if((m=l.match(/^не раньше:\s*(\S+)$/)))o.snet=m[1]});   // «не раньше» (зимник, разрешение) — как ограничение в Project
+  else if((m=l.match(/^не раньше:\s*(\S+)$/)))o.snet=m[1];
+  else if(l==="бригада: другая")o.other=true});   // делает другая бригада (вышкомонтажники и т. п.) — может идти параллельно   // «не раньше» (зимник, разрешение) — как ограничение в Project
  return o}
-const progNoteText=o=>[o.root?PROG_TAG:"",o.link?`связь: ${o.link} ${o.part||"всё"}`:"",o.after!==undefined?`после: ${o.after===null?"—":o.after}`:"",o.lag>0?`пауза: ${+(+o.lag).toFixed(5)}`:"",o.snet?`не раньше: ${o.snet}`:"",o.agreed?`согласовано: ${o.agreed[0]} — ${o.agreed[1]}`:""].filter(Boolean).join("\n");
+const progNoteText=o=>[o.root?PROG_TAG:"",o.link?`связь: ${o.link} ${o.part||"всё"}`:"",o.after!==undefined?`после: ${o.after===null?"—":o.after}`:"",o.lag>0?`пауза: ${+(+o.lag).toFixed(5)}`:"",o.snet?`не раньше: ${o.snet}`:"",o.other?"бригада: другая":"",o.agreed?`согласовано: ${o.agreed[0]} — ${o.agreed[1]}`:""].filter(Boolean).join("\n");
 /* Часть блока для связанной строки: ДПМ — первые операции (переезд, демонтаж, передвижка, монтаж);
    работы — остальное без хвостовой «Выручки» (её на листе нет — решение 13.10: 688 в программе кончается подъёмом). */
 const DPM_RE=/переезд|монтаж|демонтаж|передвижк|дпм/i,TAIL_RE=/выручк/i;
@@ -1408,7 +1435,10 @@ function progSubtree(tasks){const i=tasks.findIndex(isProgRoot);if(i<0)return[];
  for(let j=i+1;j<tasks.length&&tasks[j].lvl>r.lvl;j++)out.push({t:tasks[j],depth:tasks[j].lvl-r.lvl});return out}
 /* Расчёт: rows — progSubtree; dateOf(s) → Date; linkOf(uid, part) → {S,F,pct}|null (из операций блока); day — мс в сутках.
    Возвращает строки с S, F, pct (null у сводных), plan [S,F]|null, kind и номерами для отрисовки. */
-function progCompute(rows,dateOf,linkOf,day=864e5){const out=rows.map(({t,depth})=>{const n=progNote(t.note);
+/* opts (28.10, лист для ГД): crew — одна бригада работает подряд: строка не начинается, пока не кончилась предыдущая строка
+   той же бригады (кроме «бригада: другая»); today (мс) — не начатое не начинается в прошлом, начатое кончается не раньше
+   «сегодня + остаток» (как прогноз Графика, core.js). Тогда S/F — честный прогноз, pS/pF — даты по плану (как вписаны). */
+function progCompute(rows,dateOf,linkOf,day=864e5,opts={}){const out=rows.map(({t,depth})=>{const n=progNote(t.note);
   return{uid:t.uid,depth,name:t.name,sum:!!t.sum,note:n,S0:dateOf(t.s),F0:dateOf(t.f),pct:+t.pct||0,
    plan:n.agreed?[dateOf(n.agreed[0]),dateOf(n.agreed[1])]:null,linked:false}});
  /* связь строк (20.10): «после: uid» — не раньше конца той строки; «после: —» — только свои даты; без пометки — после
@@ -1416,10 +1446,12 @@ function progCompute(rows,dateOf,linkOf,day=864e5){const out=rows.map(({t,depth}
     Строка со связью начинается ровно в конец той строки плюс пауза: сдвинули ту раньше — и эта раньше (20.10, Паша);
     свои даты в базе у неё — только длительность. */
  let prevLeaf=null;const leaf=new Set(out.filter(r=>!r.sum).map(r=>r.uid));
- out.forEach(r=>{if(r.depth<=1)prevLeaf=null;if(r.sum)return;
+ let crew=null;
+ out.forEach(r=>{if(r.depth<=1){prevLeaf=null;crew=null}if(r.sum)return;
+  r.crewPrev=crew?crew.uid:null;if(!r.note.other)crew=r;
   r.predAuto=r.note.after===undefined||r.note.after!==null&&!leaf.has(r.note.after);   // «после» на строку, которой нет (удалена, сводная), — как по умолчанию
   r.pred=r.predAuto?(prevLeaf?prevLeaf.uid:null):r.note.after;prevLeaf=r});
- const by=new Map(out.map(r=>[r.uid,r])),done=new Set(),busy=new Set();
+ const by=new Map(out.map(r=>[r.uid,r]));let done=new Set(),busy=new Set(),fc=false;
  const calc=r=>{if(done.has(r.uid)||busy.has(r.uid))return;busy.add(r.uid);   // busy — защита от кольца
   const L=r.note.link!=null?linkOf(r.note.link,r.note.part||"всё"):null;
   if(L){r.S=L.S;r.F=L.F;r.pct=L.pct;r.linked=true;r.pred=null}
@@ -1427,9 +1459,17 @@ function progCompute(rows,dateOf,linkOf,day=864e5){const out=rows.map(({t,depth}
    if(p&&!p.sum){calc(p);pF=p.F||null}
    const d=Math.max(0,+r.F0-+r.S0);r.predF=pF;
    const ne=r.note.snet?dateOf(r.note.snet):null;r.snet=ne;
-   r.S=pF&&r.S0&&r.F0?new Date(Math.max(+pF+Math.round((r.note.lag||0)*1440)*day/1440,ne?+ne:-Infinity)):r.S0;r.F=r.S?new Date(+r.S+d):r.F0}
+   r.S=pF&&r.S0&&r.F0?new Date(Math.max(+pF+Math.round((r.note.lag||0)*1440)*day/1440,ne?+ne:-Infinity)):r.S0;
+   if(fc&&r.S&&r.F0){
+    const c=opts.crew&&!r.note.other&&r.crewPrev!=null?by.get(r.crewPrev):null;
+    if(c){calc(c);if(c.F&&+c.F>+r.S){r.S=new Date(+c.F);r.crewBy=c.uid}}   // бригада ещё занята
+    if(opts.today!=null&&r.pct<=0&&+r.S<opts.today){r.S=new Date(opts.today);r.notStarted=true}}
+   r.F=r.S?new Date(+r.S+d):r.F0;
+   if(fc&&opts.today!=null&&r.pct>0&&r.pct<100&&r.F&&+r.F<opts.today)r.F=new Date(opts.today+d*(1-r.pct/100))}
   busy.delete(r.uid);done.add(r.uid)};
  out.forEach(r=>{if(!r.sum)calc(r)});
+ if(opts.crew||opts.today!=null){   // второй проход — честный прогноз; первый остаётся как «по плану»
+  out.forEach(r=>{if(!r.sum){r.pS=r.S;r.pF=r.F}});done=new Set();fc=true;out.forEach(r=>{if(!r.sum)calc(r)})}
  for(let i=out.length-1;i>=0;i--){const r=out[i];if(!r.sum)continue;let a=null,z=null;
   for(let j=i+1;j<out.length&&out[j].depth>r.depth;j++){const c=out[j];if(c.sum||!c.S)continue;a=a==null||+c.S<+a?c.S:a;z=z==null||+c.F>+z?c.F:z}
   r.S=a||r.S0;r.F=z||r.F0;r.pct=null}
@@ -1451,7 +1491,10 @@ let DATA=JSON.parse(document.getElementById("mpp").textContent);
 const SITE=typeof makeSync==="function"&&DATA===null;   // «Скачать копию» с сайта — снова версия-файл (данные внутри)
 const DAY=864e5,$=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
 const D=s=>s?new Date(s.length>10?s:s+"T00:00"):null;
-const NOW=new Date(),TODAY=new Date(NOW.getFullYear(),NOW.getMonth(),NOW.getDate());
+let NOW=new Date(),TODAY=new Date(NOW.getFullYear(),NOW.getMonth(),NOW.getDate());
+/* новый день, а вкладка открыта со вчера (28.10, Паша: «красная полоска не работает») — «сегодня» и прогноз пересчитать */
+function dayTick(){const n=new Date();if(n.getFullYear()===TODAY.getFullYear()&&n.getMonth()===TODAY.getMonth()&&n.getDate()===TODAY.getDate())return false;
+ NOW=n;TODAY=new Date(n.getFullYear(),n.getMonth(),n.getDate());return true}
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const p2=n=>String(n).padStart(2,"0");
 const fD=d=>d?p2(d.getDate())+"."+p2(d.getMonth()+1):"";
@@ -1745,7 +1788,7 @@ function renderSumOld(){compute();
 function progRows(){const rows=progSubtree(DATA.tasks);if(!rows.length)return null;compute();
  return progCompute(rows,D,(u,part)=>{const b=BLOCKS.find(x=>x.main===u);if(!b)return null;
   const ids=progPart(b.ids,i=>byId[i].name,part).filter(i=>FC[i]);if(!ids.length)return null;
-  return{S:new Date(Math.min(...ids.map(i=>+FC[i].S))),F:new Date(Math.max(...ids.map(i=>+FC[i].F))),pct:Math.round(blockPct(ids))}})}
+  return{S:new Date(Math.min(...ids.map(i=>+FC[i].S))),F:new Date(Math.max(...ids.map(i=>+FC[i].F))),pct:Math.round(blockPct(ids))}},DAY,{crew:true,today:+TODAY})}   // честный прогноз (28.10): бригада подряд, не начатое — не в прошлом
 const pfd=d=>!d?"—":p2(d.getDate())+"."+p2(d.getMonth()+1)+"."+p2(d.getFullYear()%100);
 const pdur=(a,b)=>{const v=Math.round(dd(a,b)*10)/10;return String(v).replace(".",",")};
 const PMON=["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
@@ -1762,26 +1805,21 @@ function progSheet(R,ed){const SW=1520,SH=1030,LW=330,TW=SW-LW,HEAD=96,SC=46,LEG
   if(+m>=+a0)bg+=`<div class="mo" style="left:${X(m).toFixed(1)}px"></div>`;m=n}
  for(let q=new Date(+a0);+q<+a1;q=new Date(+q+7*DAY)){sc+=`<div class="dy" style="left:${X(q).toFixed(1)}px">${q.getDate()}</div>`;bg+=`<div class="wk" style="left:${X(q).toFixed(1)}px"></div>`}
  let yAcc=0,LATE=false,LAGS=false;const POS={};   // положение полос — для стрелок связей строк в «Правке» (20.10)
- const OV=ed?progOverlaps(R):new Map(),nmO=u=>(OV.get(u)||[]).map(x=>(R.find(z=>z.uid===x)||{}).name).join(", ");
- const nmH=r=>`<span class="nm">${OV.has(r.uid)?`<i class="pov" title="Идёт одновременно с: ${esc(nmO(r.uid))} — а бригада одна">!</i>`:""}${ed&&r.linked?`<i class="plk" title="Даты и готовность — из операций графика"><svg viewBox="0 0 16 16" width="13" height="13"><path d="M6.5 9.5l3-3M7 4.5l1.2-1.2a2.5 2.5 0 013.5 3.5L10.5 8M9 11.5l-1.2 1.2a2.5 2.5 0 01-3.5-3.5L5.5 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></i>`:""}${esc(r.name)}</span>`;
+ const OV=ed?progOverlaps(progPlanned(R)):new Map(),nmO=u=>(OV.get(u)||[]).map(x=>(R.find(z=>z.uid===x)||{}).name).join(", ");
+ const nmH=r=>`<span class="nm">${OV.has(r.uid)?`<i class="pov" title="По вписанным датам идёт одновременно с: ${esc(nmO(r.uid))} — а бригада одна; прогноз сдвинут. Если это делает другая бригада — отметьте в окне строки">!</i>`:""}${ed&&r.linked?`<i class="plk" title="Даты и готовность — из операций графика"><svg viewBox="0 0 16 16" width="13" height="13"><path d="M6.5 9.5l3-3M7 4.5l1.2-1.2a2.5 2.5 0 013.5 3.5L10.5 8M9 11.5l-1.2 1.2a2.5 2.5 0 01-3.5-3.5L5.5 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></i>`:""}${esc(r.name)}</span>`;
  const body=RB.map(r=>{const h=Math.round(HB[r.kind]*k),bh=Math.round((r.kind==="proj"?20:r.kind==="br"||r.kind==="fld"?18:16)*Math.min(1,k+.1)),top=h-bh-Math.round(6*k);   // подпись над полосой (17 px) должна влезть в строку
   const y0=yAcc;yAcc+=h;
   if(!r.S||!r.F)return `<div class="pr ${r.kind}${ed?" pe":""}" style="height:${h}px" ${ed?`data-pu="${r.uid}"`:""}><div class="lc">${nmH(r)}<span class="pc"></span></div><div class="tc"></div></div>`;
   const x=X(r.S),w=Math.max(3,X(r.F)-x);POS[r.uid]={x,w,y0,rh:h,bt:y0+top,bb:y0+top+bh};
-  /* заливка (20.10, Паша): зелёное — готовность, но не дальше линии сегодня; рыжее — отставание от конца зелёного до
-     сегодня (готовность меньше прошедшего срока); у идущей работы часть полосы позже согласованного срока — рыжей штриховкой
-     (это прогноз, правее «сегодня»: заливка меняется ровно на линии сегодня, 27.10); срок прошёл,
-     а не 100 % — недоделанное рыжим. Будущие строки — без заливки, отставание у них — числом «+N сут» у конца полосы. */
-  const late=!r.sum&&r.pct<100&&+r.F<+TODAY,st=!r.sum&&r.pct>=100?" done":late?" late":!r.sum&&r.pct>0?" cur":"";
-  const tf=Math.max(0,Math.min(100,dd(r.S,TODAY)/Math.max(1e-9,dd(r.S,r.F))*100)),run=!r.sum&&!late&&r.pct<100&&+r.S<=+TODAY;
-  const gp=st===" cur"?Math.min(r.pct,tf):r.pct,dur=dd(r.S,r.F),seg=[];
-  if(run&&(tf-gp)/100*dur>=1)seg.push([gp,tf]);   // отстаём от сегодняшнего дня
-  const ag=run&&r.plan&&r.plan[1]&&+r.F>+r.plan[1]+DAY?Math.max(tf,Math.min(100,dd(r.S,r.plan[1])/Math.max(1e-9,dur)*100)):null;
-  if(ag!=null)seg.push([ag,100,1]);   // идёт сейчас и по прогнозу кончится позже согласованного срока — штриховкой: это ещё будущее (правее «сегодня»)
+  /* заливка (28.10, как на листе для ГД): зелёное — сделано, не дальше «сегодня»; красное — часть полосы позже согласованного
+     срока; остальное — цвет работ. Число — готовность (идёт) или длительность. */
+  const tf=Math.max(0,Math.min(100,dd(r.S,TODAY)/Math.max(1e-9,dd(r.S,r.F))*100)),st=!r.sum&&r.pct>=100?" done":"";
+  const gp=!r.sum&&r.pct>0&&r.pct<100?Math.min(r.pct,tf):0;
+  const ag=!r.sum&&r.pct<100&&r.plan&&r.plan[1]&&+r.F>+r.plan[1]+DAY?Math.max(gp,Math.min(100,dd(r.S,r.plan[1])/Math.max(1e-9,dd(r.S,r.F))*100)):null;
   const lagD=!r.sum&&r.pct<100&&r.plan&&r.plan[1]?dd(r.plan[1],r.F):0,lagT=lagD>=0.5?`<b class="plag">+${pdur(0,lagD*DAY)} сут</b>`:"";
-  if(late||seg.some(x=>!x[2]))LATE=true;if(lagT||ag!=null)LAGS=true;
-  const lb=st===" cur"||st===" late"?`<span>${r.pct}%</span>`:(!r.sum&&w>48?`<span>${pdur(r.S,r.F)} сут</span>`:"");
-  const inner=(st===" cur"||st===" late"?`<i style="width:${gp.toFixed(1)}%"></i>`:"")+seg.map(([a,z,f])=>`<b${f?' class="fut"':""} style="left:${a.toFixed(1)}%;width:${(z-a).toFixed(1)}%"></b>`).join("")+lb;
+  if(ag!=null)LATE=true;
+  const lb=!r.sum&&r.pct>0&&r.pct<100?`<span>${r.pct}%</span>`:(!r.sum&&w>48?`<span>${pdur(r.S,r.F)} сут</span>`:"");
+  const inner=(gp>0?`<i style="width:${gp.toFixed(1)}%"></i>`:"")+(ag!=null?`<b style="left:${ag.toFixed(1)}%;width:${(100-ag).toFixed(1)}%"></b>`:"")+lb;
   const pl=r.plan&&r.plan[0]&&r.plan[1]?`<div class="pln" style="left:${X(r.plan[0]).toFixed(1)}px;width:${Math.max(2,X(r.plan[1])-X(r.plan[0])).toFixed(1)}px;top:${top+bh+3}px"></div>`:"";
   return `<div class="pr ${r.kind}${ed?" pe":""}" style="height:${h}px" ${ed?`data-pu="${r.uid}"`:""}><div class="lc">${nmH(r)}<span class="pc">${pdur(r.S,r.F)}<small>сут</small></span></div>
    <div class="tc"><div class="pb ${r.kind}${st}" style="left:${x.toFixed(1)}px;width:${w.toFixed(1)}px;top:${top}px;height:${bh}px">${inner}</div>${pl}
@@ -1792,7 +1830,128 @@ function progSheet(R,ed){const SW=1520,SH=1030,LW=330,TW=SW-LW,HEAD=96,SC=46,LEG
   <div class="kp"><div class="big">${Math.round(dd(pS,pF))} сут</div><div class="cap">окончание проекта ${pfd(pF)}</div></div></div>
   <div class="pgt"><div class="psc"><div class="lh"><span>Работы</span><span>Длит.</span></div><div class="tl">${sc}</div></div>
   <div class="pbg">${bg}<div class="tdy" style="left:${X(TODAY).toFixed(1)}px"></div></div><div class="pbody">${body}${ed?plinks(RB,POS,yAcc):""}</div></div>
-  <div class="pleg"><span><i style="background:var(--p-green)"></i>выполнено</span><span><i style="background:var(--p-plan)"></i>работы</span><span><i style="background:var(--p-dpm)"></i>ДПМ — демонтаж, передвижка, монтаж</span>${LAGS?`<span><i class="fut"></i><b class="plag" style="margin:0">+N сут</b>прогноз позже согласованного срока</span>`:""}${LATE?`<span><i style="background:var(--p-late)"></i>отставание</span>`:""}${hasPlan?`<span><i style="height:3px;background:var(--p-ghost)"></i>согласованный срок</span>`:""}<span><i style="width:3px;height:16px;background:var(--p-red)"></i>сегодня ${p2(TODAY.getDate())}.${p2(TODAY.getMonth()+1)}.${TODAY.getFullYear()}</span></div></div>`}
+  <div class="pleg"><span><i style="background:var(--p-green)"></i>сделано</span><span><i style="background:var(--p-plan)"></i>работы</span><span><i style="background:var(--p-dpm)"></i>ДПМ</span>${LATE?`<span><i style="background:var(--p-own)"></i>позже согласованного срока</span>`:""}${hasPlan?`<span><i style="height:3px;background:var(--p-ghost)"></i>согласованный срок</span>`:""}<span><i style="width:3px;height:16px;background:var(--p-red)"></i>сегодня ${p2(TODAY.getDate())}.${p2(TODAY.getMonth()+1)}.${TODAY.getFullYear()}</span></div></div>`}
+/* ================== лист для ГД (28.10): просмотр и печать A3 ==================
+   По итогам разбора трёх экспертов (scratchpad expert/final, DECISIONS «Сводка для ГД»): строка = скважина (ДПМ + ЗБС),
+   прогноз честный (progCompute crew+today), согласованный срок — линия под полосой, зелёное — сделано до «сегодня»,
+   тёмно-красное — своя потеря за согласованным сроком, розовое — перенос с предыдущей. Шапка: окончание, «откуда», «решить».
+   В «Правке» — подробный лист (progSheet): там правят строки. */
+function progWells(R){const crews=[];let cur=null,buf=[],fld="",pad="";
+ const nm=z=>{const m=z.name.match(/скв\.?\s*(\S+)/i);return m&&!/^дпм/i.test(z.name)?"Скв. "+m[1]:z.name};
+ /* ДПМ и работа одного куста — одна скважина, в каком бы порядке ни стояли (↑/↓); лишний ДПМ — своей строкой */
+ const flush=()=>{if(!buf.length)return;if(!cur){cur={name:"",items:[]};crews.push(cur)}const used=new Set(),out=[];
+  buf.forEach((r,k)=>{if(r.kind!=="dpm")return;let w=buf.slice(k+1).find(x=>x.kind==="work"&&!used.has(x));if(!w)w=buf.slice(0,k).reverse().find(x=>x.kind==="work"&&!used.has(x));
+   if(w){used.add(w);used.add(r);out.push({at:buf.indexOf(w),dpm:r,z:w})}});
+  buf.forEach((r,k)=>{if(!used.has(r))out.push({at:k,dpm:null,z:r})});
+  out.sort((a,b)=>a.at-b.at).forEach(o=>cur.items.push({n:nm(o.z),loc:[fld,pad].filter(Boolean).join(" · "),dpm:o.dpm,z:o.z}));buf=[]};
+ R.forEach(r=>{if(r.kind==="br"){flush();cur={name:r.name,items:[]};crews.push(cur);fld="";pad="";return}
+  if(r.kind==="fld"){flush();fld=r.name.replace(/\s*НГКМ\s*$/i,"");pad="";return}
+  if(r.kind==="pad"){flush();pad=r.name;return}
+  if(r.kind==="dpm"||r.kind==="work")buf.push(r)});
+ flush();
+ const T=+TODAY,D_=(a,b)=>a&&b?dd(a,b):0;
+ crews.forEach(c=>{let prev=null,between=[],last=null;c.items.forEach(it=>{const z=it.z,p=it.dpm;
+  it.S=p&&p.S&&+p.S<+z.S?p.S:z.S;it.F=p&&p.F&&+p.F>+z.F?p.F:z.F;it.dS=p?p.S:null;it.dF=p?p.F:null;it.pct=z.pct;
+  it.ag=z.plan&&z.plan[1]?[p&&p.plan&&p.plan[0]?p.plan[0]:z.plan[0],z.plan[1]]:null;
+  it.wait=p&&p.F&&z.S&&+z.S-+p.F>=DAY?{a:+p.F,b:+z.S}:null;   // ДПМ кончился, а работа позже («не раньше», пауза) — ожидание, не бурение
+  /* сделано: по готовности, но не дальше «сегодня» (как в «Правке») */
+  const done=p&&p.pct<100?(p.S?+p.S+(+p.F-+p.S)*p.pct/100:null):(z.pct>0&&z.S?+z.S+(+z.F-+z.S)*z.pct/100:(p&&p.F?+p.F:null));
+  it.doneEnd=done==null?null:Math.min(T,done);
+  /* простой по операциям Графика — только впереди: у сделанных операций фактическое окончание неизвестно */
+  it.holes=[];if(z.linked&&z.note.link!=null){const b=BLOCKS.find(x=>x.main===z.note.link);
+   if(b){const ids=progPart(b.ids,i=>byId[i].name,z.note.part||"всё").filter(i=>FC[i]).sort((a,q)=>+FC[a].S-+FC[q].S);let mx=null;
+    ids.forEach(i=>{const f=FC[i];if(mx!=null&&+f.S-mx>=DAY&&+f.S>T){const a=Math.max(mx,T);if(+f.S-a>=DAY)it.holes.push({a,b:+f.S})}if(mx==null||+f.F>mx)mx=+f.F})}}
+  it.gaps=it.holes.reduce((a,h)=>a+(h.b-h.a)/DAY,0);
+  if(it.ag&&it.S&&it.F){it.slip=Math.round(dd(it.ag[1],it.F)*10)/10;
+   const prevSlip=prev?prev.slip:null;it.own=prevSlip==null?it.slip:Math.round((it.slip-prevSlip)*10)/10;it.carry=prevSlip==null?0:Math.max(0,Math.min(it.slip,prevSlip));
+   /* из чего своя потеря: (перерыв до скважины − согласованный перерыв) + (длительность − согласованная) — сумма точная */
+   const parts=[],add=(v,t)=>{if(Math.abs(v)>=0.5)parts.push([v,t])};
+   if(prev){const gA=dd(prev.F,it.S),gP=dd(prev.ag[1],it.ag[0]);
+    between.forEach(b=>add(D_(b.S,b.F),`«${b.n}» — срок не согласован`));const bt=between.reduce((a,b)=>a+D_(b.S,b.F),0);
+    const rest=gA-gP-bt;
+    if(rest<=-0.5&&(z.note.other||p&&p.note.other))add(rest,"идёт одновременно с предыдущей (другая бригада)");
+    else if((z.note.snet||p&&p.note.snet)&&rest>=0.5)add(rest,`не раньше ${pfd(z.snet||p&&p.snet)}`);
+    else if(gP>=0.5&&rest<0)add(rest,`запас между скважинами ${pdur(0,gP*DAY)} сут`);
+    else add(rest,rest>0?"перерыв перед скважиной":"начали раньше согласованного")}
+   else{const st=p&&!p.plan&&z.S?z.S:it.S;add(dd(it.ag[0],st),dd(it.ag[0],st)>0?"начало позже согласованного":"начало раньше согласованного")}   // ДПМ без согласованного срока — сравнивать начало работ
+   if(p&&p.plan&&p.S&&p.F)add(D_(p.S,p.F)-dd(p.plan[0],p.plan[1]),`ДПМ ${pdur(0,D_(p.S,p.F)*DAY)} сут вместо ${pdur(0,dd(p.plan[0],p.plan[1])*DAY)}`);
+   else if(prev&&p&&p.S&&p.F&&it.ag&&z.plan&&+it.ag[0]===+z.plan[0])add(D_(p.S,p.F),"ДПМ — срок не согласован");
+   if(it.wait)add((it.wait.b-it.wait.a)/DAY-(p&&p.plan&&z.plan?Math.max(0,dd(p.plan[1],z.plan[0])):0),z.note.snet?`ожидание: не раньше ${pfd(z.snet)}`:"ожидание между ДПМ и работами");
+   if(z.plan&&z.S&&z.F){const wd=D_(z.S,z.F)-dd(z.plan[0],z.plan[1]);add(it.gaps,"простой (операции Графика)");
+    add(wd-it.gaps,z.linked?(z.pct>0&&z.pct<100&&wd-it.gaps>0?"работы дольше согласованного (или готовность не обновлена)":"работы дольше согласованного"):`${/^збс/i.test(z.name)?"бурение":"работы"} ${pdur(0,D_(z.S,z.F)*DAY)} сут вместо ${pdur(0,dd(z.plan[0],z.plan[1])*DAY)}`)}
+   const pp=parts.filter(q=>Math.abs(q[0])>=1),res=Math.round((it.own-pp.reduce((x,q)=>x+q[0],0))*10)/10;   // мелочь меньше суток — к главной части; сумма — точно своя потеря
+   if(Math.abs(res)>=0.05){const big=pp.reduce((a,q)=>!a||Math.abs(q[0])>Math.abs(a[0])?q:a,null);if(big)big[0]=Math.round((big[0]+res)*10)/10;else if(Math.abs(res)>=0.5)pp.push([res,"прочее (порядок строк, связи)"])}
+   parts.length=0;parts.push(...pp);
+   it.parts=parts;prev=it;between=[]}
+  else if(it.S&&it.F)between.push(it);
+  last=it})});
+ return crews}
+function progSheetL1(R){const crews=progWells(R).filter(c=>c.items.length),all=crews.flatMap(c=>c.items).filter(it=>it.S&&it.F);
+ if(!all.length)return `<div class="ps1"><div class="ps1-e">В программе пока нет строк с датами.</div></div>`;
+ const T=+TODAY,sd=v=>(v>0?"+":v<0?"−":"")+String(Math.abs(Math.round(v*10)/10)).replace(".",","),ag=all.filter(it=>it.ag);
+ const endIt=all.reduce((a,b)=>+b.F>+a.F?b:a),endF=endIt.F,decisive=crews.find(c=>c.items.includes(endIt));
+ const lastAg=decisive?[...decisive.items].reverse().find(it=>it.ag&&it.F):null,endAg=lastAg?lastAg.ag[1]:null,endSlip=lastAg?lastAg.slip:null;   // итог = отставание последней согласованной скважины решающей бригады
+ /* «откуда»: своя потеря каждой скважины решающей бригады — сумма сходится с итогом (перенос не считается дважды) */
+ const reason=it=>{const ps=(it.parts||[]).filter(x=>Math.abs(x[0])>=0.5);   // из чего своя потеря (progWells) — с числами, если частей больше одной
+  return ps.length===1?ps[0][1]:ps.map(([v,t])=>`${t} ${sd(v)}`).join("; ")};
+ const why=decisive?decisive.items.filter(it=>it.ag&&Math.abs(it.own)>=0.5):[];
+ /* «решить»: бригада занята, а дата вписана раньше; открытые вопросы с влиянием; сокращённые против согласованного сроки */
+ const dec=[];
+ R.forEach(r=>{if(!r.sum&&r.crewBy!=null&&r.pS&&+r.S-+r.pS>36e5){const c=R.find(x=>x.uid===r.crewBy);
+  dec.push(`<b>${esc(r.name)}: вписано с ${pfd(r.pS)}, но бригада на «${esc(c?c.name:"")}» до ${pfd(r.S)}.</b> Если это делает другая бригада — отметьте в строке («Правка»); иначе окончание ${pfd(endF)}.`)}});
+ issList(true).filter(u=>+S.issues[u].impact>0).sort((a,b)=>+S.issues[b].impact-+S.issues[a].impact).forEach(u=>{const i=S.issues[u];
+  dec.push(`<b>${esc(byId[u]?byId[u].name:"")}</b> — ${esc(trunc(i.problem||"",110))} <span class="ps1-r">${sd(+i.impact)} сут</span>`)});
+ all.forEach(it=>{const z=it.z;if(it.z.linked||!z.plan||!z.S)return;const a=dd(z.plan[0],z.plan[1]),b=dd(z.S,z.F);if(a-b>=1)dec.push(`<b>${esc(it.n)}: ${/^збс/i.test(z.name)?"бурение":"работы"} ${pdur(0,b*DAY)} сут вместо ${pdur(0,a*DAY)} согласованных</b> — на чём основано? Если ${pdur(0,a*DAY)} — окончание позже на ${pdur(0,(a-b)*DAY)} сут.`)});
+ if(!dec.length&&issList(true).length)dec.push(`<span class="ps1-m">У открытых вопросов не оценено влияние на сроки — заполните «влияние, сут» во вкладке «Вопросы».</span>`);
+ const noBuf=decisive&&decisive.items.filter(it=>it.ag).every(it=>!it.buf||it.buf<.05);
+ const col=v=>v==null?"var(--q-ink)":v>=0.5?"var(--q-own)":v<=-0.5?"var(--q-done)":"var(--q-ink)";
+ const head=`<div class="ps1-hd"><h1>ГДТ — работы до конца проекта</h1><div class="ps1-sub">${esc(R[0].name.split("·")[0].trim())}${R.some(r=>r.kind==="fld")?" · "+esc(R.filter(r=>r.kind==="fld").map(r=>r.name).join(", ")):""} · данные на <b>${pfd(TODAY)}</b></div></div>
+  <div class="ps1-band"><div><div class="ps1-lab">Окончание, прогноз</div><div class="ps1-big" style="color:${col(endSlip)}">${pfd(endF)}</div>
+   ${endSlip!=null?`<div class="ps1-big2" style="color:${col(endSlip)}">${Math.abs(endSlip)<0.5?"в срок":sd(endSlip)+" сут"} к согласованному ${pfd(endAg)}</div>`:""}
+   <div class="ps1-note">${noBuf&&endSlip>=0.5?"Запаса нет: скважины согласованы встык — каждые сутки задержки переходят в окончание.":""}</div></div>
+  <div>${why.length&&endSlip!=null?`<div class="ps1-lab">Откуда ${sd(endSlip)} сут</div><table class="ps1-why">${why.map(it=>`<tr><td class="w">${esc(it.n)}</td><td class="g">${esc(reason(it))}</td><td class="v" style="color:${col(it.own)}">${sd(it.own)}</td></tr>`).join("")}<tr class="t"><td class="w">Итого</td><td></td><td class="v" style="color:${col(endSlip)}">${sd(endSlip)}</td></tr></table>`:""}</div>
+  <div>${dec.length?`<div class="ps1-lab">Решить</div><ol class="ps1-do">${dec.slice(0,3).map(x=>`<li>${x}</li>`).join("")}</ol>`:""}</div></div>`;
+ /* график */
+ const W=1432,LW=250,RW=200,lo=Math.min(...all.map(it=>+it.S),...ag.map(it=>+it.ag[0]),T)-6*DAY,hi=Math.max(...all.map(it=>+it.F),...ag.map(it=>+it.ag[1]),T)+4*DAY,X=t=>LW+(+t-lo)/(hi-lo)*(W-LW-RW);
+ const RH=66,BH=20,TH=8,MN=["янв","фев","мар","апр","май","июн","июл","авг","сен","окт","ноя","дек"];let y=44,g="";
+ for(let m=new Date(new Date(lo).getFullYear(),new Date(lo).getMonth()+1,1);+m<hi;m=new Date(m.getFullYear(),m.getMonth()+1,1))
+  g+=`<line x1="${X(m)}" y1="22" x2="${X(m)}" y2="30" stroke="#C9C2B9"/><text x="${X(m)+5}" y="18" font-size="12.5" fill="#8C857D">${MN[m.getMonth()]}${m.getMonth()===0?" "+m.getFullYear():""}</text>`;
+ const rect=(a,b,yy,h,c)=>+b>+a?`<rect x="${X(a).toFixed(1)}" y="${yy}" width="${Math.max(1,X(b)-X(a)).toFixed(1)}" height="${h}" fill="${c}"/>`:"";
+ const paint=(a,b,yy,h,it)=>{let o="";const A=it.ag?+it.ag[1]:Infinity,ce=it.ag?A+Math.max(0,Math.min(it.carry||0,it.slip||0))*DAY:A,G=it.doneEnd==null?-Infinity:it.doneEnd;
+  const pts=[...new Set([+a,+b,...[G,A,ce].filter(t=>t>+a&&t<+b)])].sort((p,q)=>p-q);
+  for(let i=0;i<pts.length-1;i++){const mid=(pts[i]+pts[i+1])/2,c=mid>A?(mid<ce?"var(--q-carry)":"var(--q-own)"):(mid<G?"var(--q-done)":"var(--q-ahead)");o+=rect(pts[i],pts[i+1],yy,h,c)}
+  it.holes.forEach(hl=>{if(hl.b>+a&&hl.a<+b)o+=`<rect x="${(X(Math.max(+a,hl.a))+1).toFixed(1)}" y="${yy-1}" width="${Math.max(0,X(Math.min(+b,hl.b))-X(Math.max(+a,hl.a))-2).toFixed(1)}" height="${h+2}" fill="#fff"/>`});return o};
+ crews.forEach(c=>{const its=c.items.filter(it=>it.S&&it.F);if(!its.length)return;let sub="";
+  if(its.length>1){const fin=new Date(Math.max(...its.map(it=>+it.F)));let drill=0,move=0,idle=0;
+   let pf=null;its.forEach(it=>{const fu=(x,y)=>x&&y&&+y>T?Math.max(0,dd(new Date(Math.max(T,+x)),y)):0;   // только то, что впереди
+    if(pf&&+it.S>+pf)idle+=fu(pf,it.S);pf=it.F;
+    move+=fu(it.dS,it.dF);if(it.wait)idle+=fu(new Date(it.wait.a),new Date(it.wait.b));
+    const w=fu(it.z.S,it.z.F);let h=0;it.holes.forEach(x=>{h+=fu(new Date(x.a),new Date(x.b))});drill+=w-h;idle+=h});
+   if(+fin>T)sub=`с ${pfd(TODAY).slice(0,5)} до ${pfd(fin).slice(0,5)}: бурение ${Math.round(drill)} сут, переезды (ДПМ) ${Math.round(move)} сут${idle>=1?`, простой и ожидание ${Math.round(idle)} сут`:""}`}
+  g+=`<text x="0" y="${y+16}" font-size="15" font-weight="700">${esc(c.name)}</text>${sub?`<text class="h" x="${Math.min(LW+20,c.name.length*8.8+16)}" y="${y+16}" font-size="13" fill="#7A736B">${sub}</text>`:""}`;y+=30;
+  its.forEach((it,k)=>{const by=y+(RH-BH)/2-6;
+   g+=`<text x="0" y="${by+15}" font-size="15" font-weight="600">${esc(trunc(it.n,24))}</text>`;
+   if(it.loc)g+=`<text x="0" y="${by+32}" font-size="12" fill="#8C857D">${esc(it.loc)}</text>`;
+   if(it.ag)g+=`<rect x="${X(it.ag[0]).toFixed(1)}" y="${by+BH+5}" width="${Math.max(1,X(it.ag[1])-X(it.ag[0])).toFixed(1)}" height="2.5" fill="var(--q-base)"/>`;
+   if(it.dS&&it.dF)g+=paint(it.dS,it.dF,by+(BH-TH)/2,TH,it);
+   g+=paint(it.z.S||it.S,it.z.F||it.F,by,BH,it);
+   if(it.wait&&it.wait.b-it.wait.a>=2*DAY)g+=`<line x1="${X(it.wait.a).toFixed(1)}" y1="${by+BH/2}" x2="${X(it.wait.b).toFixed(1)}" y2="${by+BH/2}" stroke="#B9B1A7" stroke-dasharray="3 3"/><text class="h" x="${((X(it.wait.a)+X(it.wait.b))/2).toFixed(1)}" y="${by-7}" text-anchor="middle" font-size="12" fill="#7A736B">ожидание ${Math.round((it.wait.b-it.wait.a)/DAY)} сут</text>`;
+   const big=it.holes.reduce((a,h)=>(h.b-h.a)>(a?a.b-a.a:0)?h:a,null);
+   if(big&&big.b-big.a>=2*DAY)g+=`<rect x="${(X(big.a)+1).toFixed(1)}" y="${by}" width="${Math.max(0,X(big.b)-X(big.a)-2).toFixed(1)}" height="${BH}" fill="none" stroke="var(--q-own)" stroke-dasharray="2 2"/><text class="h" x="${((X(big.a)+X(big.b))/2).toFixed(1)}" y="${by-7}" text-anchor="middle" font-size="12" font-weight="600" fill="var(--q-own)">простой ${Math.round((big.b-big.a)/DAY)} сут</text>`;
+   const ex=Math.max(X(it.F),it.ag?X(it.ag[1]):0)+10;
+   if(it.ag){const late=it.slip>=0.5,early=it.slip<=-0.5;
+    g+=`<text x="${ex.toFixed(1)}" y="${by+15}" font-size="14" font-weight="700">${pfd(it.F).slice(0,5)}<tspan dx="8" fill="${late?"var(--q-own)":early?"var(--q-done)":"#7A736B"}">${late||early?sd(it.slip)+" сут":"в срок"}</tspan></text>`;
+    const t2=it.carry>=0.5&&it.slip>=0.5&&k>0?`перенос со ${its[k-1].n.toLowerCase()} ${sd(it.carry)}${Math.abs(it.own)>=0.5?" · своё "+sd(it.own):""}`:"";
+    if(t2)g+=`<text x="${Math.min(ex,W-4-t2.length*6.3).toFixed(1)}" y="${by+33}" font-size="12" fill="#8C857D">${esc(t2)}</text>`;
+    }
+   else g+=`<text x="${ex.toFixed(1)}" y="${by+15}" font-size="14" font-weight="700">${pfd(it.F).slice(0,5)}<tspan dx="8" font-weight="400" font-size="12.5" fill="#8C857D">срок не согласован${it.pct>0&&it.pct<100?" · "+it.pct+"%":""}</tspan></text>`;
+   y+=RH});y+=10});
+ const HH=y-6;
+ g=`<line x1="${X(T).toFixed(1)}" y1="24" x2="${X(T).toFixed(1)}" y2="${HH}" stroke="var(--q-ink)" stroke-width="1.3"/><text x="${(X(T)+5).toFixed(1)}" y="36" font-size="12" font-weight="700">сегодня ${pfd(TODAY).slice(0,5)}</text>`+g;
+ const hasCarry=all.some(it=>it.carry>=0.5&&it.slip>=0.5),hasOwn=all.some(it=>it.ag&&it.slip>=0.5),sw=(c,w,h)=>`<i style="width:${w}px;height:${h}px;background:${c}"></i>`;
+ return `<div class="ps1">${head}<svg class="ps1-g" width="${W}" height="${HH+4}">${g}</svg>
+  <div class="ps1-ft"><div class="ps1-lg"><span>${sw("var(--q-base)",22,3)}согласовано</span><span>${sw("var(--q-done)",18,12)}сделано</span><span>${sw("var(--q-ahead)",18,12)}не сделано</span>${hasOwn?`<span>${sw("var(--q-own)",18,12)}позже согласованного${hasCarry?" — своя потеря":""}</span>`:""}${hasCarry?`<span>${sw("var(--q-carry)",18,12)}перенос с предыдущей</span>`:""}<span>тонкая полоса — ДПМ</span></div>
+  <div class="ps1-ftr">Прогноз: одна бригада работает подряд; не начатое — не раньше сегодня; связанные с Графиком — по операциям.</div></div></div>`}
 /* стрелки «идёт после» между полосами строк — только в «Правке»: видно, какая строка за какой (20.10) */
 function plinks(RB,POS,H){let d="";const f=v=>v.toFixed(1);RB.forEach(r=>{if(r.sum||r.linked||r.pred==null)return;const a=POS[r.pred],b=POS[r.uid];if(!a||!b)return;
   /* (20.10) линия не пересекает подписи: от конца той полосы — по вертикали вдоль её правого края, по границе строк — к началу
@@ -1803,7 +1962,8 @@ function plinks(RB,POS,H){let d="";const f=v=>v.toFixed(1);RB.forEach(r=>{if(r.s
 function renderSum(){const R=progRows();if(!R)return renderSumOld();
  const ed=editing()&&can("plan_edit"),W=($("#tab-sum").clientWidth||1200),k=Math.min(1,W/1520);   // лист целиком по ширине; крупнее — пальцами (пользователь 20.10)
  $("#tab-sum").innerHTML=`<div class="ptools">${can("plan_edit")&&!PHONE()?`<label class="tgl"><input type="checkbox" data-opt="edit" ${UI.edit?"checked":""}><span></span>Правка</label>${ed?`<span class="m">Нажмите на строку, чтобы изменить её или добавить новую. <i class="plk2"><svg viewBox="0 0 16 16" width="13" height="13"><path d="M6.5 9.5l3-3M7 4.5l1.2-1.2a2.5 2.5 0 013.5 3.5L10.5 8M9 11.5l-1.2 1.2a2.5 2.5 0 01-3.5-3.5L5.5 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></i> — даты из графика, стрелка — «идёт после»</span>`:""}`:""}<span class="sp"></span><button class="btn" data-act="print">Печать A3</button></div>
-  <div class="pwrap"><div class="pzoom" style="transform:scale(${k})">${progSheet(R,ed)}</div></div>`;$("#tab-sum .pwrap").style.height=Math.ceil(PSH*k)+"px"}
+  <div class="pwrap"><div class="pzoom" style="transform:scale(${k})">${ed?progSheet(R,ed):progSheetL1(R)}</div></div>`;   // просмотр — лист для ГД, «Правка» — подробный (28.10)
+ const z=$("#tab-sum .pzoom").firstElementChild;$("#tab-sum .pwrap").style.height=Math.ceil((ed?PSH:(z?z.offsetHeight:1030))*k)+"px"}
 /* правка строки программы — окно; × в углу — закрыть без сохранения (16.10, просьба пользователя) */
 const PMX=`<button class="dr-x mx" data-act="mclose" title="Закрыть без сохранения" aria-label="Закрыть">×</button>`;
 let PEU=null,PEK=null;   // PEK — даты в окне до выбора в списке «идёт после»
@@ -1817,6 +1977,8 @@ function progEdit(u){const R=progRows(),r=R&&R.find(x=>x.uid===u),t=byId[u];if(!
    <label>Готовность, %${r.linked?`<input class="ed" value="${r.pct}" disabled title="Считается по операциям графика">`:`<input class="ed" id="pfP" type="number" min="0" max="100" step="5" value="${r.pct}">`}</label></div>
   ${r.linked?`<p class="m">Даты и готовность — из операций графика. Новое начало сдвигает эти операции, новое окончание удлиняет последнюю.</p>`
    :`<label class="pchk"><input type="checkbox" id="pfNE" ${r.note.snet?"checked":""}> Не раньше этой даты начала — зимник, разрешение и т. п.</label>
+   <label class="pchk"><input type="checkbox" id="pfOC" ${r.note.other?"checked":""}> Делает другая бригада — может идти одновременно с работами этой бригады</label>
+   ${r.crewBy&&!r.note.other?`<p class="m" style="color:var(--red)">Бригада занята на «${esc((R.find(x=>x.uid===r.crewBy)||{}).name||"")}» до ${pfd((R.find(x=>x.uid===r.crewBy)||{}).F)} — в прогнозе строка начнётся тогда${r.pS&&+r.pS!==+r.S?` (вписано ${pfd(r.pS)})`:""}.</p>`:""}
    <div class="pfaw" id="pfAw"><label>Идёт после<input class="ed" id="pfAq" placeholder="Найти: 235, КП-5, ДПМ…" autocomplete="off" spellcheck="false"></label>${pafSel(R,r)}
    <p class="m" id="pfAh">${pafHint(R,r.pred,r.note.lag,r.snet)}</p></div>`}`:""}
   ${r.depth?`<div class="padd-row"><span class="m">Добавить строку ниже:</span><button class="btn ghost" data-act="padd-dpm">ДПМ</button><button class="btn ghost" data-act="padd-work">ЗБС</button><button class="btn ghost" data-act="padd-pad">куст</button><button class="btn ghost" data-act="padd-fld">месторождение</button><span class="sp"></span><button class="btn ghost" data-act="pmv-up" title="Поставить выше среди соседних строк">↑ выше</button><button class="btn ghost" data-act="pmv-dn" title="Поставить ниже среди соседних строк">↓ ниже</button></div>`:""}</div>
@@ -1854,16 +2016,16 @@ const pblk=v=>{const b=v&&BLOCKS.find(x=>x.main===+String(v).split(" ")[0]);retu
 const progSnap=(t,ops)=>JSON.stringify({row:{s:t.s,f:t.f,note:t.note,pct:t.pct,name:t.name},...(ops?{ops}:{})});
 let PPEND=null;
 function progSave(){const u=PEU,t=byId[u],R=progRows(),r=R&&R.find(x=>x.uid===u);if(!t||!r)return closeModal();
- const v={u,nm:(pval("pfN")||"").replace(/\s+/g," ").trim()||t.name,hasD:pval("pfS")!=null,lk:pval("pfL"),pc:pval("pfP"),af:pval("pfAf"),ne:$("#pfNE")?$("#pfNE").checked:null};
+ const v={u,nm:(pval("pfN")||"").replace(/\s+/g," ").trim()||t.name,hasD:pval("pfS")!=null,lk:pval("pfL"),pc:pval("pfP"),af:pval("pfAf"),ne:$("#pfNE")?$("#pfNE").checked:null,oc:$("#pfOC")?$("#pfOC").checked:null};
  v.sv=v.hasD?pDT(pval("pfS"),r.S?+r.S:Date.now()):null;v.fv=v.hasD?pDT(pval("pfF"),r.F?+r.F:Date.now()):null;
  if(v.hasD&&(v.sv==null||v.fv==null))return toast("Дата вида 22.10.26 12:00",false);if(v.hasD&&v.fv<v.sv)return toast("Окончание раньше начала",false);
  if(v.hasD&&(!pYearOk(v.sv)||!pYearOk(v.fv)))return toast("Проверьте год: "+pfd(new Date(!pYearOk(v.sv)?v.sv:v.fv))+" — далеко от проекта",false);
  if(v.hasD&&!v.lk&&v.af!=null&&v.af!=="—"){const p=R.find(x=>x.uid===+v.af);   // начало раньше конца строки «после» — спросить, как в графике
   if(p&&p.F&&v.sv<+p.F-6e4&&(v.sv!==+r.S||v.fv!==+r.F)){PPEND=v;return openModal(`${PMX}<h3>«${esc(v.nm)}» идёт после «${esc(p.name)}» и не может начаться раньше ${pfd(p.F)}</h3>
-   <p>Оставить связь — начало будет ${pfd(p.F)}, длительность сохранится. Или убрать связь — тогда строка начнётся ${pfd(new Date(v.sv))}.</p>
-   <div class="mfoot"><button class="btn ghost" data-act="pkeep">Оставить связь</button><button class="btn pri" data-act="punlink">Убрать связь</button></div>`)}}
+   <p>Оставить связь — начало будет ${pfd(p.F)}, длительность сохранится. Убрать связь — строка начнётся ${pfd(new Date(v.sv))}${p.kind===r.kind||!v.oc?", но если её делает та же бригада, в прогнозе она всё равно встанет после «"+esc(p.name)+"»: бригада одна":""}.</p>
+   <div class="mfoot"><button class="btn ghost" data-act="pkeep">Оставить связь</button><button class="btn ghost" data-act="punlink">Убрать связь</button><button class="btn pri" data-act="punlink-oc">Убрать: делает другая бригада</button></div>`)}}
  closeModal();progApply(v)}
-function progApply(v){const u=v.u,t=byId[u],R=progRows(),r=R&&R.find(x=>x.uid===u);if(!t||!r)return;
+function progApply(v){const u=v.u,t=byId[u],R=progRows(),r=R&&R.find(x=>x.uid===u);if(!t||!r)return;toast.hot=false;$("#toast").classList.remove("on");   // прошлое «Изменено · Отменить» не должно висеть над этой правкой
  need(()=>{const n=progNote(t.note),snap=progSnap(t);
   if(v.nm!==t.name){LOG({act:"edit",uid:u,name:t.name,field:"программа: название",from:t.name,to:v.nm});t.name=v.nm}
   if(v.hasD){const was=n.link!=null?n.link+" "+(n.part||"всё"):"",unl=!!was&&!v.lk,af=v.af===""?null:v.af;let afCh=false;   // "" — в списке ничего не выбрано (строки «после» нет): связь не трогаем
@@ -1875,6 +2037,7 @@ function progApply(v){const u=v.u,t=byId[u],R=progRows(),r=R&&R.find(x=>x.uid===
        даты не трогали, а связь сменили — сразу следом. Длительность — из вписанных дат. */
     const lag=p&&p.F&&touched?Math.max(0,Math.round((v.sv-+p.F)/6e4)/1440):nv!==r.pred?0:n.lag||0;
     if(lag!==(n.lag||0)){n.lag=lag;t.note=progNoteText(n)}
+    if(v.oc!=null&&v.oc!==!!n.other){LOG({act:"edit",uid:u,name:t.name,field:"программа: бригада",from:n.other?"другая":"та же",to:v.oc?"другая":"та же",t:snap});n.other=v.oc;t.note=progNoteText(n)}
     if(v.ne!=null){const ne=v.ne?strOf(sv0):null;   // «не раньше» — вместо паузы, не вместе с ней
      if(ne!==n.snet){LOG({act:"edit",uid:u,name:t.name,field:"программа: не раньше",from:n.snet?pfd(D(n.snet)):"—",to:ne?pfd(D(ne)):"—",t:snap});n.snet=ne}
      if(ne)n.lag=0;t.note=progNoteText(n)}
@@ -1902,7 +2065,9 @@ function progApply(v){const u=v.u,t=byId[u],R=progRows(),r=R&&R.find(x=>x.uid===
     if(v.pc!=null){const p=Math.max(0,Math.min(100,Math.round(+v.pc||0)));if(p!==(+t.pct||0)){LOG({act:"edit",uid:u,name:t.name,field:"программа: готовность",from:(+t.pct||0)+"%",to:p+"%",t:snap});t.pct=p}}}}
   syncSums(DATA.tasks);buildModel();save();rerender();progWarn(u)})}
 /* после правки: строка пошла одновременно с другой работой той же бригады — сказать сразу (не мешает сохранению) */
-function progWarn(u){const R=progRows();if(!R)return;const o=progOverlaps(R).get(u);if(!o)return;const r=R.find(x=>x.uid===u);
+/* строки с датами «как вписано» (pS/pF) — для пометки «!»: в прогнозе бригада одна и наложений нет (28.10) */
+const progPlanned=R=>R.map(r=>r.sum||!r.pS?r:{...r,S:r.pS,F:r.pF});
+function progWarn(u){const R=progRows();if(!R)return;const o=progOverlaps(progPlanned(R)).get(u);if(!o)return;const r=R.find(x=>x.uid===u);
  toast(`Изменено. Внимание: «${r.name}» идёт одновременно с «${R.find(x=>x.uid===o[0]).name}»${o.length>1?" и ещё "+(o.length-1):""} — а бригада одна`)}
 /* добавить строку ниже: ДПМ или ЗБС — рядом с выбранной (у сводной — последней внутри); куст и месторождение — после
    своего уровня, сразу с первой строкой. Новая строка открывается для правки. */
@@ -2545,7 +2710,7 @@ let LGC=null;
 const lgCan=()=>SITE?siteWriter():true;
 const lgId=(e,i)=>(i??S.log.indexOf(e))+"|"+e.at;
 const lgGet=id=>{const[i,at]=String(id).split("|"),e=S.log[+i];return e&&e.at===at?e:null};
-const PGRP=x=>/^программа: (сроки|идёт после|откуда даты|не раньше)$/.test(x.field||"");
+const PGRP=x=>/^программа: (сроки|идёт после|откуда даты|не раньше|бригада)$/.test(x.field||"");
 function revertEntry(e){const u=e.uid,t=byId[u],f=e.field,v=e.from;
  if(/^программа: /.test(f)&&typeof e.t==="string"&&e.t[0]==="{"){if(!t)return"строки уже нет";let sn;try{sn=JSON.parse(e.t)}catch(x){return"снимок не прочитан"}
   /* возвращается только то, что меняло это поле (20.10): иначе ↶ у «сроков» затирал бы более позднюю готовность и т. п. */
@@ -2557,12 +2722,9 @@ function revertEntry(e){const u=e.uid,t=byId[u],f=e.field,v=e.from;
   if(lt)return`после неё строку меняли ещё («${lt.field.slice(11)}») — сначала отмените ту правку`;
   const was=progNote(w.note),n=progNote(t.note),dates=()=>{if("s"in w)t.s=w.s;if("f"in w)t.f=w.f};
   if(f==="программа: готовность"){if("pct"in w)t.pct=w.pct}
-  else if(f==="программа: сроки"){dates();n.lag=was.lag;n.after=was.after;n.snet=was.snet;n.link=was.link;n.part=was.part}
-  else if(f==="программа: не раньше"){dates();n.snet=was.snet;n.lag=was.lag}
-  else if(f==="программа: идёт после"){dates();n.after=was.after;n.lag=was.lag;n.snet=was.snet}
-  else if(f==="программа: откуда даты"){dates();n.link=was.link;n.part=was.part;n.after=was.after;n.lag=was.lag;if("pct"in w)t.pct=w.pct}
+  else if(PGRP(e)){dates();if("note"in w){t.note=w.note;n.__keep=true}if(f==="программа: откуда даты"&&"pct"in w)t.pct=w.pct}   // связанные поля строки — снимок целиком (запись одного сохранения)
   else return"эту правку отменить нельзя";
-  t.note=progNoteText(n);
+  if(!n.__keep)t.note=progNoteText(n);
   Object.entries(sn.ops||{}).forEach(([x,[a,b]])=>{const o=byId[x];if(o){o.s=a;o.f=b}});
   renumber(DATA.tasks);syncSums(DATA.tasks);return null}
  if(e.act==="issue"){const i=S.issues[u];if(!i)return"вопроса уже нет";
@@ -2642,6 +2804,8 @@ function go(tab,push=true){UI.tab=tab;saveUI();$$("#tabs button").forEach(b=>b.c
 function renderTab(keep){renderMe();paintDirty();const n=issList(true).length;$("#cntI").textContent=n;$("#cntI").classList.toggle("z",!n);
  if(LAND())renderGnt(keep);else if(UI.tab==="sum")renderSum();else if(UI.tab==="iss")renderIss();else renderGnt(keep)}
 const rerender=()=>{renderTab(true);refreshDrawer();refreshHist()};
+setInterval(()=>{if(DATA&&dayTick()){buildModel();rerender()}},60000);   // линия «сегодня» сама переходит на новый день
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&DATA&&dayTick()){buildModel();rerender()}});
 function askFile(){const f=$("#fx");f.onchange=()=>{const file=f.files[0];if(file)readFile(file);f.value=""};f.click()}
 function readFile(file){const r=new FileReader();
  if(/\.json$/i.test(file.name)){r.onload=()=>progPackage(String(r.result));return r.readAsText(file,"utf-8")}
@@ -2712,6 +2876,7 @@ document.addEventListener("click",e=>{if(!e.target.closest(".more"))$("#menu").h
    case"padd-fld":return progAdd("fld");
    case"pkeep":{const v=PPEND;PPEND=null;closeModal();return v&&progApply(v)}
    case"punlink":{const v=PPEND;PPEND=null;closeModal();if(v){v.af="—";progApply(v)}return}
+   case"punlink-oc":{const v=PPEND;PPEND=null;closeModal();if(v){v.af="—";v.oc=true;progApply(v)}return}
    case"pdel":return progDelAsk();
    case"pdel2":return progDel();
    case"pmv-up":return progMove(-1);
@@ -2829,7 +2994,8 @@ addEventListener("beforeunload",e=>{if(SITE?SYNC&&(SYNC.busy()||SYNC.pending()):
 
 /* ================== печать A3 ================== */
 let PRINT=false;
-function buildPrint(){compute();const R=progRows();if(R){$("#print").innerHTML=progSheet(R,false);$("#print").classList.add("pa3");if(PSH>1030)$("#print .psheet").style.zoom=(.97*1030/PSH).toFixed(3);return}$("#print").classList.remove("pa3");PRINT=true;const keep=UI.tab;UI.tab="sum";renderSum();const sum=$("#tab-sum").innerHTML;UI.tab=keep;PRINT=false;
+function buildPrint(){compute();const R=progRows();if(R){$("#print").innerHTML=progSheetL1(R);$("#print").classList.add("pa3");   // печать A3 — лист для ГД; выше страницы — уменьшить
+  const g=$("#print .ps1-g"),h=(g?+g.getAttribute("height"):700)+360;$("#print .ps1").style.zoom=Math.min(.97,.97*1060/h).toFixed(3);return}$("#print").classList.remove("pa3");PRINT=true;const keep=UI.tab;UI.tab="sum";renderSum();const sum=$("#tab-sum").innerHTML;UI.tab=keep;PRINT=false;
  $("#print").innerHTML=`<div class="pr-h"><h1>Статус проекта ГДТ</h1><div>на ${TODAY.getDate()} ${MONG[TODAY.getMonth()]} ${TODAY.getFullYear()} г.</div></div>${sum}`;
  renderTab(true)}
 addEventListener("beforeprint",buildPrint);
