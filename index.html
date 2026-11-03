@@ -2331,7 +2331,7 @@ function renderGnt(keep){if(PORT())return renderFeed();compute();
   else{const se=shifted?Math.max(+f.S,+f.F0):+f.F;
    if(se>+f.S)bars+=`<div class="bar" style="left:${L}px;width:${Math.max(3,dd(f.S,new Date(se))*pxd)}px;--bt:color-mix(in srgb,${cc} 28%,var(--surface));--bf:${cc}"><i style="width:${Math.min(100,p*dur/Math.max(.01,dd(f.S,new Date(se))))}%"></i></div>`;
    if(shifted)bars+=`<div class="hat ${se===+f.S?"full":""}" style="left:${x(new Date(se))}px;width:${Math.max(3,dd(new Date(se),f.F)*pxd)}px;--bf:${cc}"></div>`}
-  let lag="";if(r.p){const l=dd(FC[r.p].F,f.F);if(l>.05)lag=`<b>+${fN(l)}${PT?"":" сут к утв. плану"}</b>`}
+  let lag="";if(r.p){const l=dd(FC[r.p].F,f.F);if(l>.05)lag=`<b>+${fN(l)}${PT?"":" сут"}</b>`}
   const L0=UI.showImp&&S.lastImport,o0=L0&&(S.lastImport.old||{})[u];
   const lab=`<div class="blab" style="left:${x(f.F)+8}px">${ob?`<span style="color:var(--ochre)">было ${fD(D(ob.s))}–${fD(D(ob.f))} →</span>`:""}${L0&&LX(S.lastImport,"renamed").includes(u)&&o0?`<span style="color:var(--ochre)">было «${esc(o0.name)}»</span>`:""}${L0&&LX(S.lastImport,"respC").includes(u)&&o0?`<span style="color:var(--ochre)">отв. было: ${esc(o0.resp||"—")}</span>`:""}${fD(f.F)}${lag}${iss?`<span class="pr">${esc((iss.problem||"проблемный вопрос").split(/[.;(]/)[0])}</span>`:""}</div>`;
   const icons=`${iss?`<span class="ic r" title="Проблемный вопрос">${I.flagF}</span>`:PHONE()||!can("issue_edit")?"":`<button class="fl" data-flag="${u}" title="Отметить как проблемный вопрос">${I.flag}</button>`}${ncm?`<span class="ic" title="Комментарии">${I.cm}${ncm}</span>`:""}`;
