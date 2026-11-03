@@ -1464,7 +1464,7 @@ function progCompute(rows,dateOf,linkOf,day=864e5,opts={}){const out=rows.map(({
    r.S=pF&&r.S0&&r.F0?new Date(Math.max(+pF+Math.round((r.note.lag||0)*1440)*day/1440,ne?+ne:-Infinity)):r.S0;
    if(fc&&r.S&&r.F0){
     const c=opts.crew&&!r.note.other&&r.crewPrev!=null?by.get(r.crewPrev):null;
-    if(c){calc(c);if(c.F&&+c.F>+r.S){r.S=new Date(+c.F);r.crewBy=c.uid}}   // бригада ещё занята
+    if(c&&r.pct<=0){calc(c);if(c.F&&+c.F>+r.S){r.S=new Date(+c.F);r.crewBy=c.uid}}   // бригада ещё занята; начатое (готовность > 0) уже идёт — не двигаем (03.11)
     if(opts.today!=null&&r.pct<=0&&+r.S<opts.today){r.S=new Date(opts.today);r.notStarted=true}}
    r.F=r.S?new Date(+r.S+d):r.F0;
    if(fc&&opts.today!=null&&r.pct>0&&r.pct<100&&r.F&&+r.F<opts.today)r.F=new Date(opts.today+d*(1-r.pct/100))}
@@ -1816,8 +1816,10 @@ function progSheet(R,ed){const SW=1520,SH=1030,LW=330,TW=SW-LW,HEAD=96,SC=46,LEG
   /* заливка (28.10, как на листе для ГД): зелёное — сделано, не дальше «сегодня»; красное — часть полосы позже согласованного
      срока; остальное — цвет работ. Число — готовность (идёт) или длительность. */
   const tf=Math.max(0,Math.min(100,dd(r.S,TODAY)/Math.max(1e-9,dd(r.S,r.F))*100)),st=!r.sum&&r.pct>=100?" done":"";
-  const gp=!r.sum&&r.pct>0&&r.pct<100?Math.min(r.pct,tf):0;
-  const ag=!r.sum&&r.pct<100&&r.plan&&r.plan[1]&&+r.F>+r.plan[1]+DAY?Math.max(gp,Math.min(100,dd(r.S,r.plan[1])/Math.max(1e-9,dd(r.S,r.F))*100)):null;
+  /* (03.11, пользователь: «отставание идёт не от реальной даты») красное — ровно от согласованного срока, как на листе ГД;
+     сделанное после срока — тоже опоздание, зелёное до срока */
+  const ag=!r.sum&&r.pct<100&&r.plan&&r.plan[1]&&+r.F>+r.plan[1]+DAY?Math.max(0,Math.min(100,dd(r.S,r.plan[1])/Math.max(1e-9,dd(r.S,r.F))*100)):null;
+  const gp=!r.sum&&r.pct>0&&r.pct<100?Math.min(r.pct,tf,ag!=null?ag:100):0;
   const lagD=!r.sum&&r.pct<100&&r.plan&&r.plan[1]?dd(r.plan[1],r.F):0,lagT=lagD>=0.5?`<b class="plag">+${pdur(0,lagD*DAY)} сут</b>`:"";
   if(ag!=null)LATE=true;
   const lb=!r.sum&&r.pct>0&&r.pct<100?`<span>${r.pct}%</span>`:(!r.sum&&w>48?`<span>${pdur(r.S,r.F)} сут</span>`:"");
