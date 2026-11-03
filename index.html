@@ -835,6 +835,8 @@ svg.ps1-g{display:block;margin-top:14px}
 .ps1-ft{display:flex;justify-content:space-between;gap:30px;font-size:12.5px;color:var(--q-mute);border-top:1px solid var(--q-line);padding-top:10px;margin-top:4px}
 .ps1-lg{display:flex;gap:20px;align-items:center;white-space:nowrap}.ps1-lg i{display:inline-block;vertical-align:middle;margin-right:6px}
 .ps1-ftr{text-align:right;max-width:430px}
+.pform .pwhy{margin:0;padding:8px 10px;border-radius:8px;background:#FBF1E8;color:#7A3E14;font-size:13px;line-height:1.4}
+.psheet .pgh{position:absolute;z-index:0;border:1.5px dashed #9A8F84;border-radius:3px;box-sizing:border-box;pointer-events:none}.psheet .pleg .pgh-l{width:18px;height:10px;border:1.5px dashed #9A8F84;background:none;box-sizing:border-box}
 
 </style>
 </head>
@@ -1482,7 +1484,7 @@ function progCompute(rows,dateOf,linkOf,day=864e5,opts={}){const out=rows.map(({
 function progOverlaps(rows){const out=new Map();let br=[];
  const flush=()=>{for(let i=0;i<br.length;i++)for(let j=i+1;j<br.length;j++){const a=br[i],b=br[j];
    if(+a.S<+b.F-36e5&&+b.S<+a.F-36e5){(out.get(a.uid)||out.set(a.uid,[]).get(a.uid)).push(b.uid);(out.get(b.uid)||out.set(b.uid,[]).get(b.uid)).push(a.uid)}}br=[]};
- rows.forEach(r=>{if(r.depth<=1)flush();if(!r.sum&&r.S&&r.F&&+r.F>+r.S)br.push(r)});flush();return out}
+ rows.forEach(r=>{if(r.depth<=1)flush();if(!r.sum&&!(r.note&&r.note.other)&&r.S&&r.F&&+r.F>+r.S)br.push(r)});flush();return out}   // «делает другая бригада» — не наложение (03.11)
 if(typeof module!=="undefined")module.exports={PROG_TAG,isProgRoot,progNote,progNoteText,progPart,progSubtree,progCompute,progOverlaps};
 
 const SRC=document.documentElement.outerHTML;
@@ -1804,7 +1806,7 @@ function progSheet(R,ed){const SW=1520,SH=1030,LW=330,TW=SW-LW,HEAD=96,SC=46,LEG
   if(X(b)-X(a)>80)sc+=`<div class="mn" style="left:${X(a).toFixed(1)}px;width:${(X(b)-X(a)).toFixed(1)}px">${PMON[m.getMonth()]} ${m.getFullYear()}</div>`;
   if(+m>=+a0)bg+=`<div class="mo" style="left:${X(m).toFixed(1)}px"></div>`;m=n}
  for(let q=new Date(+a0);+q<+a1;q=new Date(+q+7*DAY)){sc+=`<div class="dy" style="left:${X(q).toFixed(1)}px">${q.getDate()}</div>`;bg+=`<div class="wk" style="left:${X(q).toFixed(1)}px"></div>`}
- let yAcc=0,LATE=false,LAGS=false;const POS={};   // положение полос — для стрелок связей строк в «Правке» (20.10)
+ let yAcc=0,LATE=false,LAGS=false,GH=false;const POS={};   // положение полос — для стрелок связей строк в «Правке» (20.10)
  const OV=ed?progOverlaps(progPlanned(R)):new Map(),nmO=u=>(OV.get(u)||[]).map(x=>(R.find(z=>z.uid===x)||{}).name).join(", ");
  const nmH=r=>`<span class="nm">${OV.has(r.uid)?`<i class="pov" title="По вписанным датам идёт одновременно с: ${esc(nmO(r.uid))} — а бригада одна; прогноз сдвинут. Если это делает другая бригада — отметьте в окне строки">!</i>`:""}${ed&&r.linked?`<i class="plk" title="Даты и готовность — из операций графика"><svg viewBox="0 0 16 16" width="13" height="13"><path d="M6.5 9.5l3-3M7 4.5l1.2-1.2a2.5 2.5 0 013.5 3.5L10.5 8M9 11.5l-1.2 1.2a2.5 2.5 0 01-3.5-3.5L5.5 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></i>`:""}${esc(r.name)}</span>`;
  const body=RB.map(r=>{const h=Math.round(HB[r.kind]*k),bh=Math.round((r.kind==="proj"?20:r.kind==="br"||r.kind==="fld"?18:16)*Math.min(1,k+.1)),top=h-bh-Math.round(6*k);   // подпись над полосой (17 px) должна влезть в строку
@@ -1820,9 +1822,10 @@ function progSheet(R,ed){const SW=1520,SH=1030,LW=330,TW=SW-LW,HEAD=96,SC=46,LEG
   if(ag!=null)LATE=true;
   const lb=!r.sum&&r.pct>0&&r.pct<100?`<span>${r.pct}%</span>`:(!r.sum&&w>48?`<span>${pdur(r.S,r.F)} сут</span>`:"");
   const inner=(gp>0?`<i style="width:${gp.toFixed(1)}%"></i>`:"")+(ag!=null?`<b style="left:${ag.toFixed(1)}%;width:${(100-ag).toFixed(1)}%"></b>`:"")+lb;
+  const gh=ed&&!r.sum&&!r.linked&&(pMv(r.S,pPS(r))||pMv(r.F,pPF(r)))?`<div class="pgh" style="left:${X(pPS(r)).toFixed(1)}px;width:${Math.max(3,X(pPF(r))-X(pPS(r))).toFixed(1)}px;top:${top}px;height:${bh}px" title="Вписано: ${pfd(pPS(r))} — ${pfd(pPF(r))}"></div>`:"";if(gh)GH=true;   // вписанные даты, если прогноз их сдвинул (03.11)
   const pl=r.plan&&r.plan[0]&&r.plan[1]?`<div class="pln" style="left:${X(r.plan[0]).toFixed(1)}px;width:${Math.max(2,X(r.plan[1])-X(r.plan[0])).toFixed(1)}px;top:${top+bh+3}px"></div>`:"";
   return `<div class="pr ${r.kind}${ed?" pe":""}" style="height:${h}px" ${ed?`data-pu="${r.uid}"`:""}><div class="lc">${nmH(r)}<span class="pc">${pdur(r.S,r.F)}<small>сут</small></span></div>
-   <div class="tc"><div class="pb ${r.kind}${st}" style="left:${x.toFixed(1)}px;width:${w.toFixed(1)}px;top:${top}px;height:${bh}px">${inner}</div>${pl}
+   <div class="tc">${gh}<div class="pb ${r.kind}${st}" style="left:${x.toFixed(1)}px;width:${w.toFixed(1)}px;top:${top}px;height:${bh}px">${inner}</div>${pl}
    <div class="pn ${r.kind}" style="left:${x.toFixed(1)}px;top:${top-17}px">${esc(r.name)}</div>
    <div class="pd" style="left:${(x-6).toFixed(1)}px;top:${top}px;line-height:${bh}px;transform:translateX(-100%)">${pfd(r.S)}</div><div class="pd" style="left:${(x+w+6).toFixed(1)}px;top:${top}px;line-height:${bh}px">${pfd(r.F)}${lagT}</div></div></div>`}).join("");
  const hasPlan=R.some(r=>r.plan),fields=R.filter(r=>r.kind==="fld").map(r=>r.name);
@@ -1830,7 +1833,7 @@ function progSheet(R,ed){const SW=1520,SH=1030,LW=330,TW=SW-LW,HEAD=96,SC=46,LEG
   <div class="kp"><div class="big">${Math.round(dd(pS,pF))} сут</div><div class="cap">окончание проекта ${pfd(pF)}</div></div></div>
   <div class="pgt"><div class="psc"><div class="lh"><span>Работы</span><span>Длит.</span></div><div class="tl">${sc}</div></div>
   <div class="pbg">${bg}<div class="tdy" style="left:${X(TODAY).toFixed(1)}px"></div></div><div class="pbody">${body}${ed?plinks(RB,POS,yAcc):""}</div></div>
-  <div class="pleg"><span><i style="background:var(--p-green)"></i>сделано</span><span><i style="background:var(--p-plan)"></i>работы</span><span><i style="background:var(--p-dpm)"></i>ДПМ</span>${LATE?`<span><i style="background:var(--p-own)"></i>позже согласованного срока</span>`:""}${hasPlan?`<span><i style="height:3px;background:var(--p-ghost)"></i>согласованный срок</span>`:""}<span><i style="width:3px;height:16px;background:var(--p-red)"></i>сегодня ${p2(TODAY.getDate())}.${p2(TODAY.getMonth()+1)}.${TODAY.getFullYear()}</span></div></div>`}
+  <div class="pleg"><span><i style="background:var(--p-green)"></i>сделано</span><span><i style="background:var(--p-plan)"></i>работы</span><span><i style="background:var(--p-dpm)"></i>ДПМ</span>${LATE?`<span><i style="background:var(--p-own)"></i>позже согласованного срока</span>`:""}${hasPlan?`<span><i style="height:3px;background:var(--p-ghost)"></i>согласованный срок</span>`:""}${GH?`<span><i class="pgh-l"></i>вписано (прогноз сдвинул)</span>`:""}<span><i style="width:3px;height:16px;background:var(--p-red)"></i>сегодня ${p2(TODAY.getDate())}.${p2(TODAY.getMonth()+1)}.${TODAY.getFullYear()}</span></div></div>`}
 /* ================== лист для ГД (28.10): просмотр и печать A3 ==================
    По итогам разбора трёх экспертов (scratchpad expert/final, DECISIONS «Сводка для ГД»): строка = скважина (ДПМ + ЗБС),
    прогноз честный (progCompute crew+today), согласованный срок — линия под полосой, зелёное — сделано до «сегодня»,
@@ -1890,11 +1893,15 @@ function progSheetL1(R){const crews=progWells(R).filter(c=>c.items.length),all=c
  if(!all.length)return `<div class="ps1"><div class="ps1-e">В программе пока нет строк с датами.</div></div>`;
  const T=+TODAY,sd=v=>(v>0?"+":v<0?"−":"")+String(Math.abs(Math.round(v*10)/10)).replace(".",","),ag=all.filter(it=>it.ag);
  const endIt=all.reduce((a,b)=>+b.F>+a.F?b:a),endF=endIt.F,decisive=crews.find(c=>c.items.includes(endIt));
- const lastAg=decisive?[...decisive.items].reverse().find(it=>it.ag&&it.F):null,endAg=lastAg?lastAg.ag[1]:null,endSlip=lastAg?lastAg.slip:null;   // итог = отставание последней согласованной скважины решающей бригады
+ const lastAg=decisive?[...decisive.items].reverse().find(it=>it.ag&&it.F):null,endAg=lastAg?lastAg.ag[1]:null;   // итог = отставание последней согласованной скважины решающей бригады
+ /* (03.11) после неё — скважины без согласованного срока: окончание позже — на столько же больше итог, отдельной строкой «Откуда» */
+ const tailIt=lastAg?decisive.items.slice(decisive.items.indexOf(lastAg)+1).filter(it=>it.S&&it.F):[],tail=lastAg&&+endF>+lastAg.F?Math.round(dd(lastAg.F,endF)*10)/10:0;
+ const endSlip=lastAg?Math.round((lastAg.slip+tail)*10)/10:null;
  /* «откуда»: своя потеря каждой скважины решающей бригады — сумма сходится с итогом (перенос не считается дважды) */
  const reason=it=>{const ps=(it.parts||[]).filter(x=>Math.abs(x[0])>=0.5);   // из чего своя потеря (progWells) — с числами, если частей больше одной
   return ps.length===1?ps[0][1]:ps.map(([v,t])=>`${t} ${sd(v)}`).join("; ")};
  const why=decisive?decisive.items.filter(it=>it.ag&&Math.abs(it.own)>=0.5):[];
+ if(tail>=0.5&&tailIt.length)why.push({n:tailIt.map(it=>it.n).join(", "),own:tail,parts:[[tail,`после согласованных — срок не согласован`]]});
  /* «решить»: бригада занята, а дата вписана раньше; открытые вопросы с влиянием; сокращённые против согласованного сроки */
  const dec=[];
  R.forEach(r=>{if(!r.sum&&r.crewBy!=null&&r.pS&&+r.S-+r.pS>36e5){const c=R.find(x=>x.uid===r.crewBy);
@@ -1973,18 +1980,27 @@ function progEdit(u){const R=progRows(),r=R&&R.find(x=>x.uid===u),t=byId[u];if(!
  openModal(`${PMX}<h3>${esc(t.name)}</h3><div class="pform">
   <label>Название<input class="ed" id="pfN" value="${esc(t.name)}" autocomplete="off"></label>
   ${leaf?`<label>Откуда даты<select class="ed" id="pfL"><option value="">свои — вписываются здесь</option>${opts}</select></label>
-  <div class="frow2"><label>Начало<input class="ed" id="pfS" value="${r.S?fmtDT(+r.S):""}" placeholder="22.10.26 12:00"></label><label>Окончание<input class="ed" id="pfF" value="${r.F?fmtDT(+r.F):""}" placeholder="22.10.26 12:00"></label>
+  <div class="frow2"><label>Начало<input class="ed" id="pfS" value="${pPS(r)?fmtDT(+pPS(r)):""}" placeholder="22.10.26 12:00"></label><label>Окончание<input class="ed" id="pfF" value="${pPF(r)?fmtDT(+pPF(r)):""}" placeholder="22.10.26 12:00"></label>
    <label>Готовность, %${r.linked?`<input class="ed" value="${r.pct}" disabled title="Считается по операциям графика">`:`<input class="ed" id="pfP" type="number" min="0" max="100" step="5" value="${r.pct}">`}</label></div>
   ${r.linked?`<p class="m">Даты и готовность — из операций графика. Новое начало сдвигает эти операции, новое окончание удлиняет последнюю.</p>`
    :`<label class="pchk"><input type="checkbox" id="pfNE" ${r.note.snet?"checked":""}> Не раньше этой даты начала — зимник, разрешение и т. п.</label>
    <label class="pchk"><input type="checkbox" id="pfOC" ${r.note.other?"checked":""}> Делает другая бригада — может идти одновременно с работами этой бригады</label>
-   ${r.crewBy&&!r.note.other?`<p class="m" style="color:var(--red)">Бригада занята на «${esc((R.find(x=>x.uid===r.crewBy)||{}).name||"")}» до ${pfd((R.find(x=>x.uid===r.crewBy)||{}).F)} — в прогнозе строка начнётся тогда${r.pS&&+r.pS!==+r.S?` (вписано ${pfd(r.pS)})`:""}.</p>`:""}
+   ${pWhy(R,r)}
    <div class="pfaw" id="pfAw"><label>Идёт после<input class="ed" id="pfAq" placeholder="Найти: 235, КП-5, ДПМ…" autocomplete="off" spellcheck="false"></label>${pafSel(R,r)}
    <p class="m" id="pfAh">${pafHint(R,r.pred,r.note.lag,r.snet)}</p></div>`}`:""}
   ${r.depth?`<div class="padd-row"><span class="m">Добавить строку ниже:</span><button class="btn ghost" data-act="padd-dpm">ДПМ</button><button class="btn ghost" data-act="padd-work">ЗБС</button><button class="btn ghost" data-act="padd-pad">куст</button><button class="btn ghost" data-act="padd-fld">месторождение</button><span class="sp"></span><button class="btn ghost" data-act="pmv-up" title="Поставить выше среди соседних строк">↑ выше</button><button class="btn ghost" data-act="pmv-dn" title="Поставить ниже среди соседних строк">↓ ниже</button></div>`:""}</div>
   <div class="mfoot">${r.depth?`<button class="btn ghost" data-act="pdel" style="color:var(--red)">Удалить${r.sum?" вместе со строками":""}</button>`:""}<span class="sp"></span>
    <button class="btn pri" data-act="psave">Сохранить</button></div>`);
  $("#modal").classList.add("wide")}
+/* (03.11, Паша: «вписал 21.10, а полоса стоит на 02.11») окно показывает даты как вписаны (pS/pF), а прогноз, если он
+   другой, — отдельной строкой с причиной: бригада занята / не начато, а дата прошла / готовность не догоняет / цепочка. */
+const pPS=r=>r.pS||r.S,pPF=r=>r.pF||r.F,pMv=(a,b)=>a&&b&&Math.abs(+a-+b)>36e5;
+function pWhy(R,r){if(r.linked||!(pMv(r.S,pPS(r))||pMv(r.F,pPF(r))))return"";const why=[];
+ if(r.crewBy!=null){const c=R.find(x=>x.uid===r.crewBy)||{};why.push(`бригада занята на «${esc(c.name||"")}» до ${pfd(c.F)}. Если эту работу делает другая бригада (вышкомонтажники и т. п.) — отметьте галочку выше`)}
+ if(r.notStarted)why.push(`готовность 0 %, а начало уже прошло — не начатая работа ставится с сегодня. Работа идёт или сделана — впишите готовность`);
+ else if(r.pct>0&&r.pct<100&&pMv(r.F,pPF(r))&&+r.F>+pPF(r))why.push(`готовность ${r.pct} % — остаток ${pdur(0,(+pPF(r)-+pPS(r))*(1-r.pct/100))} сут считается с сегодня. Обновите готовность`);
+ if(!why.length&&r.pred!=null){const p=R.find(x=>x.uid===r.pred);if(p)why.push(`«${esc(p.name)}» по прогнозу кончится ${pfd(p.F)}`)}
+ return `<p class="pwhy">На листе (прогноз): <b>${pfd(r.S)} — ${pfd(r.F)}</b>${why.length?". Почему: "+why.join("; "):""}.</p>`}
 /* «Идёт после» (20.10): строк может быть много — список открыт, сгруппирован по кустам, сверху поиск; строки, которые
    сами идут после этой (прямо или через другие), видны серыми и не выбираются — кольца не будет. */
 function pafSel(R,r){const u=r.uid,after=new Set([u]);let grow=true;
@@ -1993,15 +2009,15 @@ function pafSel(R,r){const u=r.uid,after=new Set([u]);let grow=true;
    cur={lab:[...up,x.name].join(" · "),it:[]};grp.push(cur)}return}
   if(x.uid!==u&&cur)cur.it.push(x)});
  const n=grp.reduce((a,g)=>a+g.it.length,0)+1;
- return `<select class="ed paf" id="pfAf" size="${Math.min(9,n+grp.length)}"><option value="—" ${r.pred==null?"selected":""}>ни после чего — только свои даты</option>${grp.filter(g=>g.it.length).map(g=>`<optgroup label="${esc(g.lab)}">${g.it.map(x=>after.has(x.uid)?`<option disabled>${esc(x.name)} — идёт после этой строки</option>`:`<option value="${x.uid}" ${r.pred===x.uid?"selected":""}>${esc(x.name)} — до ${pfd(x.F)}</option>`).join("")}</optgroup>`).join("")}</select>`}
-function pafHint(R,pred,lag,ne){const p=pred!=null&&R.find(x=>x.uid===pred);if(!p)return"Не связана с другими строками: даты — как впишете.";
+ return `<select class="ed paf" id="pfAf" size="${Math.min(9,n+grp.length)}"><option value="—" ${r.pred==null?"selected":""}>ни после чего — только свои даты</option>${grp.filter(g=>g.it.length).map(g=>`<optgroup label="${esc(g.lab)}">${g.it.map(x=>after.has(x.uid)?`<option disabled>${esc(x.name)} — идёт после этой строки</option>`:`<option value="${x.uid}" ${r.pred===x.uid?"selected":""}>${esc(x.name)} — до ${pfd(pPF(x))}</option>`).join("")}</optgroup>`).join("")}</select>`}
+function pafHint(R,pred,lag,ne){const p0=pred!=null&&R.find(x=>x.uid===pred);if(!p0)return"Не связана с другими строками: даты — как впишете.";const p={...p0,F:pPF(p0)};
  if(ne)return `Начнётся после окончания «${esc(p.name)}» (${pfd(p.F)}), но не раньше ${pfd(ne)}.`;
  if(lag<0)return `Начало раньше окончания «${esc(p.name)}» (${pfd(p.F)}) — при сохранении спросим: оставить связь или убрать.`;
  return `Начнётся ${lag>0?"через "+pdur(0,lag*DAY)+" сут после":"сразу после"} окончания «${esc(p.name)}» (${pfd(p.F)}). Сдвинется она — раньше или позже — сдвинется и эта строка.`}
 /* подсказка по тому, что сейчас вписано в окне: пауза = начало − конец выбранной строки */
 function pafLive(){const sel=$("#pfAf"),h=$("#pfAh");if(!sel||!h)return;const R=progRows(),v=sel.value,p=v&&v!=="—"&&R.find(x=>x.uid===+v);
  const r0=(R||[]).find(x=>x.uid===PEU),sv=pDT($("#pfS").value,r0&&r0.S?+r0.S:Date.now()),ne=$("#pfNE")&&$("#pfNE").checked&&sv!=null?new Date(sv):null;
- h.innerHTML=pafHint(R,p?p.uid:null,p&&sv!=null&&p.F?Math.round((sv-+p.F)/6e4)/1440:0,ne)}
+ h.innerHTML=pafHint(R,p?p.uid:null,p&&sv!=null&&pPF(p)?Math.round((sv-+pPF(p))/6e4)/1440:0,ne)}
 const pafNorm=x=>String(x).toLowerCase().replace(/ё/g,"е").replace(/[^a-zа-я0-9]+/g," ").trim();
 function pafFilter(q){const sel=$("#pfAf");if(!sel)return;const tk=pafNorm(q).split(" ").filter(Boolean);   // каждое слово где угодно: «кп5», «скв 235», «235 збс», «мирное»
  sel.querySelectorAll("optgroup").forEach(g=>{let any=false;
@@ -2017,11 +2033,11 @@ const progSnap=(t,ops)=>JSON.stringify({row:{s:t.s,f:t.f,note:t.note,pct:t.pct,n
 let PPEND=null;
 function progSave(){const u=PEU,t=byId[u],R=progRows(),r=R&&R.find(x=>x.uid===u);if(!t||!r)return closeModal();
  const v={u,nm:(pval("pfN")||"").replace(/\s+/g," ").trim()||t.name,hasD:pval("pfS")!=null,lk:pval("pfL"),pc:pval("pfP"),af:pval("pfAf"),ne:$("#pfNE")?$("#pfNE").checked:null,oc:$("#pfOC")?$("#pfOC").checked:null};
- v.sv=v.hasD?pDT(pval("pfS"),r.S?+r.S:Date.now()):null;v.fv=v.hasD?pDT(pval("pfF"),r.F?+r.F:Date.now()):null;
+ v.sv=v.hasD?pDT(pval("pfS"),pPS(r)?+pPS(r):Date.now()):null;v.fv=v.hasD?pDT(pval("pfF"),pPF(r)?+pPF(r):Date.now()):null;
  if(v.hasD&&(v.sv==null||v.fv==null))return toast("Дата вида 22.10.26 12:00",false);if(v.hasD&&v.fv<v.sv)return toast("Окончание раньше начала",false);
  if(v.hasD&&(!pYearOk(v.sv)||!pYearOk(v.fv)))return toast("Проверьте год: "+pfd(new Date(!pYearOk(v.sv)?v.sv:v.fv))+" — далеко от проекта",false);
- if(v.hasD&&!v.lk&&v.af!=null&&v.af!=="—"){const p=R.find(x=>x.uid===+v.af);   // начало раньше конца строки «после» — спросить, как в графике
-  if(p&&p.F&&v.sv<+p.F-6e4&&(v.sv!==+r.S||v.fv!==+r.F)){PPEND=v;return openModal(`${PMX}<h3>«${esc(v.nm)}» идёт после «${esc(p.name)}» и не может начаться раньше ${pfd(p.F)}</h3>
+ if(v.hasD&&!v.lk&&v.af!=null&&v.af!=="—"){const p0=R.find(x=>x.uid===+v.af),p=p0&&{...p0,F:pPF(p0)};   // начало раньше конца строки «после» — спросить, как в графике
+  if(p&&p.F&&v.sv<+p.F-6e4&&(v.sv!==+pPS(r)||v.fv!==+pPF(r))){PPEND=v;return openModal(`${PMX}<h3>«${esc(v.nm)}» идёт после «${esc(p.name)}» и не может начаться раньше ${pfd(p.F)}</h3>
    <p>Оставить связь — начало будет ${pfd(p.F)}, длительность сохранится. Убрать связь — строка начнётся ${pfd(new Date(v.sv))}${p.kind===r.kind||!v.oc?", но если её делает та же бригада, в прогнозе она всё равно встанет после «"+esc(p.name)+"»: бригада одна":""}.</p>
    <div class="mfoot"><button class="btn ghost" data-act="pkeep">Оставить связь</button><button class="btn ghost" data-act="punlink">Убрать связь</button><button class="btn pri" data-act="punlink-oc">Убрать: делает другая бригада</button></div>`)}}
  closeModal();progApply(v)}
@@ -2030,9 +2046,9 @@ function progApply(v){const u=v.u,t=byId[u],R=progRows(),r=R&&R.find(x=>x.uid===
   if(v.nm!==t.name){LOG({act:"edit",uid:u,name:t.name,field:"программа: название",from:t.name,to:v.nm});t.name=v.nm}
   if(v.hasD){const was=n.link!=null?n.link+" "+(n.part||"всё"):"",unl=!!was&&!v.lk,af=v.af===""?null:v.af;let afCh=false;   // "" — в списке ничего не выбрано (строки «после» нет): связь не трогаем
    if((v.lk||"")!==was){LOG({act:"edit",uid:u,name:t.name,field:"программа: откуда даты",from:pblk(was),to:pblk(v.lk),t:snap});const[lu,lp]=v.lk?v.lk.split(" "):[];n.link=lu?+lu:null;n.part=lu?lp:null;t.note=progNoteText(n)}
-   if(!v.lk&&af!=null){const nv=af==="—"?null:+af,p=nv!=null&&R.find(z=>z.uid===nv);
+   if(!v.lk&&af!=null){const nv=af==="—"?null:+af,p0=nv!=null&&R.find(z=>z.uid===nv),p=p0&&{...p0,F:pPF(p0)};
     const sv0=v.sv;if(p&&p.F&&v.sv<+p.F-6e4){const d=v.fv-v.sv;v.sv=+p.F;v.fv=v.sv+d}   // «оставить связь»: в базе и истории — то, что станет
-    const touched=v.sv!==+r.S||v.fv!==+r.F||v.ne!=null&&(v.ne?strOf(sv0):null)!==(n.snet||null);   // сняли «не раньше» — пауза по видимой дате
+    const touched=v.sv!==+pPS(r)||v.fv!==+pPF(r)||v.ne!=null&&(v.ne?strOf(sv0):null)!==(n.snet||null);   // сняли «не раньше» — пауза по видимой дате
     /* пауза после строки «после»: начало вписано позже её конца — разница и есть пауза; раньше («оставить связь») или
        даты не трогали, а связь сменили — сразу следом. Длительность — из вписанных дат. */
     const lag=p&&p.F&&touched?Math.max(0,Math.round((v.sv-+p.F)/6e4)/1440):nv!==r.pred?0:n.lag||0;
@@ -2046,7 +2062,7 @@ function progApply(v){const u=v.u,t=byId[u],R=progRows(),r=R&&R.find(x=>x.uid===
    if(unl){   // связь с графиком убрана: даты и готовность остаются, как были видны; к строке «после» — с паузой, без кольца
     t.pct=r.pct||0;const R2=progRows(),r2=R2&&R2.find(x=>x.uid===u);
     if(r2&&r2.pred!=null){let ring=false;for(let x=r2.pred,k=0;x!=null&&k<999;k++){if(x===u){ring=true;break}const y=R2.find(z=>z.uid===x);x=y?y.pred:null}
-     if(!ring&&r2.predF&&v.sv>=+r2.predF-6e4)n.lag=Math.max(0,Math.round((v.sv-+r2.predF)/6e4)/1440);else{n.after=null;n.lag=0}
+     const pq=R2.find(z=>z.uid===r2.pred),qF=pq&&pPF(pq);if(!ring&&qF&&v.sv>=+qF-6e4)n.lag=Math.max(0,Math.round((v.sv-+qF)/6e4)/1440);else{n.after=null;n.lag=0}
      t.note=progNoteText(n)}}
    const b=n.link!=null&&BLOCKS.find(x=>x.main===n.link),ids=b?progPart(b.ids,i=>byId[i].name,n.part||"всё"):[];
    if(ids.length){   // даты строки — из операций: начало сдвигает их, окончание удлиняет последнюю (16.10)
@@ -2060,8 +2076,8 @@ function progApply(v){const u=v.u,t=byId[u],R=progRows(),r=R&&R.find(x=>x.uid===
     if(v.fv!==+r.F){res=editFinish(ops,last,+byId[last].F0+(v.fv-+r.F));if(res.error){const o=ops.find(x=>x.uid===last);return toast(`Окончание — не раньше ${o?fmtDT(o.s):"начала"}: тогда начинается последняя операция «${byId[last].name}»`,false)}ops=res.ops;ch=ch.concat(res.changed)}
     if(ch.length){ch=[...new Set(ch)];const old={};ch.forEach(x=>{if(byId[x])old[x]=[byId[x].s,byId[x].f]});
      return commitPlan({ops,changed:ch},ids[0],{act:"edit",uid:u,name:t.name,field:"программа: сроки",from:pfd(r.S)+"–"+pfd(r.F),to:pfd(new Date(v.sv))+"–"+pfd(new Date(v.fv)),t:progSnap(t,old)})}}
-   else{if(v.sv!==+r.S||v.fv!==+r.F)LOG({act:"edit",uid:u,name:t.name,field:"программа: сроки",from:pfd(r.S)+"–"+pfd(r.F),to:pfd(new Date(v.sv))+"–"+pfd(new Date(v.fv)),t:snap});
-    if(!t.s||!t.f||(v.sv!==+r.S||v.fv!==+r.F||unl||afCh)&&(+D(t.s)!==v.sv||+D(t.f)!==v.fv)){t.s=strOf(v.sv);t.f=strOf(v.fv)}   // в базе — то, что видно (связь убрали — даты не прыгают к старым)
+   else{if(v.sv!==+pPS(r)||v.fv!==+pPF(r))LOG({act:"edit",uid:u,name:t.name,field:"программа: сроки",from:pfd(pPS(r))+"–"+pfd(pPF(r)),to:pfd(new Date(v.sv))+"–"+pfd(new Date(v.fv)),t:snap});
+    if(!t.s||!t.f||(v.sv!==+pPS(r)||v.fv!==+pPF(r)||unl||afCh)&&(+D(t.s)!==v.sv||+D(t.f)!==v.fv)){t.s=strOf(v.sv);t.f=strOf(v.fv)}   // в базе — то, что видно (связь убрали — даты не прыгают к старым)
     if(v.pc!=null){const p=Math.max(0,Math.min(100,Math.round(+v.pc||0)));if(p!==(+t.pct||0)){LOG({act:"edit",uid:u,name:t.name,field:"программа: готовность",from:(+t.pct||0)+"%",to:p+"%",t:snap});t.pct=p}}}}
   syncSums(DATA.tasks);buildModel();save();rerender();progWarn(u)})}
 /* после правки: строка пошла одновременно с другой работой той же бригады — сказать сразу (не мешает сохранению) */
@@ -2100,9 +2116,12 @@ function progDel(){const u=PEU,t=byId[u];if(!t)return;closeModal();
  need(()=>{const T=DATA.tasks,i=T.indexOf(t);let j=i+1;while(j<T.length&&T[j].lvl>t.lvl)j++;
   LOG({act:"del",uid:u,name:t.name+" (программа работ)"});
   /* строки, которые шли «после» удалённой, — теперь после той, за которой шла она (цепочка не рвётся, 20.10) */
-  const R=progRows()||[],gone=new Set(T.slice(i,j).map(x=>x.uid)),r=R.find(x=>x.uid===u),up=r&&r.pred!=null&&!gone.has(r.pred)?r.pred:null;
+  /* удаляют куст или месторождение (03.11, проверка: «дыра 44 сут») — «предыдущая» у удалённого блока та, за которой шла
+     его первая строка; кто шёл за строками блока, встаёт за неё. Шла по порядку бригады — остаётся по порядку. */
+  const R=progRows()||[],gone=new Set(T.slice(i,j).map(x=>x.uid)),r0=R.find(x=>gone.has(x.uid)&&!x.sum)||R.find(x=>x.uid===u),up=r0&&r0.pred!=null&&!gone.has(r0.pred)?r0.pred:null;
   R.forEach(q=>{if(q.sum||gone.has(q.uid)||q.linked||q.pred==null||!gone.has(q.pred))return;const x=byId[q.uid],n=progNote(x.note);
-   n.after=up;if(up==null&&q.S&&q.F){x.s=strOf(+q.S);x.f=strOf(+q.F)}x.note=progNoteText(n)});   // шли за удалённой: за её предыдущей, а нет её — на своих датах
+   if(q.predAuto&&up!=null)return;   // по порядку бригады — сама встанет за строкой перед удалённым блоком
+   n.after=up;if(up==null){n.lag=0;if(q.S&&q.F){x.s=strOf(+pPS(q));x.f=strOf(+pPF(q))}}x.note=progNoteText(n)});   // шли за удалённой: за её предыдущей, а нет её — на своих датах
   T.splice(i,j-i);renumber(T);syncSums(T);buildModel();save();rerender();toast("Строка удалена")})}
 /* Пакет программы от Claude (16.10: файлы Project — только через Claude): JSON {type:"gdt-program", rows:[{depth,
    name, sum, s, f, pct, link:{title, part}|null, agreed:[s,f]|null}]}. Заменяет программу целиком, одной правкой. */
