@@ -1643,7 +1643,9 @@ function toast(t,act){const e=$("#toast");if(act===undefined&&toast.hot)act={l:"
  e.classList.add("on");clearTimeout(toast.h);toast.h=setTimeout(()=>{e.classList.remove("on");toast.hot=false},act?5000:2600)}
 /* Отмена и повтор: возвращают снимок из стека (src/state.js, HIST) и перерисовывают.
    Сообщение называет, что именно отменено: «Отменено: №88 «Завоз ГСМ» — окончание 13.10 → 14.10» (06.10, пользователь). */
-const undoText=q=>{const e=q[0],t=e.uid&&byId[e.uid];return trunc((t?"№"+t.id+" ":"")+logText(e)+(q.length>1?" и ещё "+(q.length-1):""),140)};
+/* текст отмены: первая правка, сколько сдвинуто операций, сколько ещё правок (03.11, «Паша»: «и ещё 1» при 15 сдвинутых) */
+const undoText=q=>{const e=q[0],t=e.uid&&byId[e.uid],sh=q.find(x=>x.act==="shift"&&x!==e),r=q.filter(x=>x!==e&&x!==sh).length;
+ return trunc((t?"№"+t.id+" ":"")+logText(e)+(sh&&sh.n?", сдвинуто "+sh.n+" "+plural(sh.n,"операция","операции","операций"):"")+(r?" и ещё "+r+" "+plural(r,"правка","правки","правок"):""),140)};
 function restoreSnap(str){const x=JSON.parse(str),keep={me:S.me,log:S.log,rev:S.rev,fileId:S.fileId,open:S.open};
  DATA=x.d;S={...x.s,...keep};buildModel();S.dirty=!HIST.isClean();
  UI.blocks=UI.blocks.filter(k=>BK[k]);if(!UI.blocks.length){const b=BLOCKS.find(y=>y.def&&y.kind!=="misc")||BLOCKS[0];if(b)UI.blocks=[b.key]}
@@ -1973,7 +1975,7 @@ function progSave2(v,r,R){
    <div class="mfoot"><button class="btn ghost" data-act="pkeep">Оставить связь</button><button class="btn ghost" data-act="punlink">Убрать связь</button><button class="btn pri" data-act="punlink-oc">Убрать: делает другая бригада</button></div>`)}}
  closeModal();progApply(v)}
 function progApply(v){const u=v.u,t=byId[u],R=progRows(),r=R&&R.find(x=>x.uid===u);if(!t||!r)return;toast.hot=false;$("#toast").classList.remove("on");   // прошлое «Изменено · Отменить» не должно висеть над этой правкой
- need(()=>{const n=progNote(t.note),snap=progSnap(t);
+ need(()=>{const n=progNote(t.note),snap=progSnap(t),was0=progSame(),lg0=S.log.length;
   if(v.nm!==t.name){LOG({act:"edit",uid:u,name:t.name,field:"программа: название",from:t.name,to:v.nm});t.name=v.nm}
   if(v.hasD){const was=n.link!=null?n.link+" "+(n.part||"всё"):"",unl=!!was&&!v.lk,af=v.af===""?null:v.af;let afCh=false;   // "" — в списке ничего не выбрано (строки «после» нет): связь не трогаем
    if((v.lk||"")!==was){LOG({act:"edit",uid:u,name:t.name,field:"программа: откуда даты",from:pblk(was),to:pblk(v.lk),t:snap});const[lu,lp]=v.lk?v.lk.split(" "):[];n.link=lu?+lu:null;n.part=lu?lp:null;t.note=progNoteText(n)}
@@ -1999,7 +2001,10 @@ function progApply(v){const u=v.u,t=byId[u],R=progRows(),r=R&&R.find(x=>x.uid===
     if(v.sv!==+pPS(r)||v.fv!==+pPF(r))LOG({act:"edit",uid:u,name:t.name,field:"программа: сроки",from:pfd(pPS(r))+"–"+pfd(pPF(r)),to:pfd(new Date(v.sv))+"–"+pfd(new Date(v.fv)),t:snap});
     if(!t.s||!t.f||(v.sv!==+pPS(r)||v.fv!==+pPF(r)||unl||afCh)&&(+D(t.s)!==v.sv||+D(t.f)!==v.fv)){t.s=strOf(v.sv);t.f=strOf(v.fv)}   // в базе — то, что видно (связь убрали — даты не прыгают к старым)
     if(v.pc!=null){const p=Math.max(0,Math.min(100,Math.round(+v.pc||0)));if(p!==(+t.pct||0)){LOG({act:"edit",uid:u,name:t.name,field:"программа: готовность",from:(+t.pct||0)+"%",to:p+"%",t:snap});t.pct=p}}}}
-  syncSums(DATA.tasks);buildModel();save();rerender();progWarn(u)})}
+  syncSums(DATA.tasks);if(progSame()===was0&&S.log.length===lg0){closeModal();buildModel();return rerender()}   // ничего не поменяли — не «Изменено» (03.11, «Паша»)
+  buildModel();save();rerender();progWarn(u)})}
+/* строки плана без сводных (их даты — следствие) и поля состояния: равны — правки не было */
+const progSame=()=>JSON.stringify([DATA.tasks.filter(x=>!x.sum).map(x=>[x.uid,x.name,x.s,x.f,x.pct,x.note,x.pred]),S.tasks])
 /* после правки: строка пошла одновременно с другой работой той же бригады — сказать сразу (не мешает сохранению) */
 /* строки с датами «как вписано» (pS/pF) — для пометки «!»: в прогнозе бригада одна и наложений нет (28.10) */
 const progPlanned=R=>R.map(r=>r.sum||!r.pS?r:{...r,S:r.pS,F:r.pF});
@@ -2458,7 +2463,7 @@ function refreshDrawer(){if(UI.sel&&$("#drawer").classList.contains("on")){const
 
 /* ================== модальные ================== */
 function openModal(h){$("#modal").innerHTML=h;$("#scrim").classList.add("on")}
-function closeModal(){if(PKQ){const c=PKQ.cancel;PKQ=null;if(c)c()}$("#modal").classList.remove("wide","ord");const pending=!!meCb;$("#scrim").classList.remove("on");meCb=null;PEND=null;if(pending)rerender()}
+function closeModal(){if(PKQ){const c=PKQ.cancel;PKQ=null;if(c)c()}$("#modal").classList.remove("wide","ord");const pending=!!meCb||!!EARLY||!!STEPF||!!FUTQ;$("#scrim").classList.remove("on");meCb=null;PEND=null;EARLY=null;STEPF=null;FUTQ=null;if(pending)rerender()}
 function addIssModal(){const cand=ALLOPS.filter(u=>!openIss(u));
  const list=q=>{q=(q||"").toLowerCase();let h="";[...BLOCKS].sort((x,y)=>(y.def?1:0)-(x.def?1:0)).forEach(b=>{const it=cand.filter(u=>BOF[u]===b.key&&(!q||byId[u].name.toLowerCase().includes(q)||String(byId[u].id)===q));
   if(it.length)h+=`<div class="gh">${esc(b.title)}${b.def?"":" (завершено)"}</div>`+it.map(u=>`<button data-pick="${u}"><span>${esc(byId[u].name)}</span><span>№${byId[u].id}, ${Math.round(pct(u))}%</span></button>`).join("")});
@@ -2621,7 +2626,14 @@ function fieldErr(el,msg){$$(".ferr").forEach(x=>x.remove());const row=el.closes
 const predNo=n=>{const x=RAW.find(y=>y.id===n);
  if(!x)return{err:"Нет операции №"+n};if(x.sum)return{err:"№"+n+" — сводная строка, связи только между операциями"};
  if(PLANIDS.has(x.uid))return{err:"№"+n+" — базовый план, для связей не подходит"};return{uid:x.uid}};
-let EARLY=null,STEPF=null;
+let EARLY=null,STEPF=null,FUTQ=null;
+/* «так не бывает» для связей (03.11, «Паша»): сдвиг уносит выполненные (100 %) операции позже сегодняшнего дня — спросить */
+function futDone(res){const now=Date.now()+36e5;return res.changed.filter(x=>byId[x]&&!PLANIDS.has(x)&&pct(x)>=100).filter(x=>{const o=res.ops.find(y=>y.uid===x);return o&&o.f>now&&o.f>+byId[x].F0})}
+function planGo(res,u,lg){const f=futDone(res);if(!f.length)return need(()=>commitPlan(res,u,lg));FUTQ={res,u,lg};
+ const fe=x=>fDT(new Date(res.ops.find(y=>y.uid===x).f));
+ openModal(`<h3>Выполненные операции окажутся позже сегодняшнего дня</h3><p>${f.slice(0,4).map(x=>`№${byId[x].id} «${esc(trunc(byId[x].name,60))}» — 100 %, кончится ${fe(x)}`).join("<br>")}${f.length>4?`<br>и ещё ${f.length-4}`:""}</p>
+  <p class="m">Сделанная работа не может кончиться в будущем. Если дата верная — у этих операций, видимо, не 100 %: поправьте готовность.</p>
+  <div class="mfoot"><button class="btn ghost" data-act="fut-no">Отмена</button><button class="btn pri" data-act="fut-ok">Сдвинуть всё равно</button></div>`)}
 /* операция с этапами решения: окончание = начало + сумма этапов (stepPlan) */
 const endOf=u=>isP(u)?+stepPlan(u).slice(-1)[0].F0:+byId[u].F0;
 /* окончание в поле: у операции с этапами — конец этапов, как на полосе (03.11, «Паша»: в ячейке 11.10, а этапы до 08.11) */
@@ -2656,17 +2668,17 @@ function editField(el){const[us,f]=el.dataset.ed.split(":"),u=+us,t=byId[u];if(!
    return openModal(`<h3>Операция связана с ${ns} и не может начаться раньше ${fDT(new Date(res.calc))}</h3><p>Оставить как есть — дата вернётся к расчётной. Или удалить связь, тогда операция начнётся, когда вы указали.</p>
     <div class="mfoot"><button class="btn ghost" data-act="early-keep">Оставить как есть</button><button class="btn pri" data-act="early-unlink">Удалить связь</button></div>`)}
   if(res.error)return fieldErr(el,"Дату не удалось изменить");
-  return need(()=>commitPlan(res,u,{act:"edit",uid:u,name:t.name,field:f==="s"?"начало":"окончание",from:fmtDT(cur),to:fmtDT(ms)}))}
+  return planGo(res,u,{act:"edit",uid:u,name:t.name,field:f==="s"?"начало":"окончание",from:fmtDT(cur),to:fmtDT(ms)})}
  if(f==="pred"){const r=parsePreds(v,predNo);if(r.error)return fieldErr(el,r.error);
   const res=setPreds(planOps(),u,r.preds);
   if(res.error==="cycle")return fieldErr(el,"Кольцевая связь: "+res.path.map(x=>"№"+noOf(x)).join(" → "));
   if(res.error)return fieldErr(el,"Связь не сохранена");
   if(!res.changed.length&&JSON.stringify(res.ops.find(o=>o.uid===u).pred)===JSON.stringify(t.pred)){el.value=fmtPreds(t.pred,noOf);return}
-  return need(()=>commitPlan(res,u,{act:"link",uid:u,name:t.name,from:fmtPreds(t.pred,noOf)||"—",to:fmtPreds(res.ops.find(o=>o.uid===u).pred,noOf)||"—"}))}}
+  return planGo(res,u,{act:"link",uid:u,name:t.name,from:fmtPreds(t.pred,noOf)||"—",to:fmtPreds(res.ops.find(o=>o.uid===u).pred,noOf)||"—"})}}
 function earlyUnlink(){if(!EARLY)return;const{u,ms}=EARLY,t=byId[u];EARLY=null;closeModal();
  need(()=>{const keep=t.pred.filter(p=>byId[p.uid]&&fsStart(+byId[p.uid].F0,p.lag)<=ms);
   const r1=setPreds(planOps(),u,keep),r2=editStart(r1.ops,u,ms);if(r1.error||r2.error)return toast("Не получилось удалить связь");
-  commitPlan({ops:r2.ops,changed:[...new Set([...r1.changed,...r2.changed])]},u,[{act:"link",uid:u,name:t.name,from:fmtPreds(t.pred,noOf)||"—",to:fmtPreds(keep,noOf)||"—"},{act:"edit",uid:u,name:t.name,field:"начало",from:fmtDT(+t.S0),to:fmtDT(ms)}])})}
+  planGo({ops:r2.ops,changed:[...new Set([...r1.changed,...r2.changed])]},u,[{act:"link",uid:u,name:t.name,from:fmtPreds(t.pred,noOf)||"—",to:fmtPreds(keep,noOf)||"—"},{act:"edit",uid:u,name:t.name,field:"начало",from:fmtDT(+t.S0),to:fmtDT(ms)}])})}
 /* вставка между above и below (UID или null): новая строка с «Новая операция», курсор в названии */
 function addOp(aboveUid,belowUid){if(!editing())return;need(()=>{
  const A=aboveUid!=null?byId[aboveUid]:null,B=belowUid!=null?byId[belowUid]:null,anchor=A||B;if(!anchor)return;
@@ -2790,7 +2802,8 @@ function goto(u){const k=BOF[u];if(k&&!UI.blocks.includes(k))UI.blocks=[k];UI.se
  requestAnimationFrame(()=>{const r=$("#r-"+u),gw=$("#gw");if(PHONE()&&!LAND()&&r){r.scrollIntoView({block:"center"});openDrawer(u);return}if(!r||!gw)return;gw.scrollTop=Math.max(0,r.offsetTop-gw.clientHeight/2);
   if(geoCache)gw.scrollLeft=Math.max(0,geoCache.x(FC[u].S)-(gw.clientWidth-geoCache.lw)*.3);
   openDrawer(u)})}
-function go(tab,push=true){UI.tab=tab;saveUI();$$("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.tab===tab));
+function go(tab,push=true){UI.tab=tab;saveUI();if(tab!=="gnt"&&$("#drawer").classList.contains("on"))closeDrawer();   // панель операции — только в «Графике» (03.11, «Паша»)
+ $$("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.tab===tab));
  $$("section.tab").forEach(s=>s.classList.toggle("on",s.id==="tab-"+tab));if(push)history.replaceState(null,"","#"+tab);renderTab()}
 function renderTab(keep){renderMe();paintDirty();const n=issList(true).length;$("#cntI").textContent=n;$("#cntI").classList.toggle("z",!n);
  if(LAND())renderGnt(keep);else if(UI.tab==="sum")renderSum();else if(UI.tab==="iss")renderIss();else renderGnt(keep)}
@@ -2889,6 +2902,8 @@ document.addEventListener("click",e=>{if(!e.target.closest(".more"))$("#menu").h
    case"early-unlink":return earlyUnlink();
    case"stepf-ok":return stepFinishOk();
    case"stepf-no":STEPF=null;closeModal();return rerender();
+   case"fut-no":return closeModal();
+   case"fut-ok":{const z=FUTQ;FUTQ=null;closeModal();return z&&need(()=>commitPlan(z.res,z.u,z.lg))}
    case"delok":{const u=DELU;DELU=null;closeModal();return doDelOp(u)}
    case"undo":return undo();
    case"redo":return redo();
