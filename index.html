@@ -797,7 +797,7 @@ body.hist main{margin-right:min(420px,94vw)}
 .psheet .pln{position:absolute;z-index:1;height:3px;border-radius:2px;background:var(--p-ghost)}
 .psheet .pn{position:absolute;z-index:4;font-size:13.5px;line-height:16px;font-weight:600;white-space:nowrap}
 .psheet .pn.proj{color:var(--p-gz);font-size:16px;font-weight:700}.psheet .pn.br{color:var(--p-gz);font-size:15px;font-weight:700}.psheet .pn.fld{font-size:15px;font-weight:700}.psheet .pn.pad{color:var(--p-ink2);font-weight:700}.psheet .pn.dpm{color:var(--p-dpm)}
-.psheet .pd{position:absolute;z-index:4;font-size:12.5px;font-weight:600;color:var(--p-ink2);white-space:nowrap}
+.psheet .pd{position:absolute;z-index:4;font-size:12.5px;font-weight:600;color:var(--p-ink2);white-space:nowrap;text-shadow:0 0 2px #fff,0 0 2px #fff,0 0 3px #fff,0 0 3px #fff}
 .psheet .pleg{position:absolute;left:0;right:0;bottom:0;height:44px;padding:0 28px;display:flex;gap:26px;align-items:center;font-size:13px;color:var(--p-ink2);border-top:1px solid var(--p-rule2)}
 .psheet .pleg span{display:inline-flex;align-items:center;gap:8px;white-space:nowrap}.psheet .pleg i{width:26px;height:12px;border-radius:3px;display:inline-block}
 .ptools{display:flex;align-items:center;gap:14px;margin:0 0 12px;min-height:34px}.ptools .m{font-size:13px;color:var(--ink3)}.ptools .sp{flex:1}
@@ -1777,12 +1777,15 @@ let PSH=1030;
 function progSheet(R,ed){const SW=1520,SH=1030,LW=330,TW=SW-LW,HEAD=96,SC=46,LEG=44;
  const all=R.filter(r=>r.S&&r.F),pS=R[0].S,pF=R[0].F;
  const lo=Math.min(...all.map(r=>+r.S),...all.filter(r=>r.plan&&r.plan[0]).map(r=>+r.plan[0])),hi=Math.max(...all.map(r=>+r.F),...all.filter(r=>r.plan&&r.plan[1]).map(r=>+r.plan[1]),+TODAY);
- const a0=new Date(lo-14*DAY),rw=R.some(r=>!r.sum&&r.pct<100&&r.plan&&r.plan[1]&&r.F&&hi-+r.F<20*DAY&&dd(r.plan[1],r.F)>=.5)?185:95,a1=new Date(Math.max(hi+16*DAY,+a0+(hi-+a0)*TW/(TW-rw))),px=TW/dd(a0,a1),X=d=>dd(a0,d)*px;
+ let a0=new Date(lo-14*DAY);const rw=R.some(r=>!r.sum&&r.pct<100&&r.plan&&r.plan[1]&&r.F&&hi-+r.F<20*DAY&&dd(r.plan[1],r.F)>=.5)?185:95,a1f=()=>new Date(Math.max(hi+16*DAY,+a0+(hi-+a0)*TW/(TW-rw)));let a1=a1f();
+ if((lo-+a0)/(+a1-+a0)*TW<80){a0=new Date(lo-(+a1-lo)*80/(TW-80));a1=a1f()}   // слева место под дату начала самой ранней строки (03.11: «01.09.26» обрезалась)
+ const px=TW/dd(a0,a1),X=d=>dd(a0,d)*px;
  const RB=R.filter(r=>r.kind!=="proj");   // строку всего проекта не показываем (16.10): сроки и так видны по бригадам; её итог — в шапке
  const HB={proj:58,br:48,fld:48,pad:42,dpm:42,work:42},tot=RB.reduce((s,r)=>s+HB[r.kind],0),k0=(SH-HEAD-SC-LEG)/tot,k=Math.min(1.2,Math.max(.85,k0));
  PSH=k0<.85?HEAD+SC+LEG+Math.ceil(tot*k):SH;   // строк много — лист выше A3 (подписи не налезают), в печати — уменьшается до страницы
  let sc="",bg="";for(let m=new Date(a0.getFullYear(),a0.getMonth(),1);+m<+a1;){const n=new Date(m.getFullYear(),m.getMonth()+1,1),a=+m<+a0?a0:m,b=+n>+a1?a1:n;
-  if(X(b)-X(a)>80)sc+=`<div class="mn" style="left:${X(a).toFixed(1)}px;width:${(X(b)-X(a)).toFixed(1)}px">${PMON[m.getMonth()]} ${m.getFullYear()}</div>`;
+  const mw=X(b)-X(a),ml=mw>=118?PMON[m.getMonth()]+" "+m.getFullYear():mw>=62?PMON[m.getMonth()].slice(0,3)+" "+String(m.getFullYear()).slice(2):"";   // узкий месяц — коротко (03.11: слипались)
+  if(ml)sc+=`<div class="mn" style="left:${X(a).toFixed(1)}px;width:${mw.toFixed(1)}px">${ml}</div>`;
   if(+m>=+a0)bg+=`<div class="mo" style="left:${X(m).toFixed(1)}px"></div>`;m=n}
  for(let q=new Date(+a0);+q<+a1;q=new Date(+q+7*DAY)){sc+=`<div class="dy" style="left:${X(q).toFixed(1)}px">${q.getDate()}</div>`;bg+=`<div class="wk" style="left:${X(q).toFixed(1)}px"></div>`}
  let yAcc=0,LATE=false,LAGS=false,GH=false;const POS={};   // положение полос — для стрелок связей строк в «Правке» (20.10)
@@ -1837,8 +1840,8 @@ function progEdit(u){const R=progRows(),r=R&&R.find(x=>x.uid===u),t=byId[u];if(!
   <label>Название<input class="ed" id="pfN" value="${esc(t.name)}" autocomplete="off"></label>
   ${leaf?`<label>Откуда даты<select class="ed" id="pfL"><option value="">свои — вписываются здесь</option>${opts}</select></label>
   <div class="frow2"><label>Начало<input class="ed" id="pfS" value="${pPS(r)?fmtDT(+pPS(r)):""}" placeholder="22.10.26 12:00"></label><label>Окончание<input class="ed" id="pfF" value="${pPF(r)?fmtDT(+pPF(r)):""}" placeholder="22.10.26 12:00"></label>
-   <label>Готовность, %${r.linked?`<input class="ed" value="${r.pct}" disabled title="Считается по операциям графика">`:`<input class="ed" id="pfP" type="number" min="0" max="100" step="5" value="${r.pct}">`}</label></div>
-  ${r.linked?`<p class="m">Даты и готовность — из операций графика. Новое начало сдвигает эти операции, новое окончание удлиняет последнюю.</p>`
+   <label>Готовность, %<input class="ed" id="pfP" type="number" min="0" max="100" step="5" value="${r.pct}"${r.linked?" disabled":""}></label></div>
+  ${r.linked?`<p class="m" id="pfLh">${pLinkHint(r)}</p>`
    :`<label class="pchk"><input type="checkbox" id="pfNE" ${r.note.snet?"checked":""}> Не раньше этой даты начала — зимник, разрешение и т. п.</label>
    <label class="pchk"><input type="checkbox" id="pfOC" ${r.note.other?"checked":""}> Делает другая бригада — может идти одновременно с работами этой бригады</label>
    ${pWhy(R,r)}
@@ -1857,6 +1860,8 @@ function pWhy(R,r){if(r.linked||!(pMv(r.S,pPS(r))||pMv(r.F,pPF(r))))return"";con
  else if(r.pct>0&&r.pct<100&&pMv(r.F,pPF(r))&&+r.F>+pPF(r))why.push(`готовность ${r.pct} % — остаток ${pdur(0,(+pPF(r)-+pPS(r))*(1-r.pct/100))} сут считается с сегодня. Обновите готовность`);
  if(!why.length&&r.pred!=null){const p=R.find(x=>x.uid===r.pred);if(p)why.push(`«${esc(p.name)}» по прогнозу кончится ${pfd(p.F)}`)}
  return `<p class="pwhy">На листе (прогноз): <b>${pfd(r.S)} — ${pfd(r.F)}</b>${why.length?". Почему: "+why.join("; "):""}.</p>`}
+/* (03.11, проверка «Пашей»: «готовность не поставить, куда идти — непонятно») */
+const pLinkHint=r=>{const b=BLOCKS.find(x=>x.main===r.note.link);return `Даты и готовность — из операций графика${b?` «${esc(b.title)}»`:""}. Готовность ставится процентами операций во вкладке «График». Новое начало сдвигает эти операции, новое окончание удлиняет последнюю.`};
 /* «Идёт после» (20.10): строк может быть много — список открыт, сгруппирован по кустам, сверху поиск; строки, которые
    сами идут после этой (прямо или через другие), видны серыми и не выбираются — кольца не будет. */
 function pafSel(R,r){const u=r.uid,after=new Set([u]);let grow=true;
@@ -2818,7 +2823,7 @@ document.addEventListener("change",e=>{const a=e.target.dataset;
    if(!PEK)PEK={s:S.value,f:F.value};S.value=fmtDT(+p.F);F.value=fmtDT(+p.F+d)}
   else if(PEK){S.value=PEK.s;F.value=PEK.f;PEK=null}   // «ни после чего» — даты, какие были до выбора в списке
   pafLive();return}
- if(e.target.id==="pfL"){const w=$("#pfAw");if(w)w.hidden=!!e.target.value;return}
+ if(e.target.id==="pfL"){const w=$("#pfAw");if(w)w.hidden=!!e.target.value;const P=$("#pfP"),h=$("#pfLh");if(P&&h){P.disabled=!!e.target.value;h.textContent=e.target.value?"Даты и готовность — из операций графика; после сохранения — по ним. Готовность ставится в «Графике».":"Свои даты и готовность — как впишете здесь; операции графика не изменятся."}return}
  if(e.target.id==="pfNE")return pafLive();
  if(a.pick!==undefined&&!pickOk(e.target))return;
  if(a.lgw!==undefined){LGF.who=e.target.value;$("#lgl").innerHTML=logRows();return}
