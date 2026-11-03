@@ -816,6 +816,8 @@ body.hist main{margin-right:min(420px,94vw)}
 
 .pform .pwhy{margin:0;padding:8px 10px;border-radius:8px;background:#FBF1E8;color:#7A3E14;font-size:13px;line-height:1.4}
 .psheet .pgh{position:absolute;z-index:0;border:1.5px dashed #9A8F84;border-radius:3px;box-sizing:border-box;pointer-events:none}.psheet .pleg .pgh-l{width:18px;height:10px;border:1.5px dashed #9A8F84;background:none;box-sizing:border-box}
+.pkd{display:grid;gap:4px;margin:4px 20px 0;max-width:240px;font-size:12.5px;color:var(--ink3)}.pkd .ed{margin-left:0;padding:7px 9px;border:1px solid var(--rule2);border-radius:8px;background:var(--surface);font-size:14px;color:var(--ink)}
+.mfoot.pkb{flex-wrap:wrap;gap:8px;justify-content:flex-end}
 
 </style>
 </head>
@@ -1862,6 +1864,46 @@ function pWhy(R,r){if(r.linked||!(pMv(r.S,pPS(r))||pMv(r.F,pPF(r))))return"";con
  return `<p class="pwhy">На листе (прогноз): <b>${pfd(r.S)} — ${pfd(r.F)}</b>${why.length?". Почему: "+why.join("; "):""}.</p>`}
 /* (03.11, проверка «Пашей»: «готовность не поставить, куда идти — непонятно») */
 const pLinkHint=r=>{const b=BLOCKS.find(x=>x.main===r.note.link);return `Даты и готовность — из операций графика${b?` «${esc(b.title)}»`:""}. Готовность ставится процентами операций во вкладке «График». Новое начало сдвигает эти операции, новое окончание удлиняет последнюю.`};
+/* Сводка: строка со своими датами (не из Графика). Возвращает true, если показано окно. */
+function progAsk(v,r,R){if(r.linked||v.lk||v.pc==null||!v.hasD)return false;
+ const np=Math.max(0,Math.min(100,Math.round(+v.pc||0))),op=Math.round(+r.pct||0);if(np<=0||np===op)return false;
+ const now=Date.now(),dur=v.fv-v.sv,nm=esc(v.nm),go=x=>{if(!progAsk(x,r,R))progSave2(x,r,R)},keep=()=>go({...v,pc:String(op)});
+ const ask=(h,p,opts)=>{pAsk({h,p,date:opts.some(o=>o.date!==false)?(np>=100?"С какого числа шла работа":"С какого числа идёт работа"):null,d0:Math.min(pNow(),Math.max(v.sv,now-30*DAY)),opts:[...opts,{l:`Ошибся — оставить ${op} %`,date:false,fn:keep}]});return true};
+ const at=d=>({...v,sv:d,fv:np>=100?Math.max(d+36e5,Math.min(d+dur,pNow())):d+dur});   // работа идёт с d, длительность та же; 100 % — уже кончилась, не позже сегодня
+ /* 1) идёт после работы, которая не закончена (или закончена, но по плану кончается позже) */
+ const af=v.af==null||v.af===""?(r.pred!=null?String(r.pred):"—"):v.af,p=af!=="—"&&R.find(x=>x.uid===+af&&!x.sum);
+ if(p&&(p.pct<100||+pPF(p)>now+36e5)){const pt=byId[p.uid],why=p.pct<100?`не закончена (${p.pct} %, по плану до ${pfd(pPF(p))})`:`по плану кончается позже — ${pfd(pPF(p))}`;
+  return ask(`«${nm}» — ${np} %, но предыдущая работа «${esc(p.name)}» ${why}`,`Работа не может идти, пока не закончена предыдущая. Как на самом деле?${p.linked?"":` Если предыдущая закончена — она станет 100 % и кончится указанной датой (следующие строки сдвинутся).`}`,[
+   p.linked?{l:`Открыть «${esc(p.name)}» в Графике`,pri:true,date:false,fn:()=>{const b=BLOCKS.find(x=>x.main===p.note.link),o=b&&b.ids.find(i=>pct(i)<100);closeModal();go_g(o)}}
+    :{l:`Предыдущая закончена — эта идёт с этой даты`,pri:true,fn:d=>need(()=>{pDone(p,d);
+       const rt=byId[r.uid],n=progNote(rt.note);n.lag=0;rt.note=progNoteText(n);
+       progApply({...at(d),af:String(p.uid),ne:false})})},
+   {l:`Идёт отдельно — не после «${esc(p.name)}»`,fn:d=>go({...at(d),af:"—",ne:false})}])}
+ /* 2) бригада ещё на предыдущей работе */
+ const c=!(v.oc!=null?v.oc:r.note.other)&&r.crewPrev!=null&&R.find(x=>x.uid===r.crewPrev);
+ if(c&&c!==p&&(c.pct<100||+pPF(c)>now+36e5)&&+pPF(c)>Math.min(v.sv,now)+36e5){const ct=byId[c.uid];
+  return ask(`«${nm}» — ${np} %, но бригада ещё на работе «${esc(c.name)}»`,`«${esc(c.name)}»: ${c.pct} %, по плану до ${pfd(pPF(c))}. Одна бригада две работы сразу не ведёт. Как на самом деле?`,[
+   c.linked?{l:`Открыть «${esc(c.name)}» в Графике`,pri:true,date:false,fn:()=>{const b=BLOCKS.find(x=>x.main===c.note.link),o=b&&b.ids.find(i=>pct(i)<100);closeModal();go_g(o)}}
+    :{l:`Та работа закончена — эта идёт с этой даты`,pri:true,fn:d=>need(()=>{pDone(c,d);
+       progApply(r.pred==null||af==="—"?{...at(d),ne:false}:v)})},
+   {l:"Делает другая бригада",fn:d=>go({...at(d),oc:true})}])}
+ /* 3) «не раньше» в будущем; 4) начало по плану в будущем */
+ const ne=v.ne!=null?(v.ne?v.sv:null):(r.snet?+r.snet:null);
+ if(ne!=null&&ne>now+36e5)return ask(`«${nm}» — ${np} %, но стоит «не раньше ${pfd(new Date(ne))}»`,`Зимник, разрешение и т. п. ещё впереди. Как на самом деле?`,[{l:"Снять «не раньше» — идёт с этой даты",pri:true,fn:d=>go({...at(d),ne:false})}]);
+ if(v.sv>now+36e5)return ask(`«${nm}» — ${np} %, но по плану начинается ${pfd(new Date(v.sv))}`,`Начало ещё впереди. Работа уже идёт?`,[{l:"Идёт с этой даты",pri:true,fn:d=>go(at(d))}]);
+ /* 5) 100 %, а по плану кончается позже */
+ if(np===100&&v.fv>now+36e5){pAsk({h:`«${nm}» — 100 %, а по плану кончается ${pfd(new Date(v.fv))}`,p:"Закончили раньше плана? Следующие работы сдвинутся раньше.",date:"Когда закончили",d0:Math.max(pNow(),v.sv+36e5),dmin:v.sv,
+  opts:[{l:"Закончена этой датой",pri:true,fn:d=>go({...v,fv:d})},{l:`Оставить окончание ${pfd(new Date(v.fv))}`,date:false,fn:()=>progSave2(v,r,R)},{l:`Ошибся — оставить ${op} %`,date:false,fn:keep}]});return true}
+ return false}
+/* строка q закончена датой d: 100 %, окончание d. Началась по плану позже d — значит, прошла раньше: встаёт целиком
+   так, чтобы кончиться d (длительность та же), и больше не ждёт свою предыдущую («после: —»). */
+function pDone(q,d){const qt=byId[q.uid],snap=progSnap(qt),ps=+pPS(q),pf=+pPF(q),n=progNote(qt.note);
+ if(q.pct<100){LOG({act:"edit",uid:q.uid,name:qt.name,field:"программа: готовность",from:q.pct+"%",to:"100%",t:snap});qt.pct=100}
+ let ns=ps;if(d<=ps+36e5){ns=d-Math.max(36e5,pf-ps);if(q.pred!=null){LOG({act:"edit",uid:q.uid,name:qt.name,field:"программа: идёт после",from:(byId[q.pred]||{}).name||"",to:"ни после чего",t:snap});n.after=null;n.lag=0;qt.note=progNoteText(n)}}
+ LOG({act:"edit",uid:q.uid,name:qt.name,field:"программа: сроки",from:pfd(new Date(ps))+"–"+pfd(new Date(pf)),to:pfd(new Date(ns))+"–"+pfd(new Date(d)),t:snap});
+ if(n.after===null||q.pred==null){qt.s=strOf(ns);qt.f=strOf(d)}else qt.f=strOf(+D(qt.s)+(d-ps))}   // по цепочке в базе — длительность
+/* перейти в График к операции (из окна «так не бывает») */
+const go_g=u=>u!=null?goto(u):go("gnt");
 /* «Идёт после» (20.10): строк может быть много — список открыт, сгруппирован по кустам, сверху поиск; строки, которые
    сами идут после этой (прямо или через другие), видны серыми и не выбираются — кольца не будет. */
 function pafSel(R,r){const u=r.uid,after=new Set([u]);let grow=true;
@@ -1892,11 +1934,27 @@ const pblk=v=>{const b=v&&BLOCKS.find(x=>x.main===+String(v).split(" ")[0]);retu
 /* снимок строки (и операций) до правки — в поле t записи истории: по нему ↶ в истории возвращает правку (20.10) */
 const progSnap=(t,ops)=>JSON.stringify({row:{s:t.s,f:t.f,note:t.note,pct:t.pct,name:t.name},...(ops?{ops}:{})});
 let PPEND=null;
+/* ================== «так не бывает» (03.11, пользователь) ==================
+   Готовность > 0 у работы, которая ещё не может идти (не закончена предыдущая, бригада занята, «не раньше» в будущем,
+   начало по плану в будущем), и 100 % у работы, которая по плану кончается позже, — молча не принимаем: окно с
+   причиной и кнопками, которые приводят план в порядок одним нажатием. Сводка (progAsk) и График (opAsk). */
+let PKQ=null;
+const pNow=()=>{const d=new Date();d.setMinutes(0,0,0);return +d};
+function pAsk(o){const ae=document.activeElement;PKQ=o;if(ae&&ae!==document.body&&ae.blur)ae.blur();openModal(`${PMX}<h3>${o.h}</h3><p class="m">${o.p}</p>${o.date?`<label class="pkd">${o.date}<input class="ed" id="pkD" value="${fmtDT(o.d0)}" autocomplete="off"></label>`:""}
+ <div class="mfoot pkb">${o.opts.map((x,i)=>`<button class="btn ${x.pri?"pri":"ghost"}" data-act="pkx" data-i="${i}">${x.l}</button>`).join("")}</div>`);$("#modal").classList.add("wide")}
+function pAskGo(i){const o=PKQ;if(!o)return;const x=o.opts[i];if(!x)return;let d=null;
+ if(o.date&&x.date!==false){d=pDT(pval("pkD"),o.d0);if(d==null)return toast("Дата вида 05.11.26 12:00",false);
+  if(d>Date.now()+36e5)return toast("Дата — не позже сегодняшней: работа уже идёт или сделана",false);
+  if(o.dmin!=null&&d<=o.dmin)return toast(`Не раньше ${fmtDT(o.dmin)} — тогда она начинается`,false)}
+ PKQ=null;closeModal();x.fn(d)}
 function progSave(){const u=PEU,t=byId[u],R=progRows(),r=R&&R.find(x=>x.uid===u);if(!t||!r)return closeModal();
  const v={u,nm:(pval("pfN")||"").replace(/\s+/g," ").trim()||t.name,hasD:pval("pfS")!=null,lk:pval("pfL"),pc:pval("pfP"),af:pval("pfAf"),ne:$("#pfNE")?$("#pfNE").checked:null,oc:$("#pfOC")?$("#pfOC").checked:null};
  v.sv=v.hasD?pDT(pval("pfS"),pPS(r)?+pPS(r):Date.now()):null;v.fv=v.hasD?pDT(pval("pfF"),pPF(r)?+pPF(r):Date.now()):null;
  if(v.hasD&&(v.sv==null||v.fv==null))return toast("Дата вида 22.10.26 12:00",false);if(v.hasD&&v.fv<v.sv)return toast("Окончание раньше начала",false);
  if(v.hasD&&(!pYearOk(v.sv)||!pYearOk(v.fv)))return toast("Проверьте год: "+pfd(new Date(!pYearOk(v.sv)?v.sv:v.fv))+" — далеко от проекта",false);
+ if(progAsk(v,r,R))return;
+ progSave2(v,r,R)}
+function progSave2(v,r,R){
  if(v.hasD&&!v.lk&&v.af!=null&&v.af!=="—"){const p0=R.find(x=>x.uid===+v.af),p=p0&&{...p0,F:pPF(p0)};   // начало раньше конца строки «после» — спросить, как в графике
   if(p&&p.F&&v.sv<+p.F-6e4&&(v.sv!==+pPS(r)||v.fv!==+pPF(r))){PPEND=v;return openModal(`${PMX}<h3>«${esc(v.nm)}» идёт после «${esc(p.name)}» и не может начаться раньше ${pfd(p.F)}</h3>
    <p>Оставить связь — начало будет ${pfd(p.F)}, длительность сохранится. Убрать связь — строка начнётся ${pfd(new Date(v.sv))}${p.kind===r.kind||!v.oc?", но если её делает та же бригада, в прогнозе она всё равно встанет после «"+esc(p.name)+"»: бригада одна":""}.</p>
@@ -2399,7 +2457,7 @@ function refreshDrawer(){if(UI.sel&&$("#drawer").classList.contains("on")){const
 
 /* ================== модальные ================== */
 function openModal(h){$("#modal").innerHTML=h;$("#scrim").classList.add("on")}
-function closeModal(){$("#modal").classList.remove("wide","ord");const pending=!!meCb;$("#scrim").classList.remove("on");meCb=null;PEND=null;if(pending)rerender()}
+function closeModal(){if(PKQ){const c=PKQ.cancel;PKQ=null;if(c)c()}$("#modal").classList.remove("wide","ord");const pending=!!meCb;$("#scrim").classList.remove("on");meCb=null;PEND=null;if(pending)rerender()}
 function addIssModal(){const cand=ALLOPS.filter(u=>!openIss(u));
  const list=q=>{q=(q||"").toLowerCase();let h="";[...BLOCKS].sort((x,y)=>(y.def?1:0)-(x.def?1:0)).forEach(b=>{const it=cand.filter(u=>BOF[u]===b.key&&(!q||byId[u].name.toLowerCase().includes(q)||String(byId[u].id)===q));
   if(it.length)h+=`<div class="gh">${esc(b.title)}${b.def?"":" (завершено)"}</div>`+it.map(u=>`<button data-pick="${u}"><span>${esc(byId[u].name)}</span><span>№${byId[u].id}, ${Math.round(pct(u))}%</span></button>`).join("")});
@@ -2501,7 +2559,42 @@ function applyPlan(ops){ops.forEach(o=>{const t=byId[o.uid];if(!t)return;t.s=str
 const blockEnd=u=>{const b=BK[BOF[u]];return b&&b.main!=null&&FC[b.main]?+FC[b.main].F0:null};
 /* «Выполнено сегодня» (DECISIONS 06.10): Паша ведёт факт одним нажатием — 100 % и фактическое окончание «сейчас»
    (с пересчётом последователей). Без права на структуру плана (ГД) — только 100 %. Один шаг отмены. */
-function doneToday(u){const t=byId[u];if(!t)return;need(()=>{
+/* График: готовность v у операции u. mut() меняет готовность и возвращает запись журнала (без сохранения).
+   Возвращает true, если показано окно. o.no100 — не спрашивать про 100 % (этапы). */
+function opUndone(u){const out=[],seen=new Set(),walk=x=>(byId[x].pred||[]).forEach(q=>{const y=q.uid;if(seen.has(y)||!byId[y]||PLANIDS.has(y))return;seen.add(y);if(pct(y)<100){out.push(y);walk(y)}});walk(u);return out}
+let PKL=null;   // последний вопрос «так не бывает»: тот же ввод ещё раз (change после blur) — не спрашивать снова
+function opAsk(u,v,mut,o={}){if(PLANIDS.has(u)||!(v>0))return false;const key=u+":"+v+":"+(o.lab||"");if(PKQ&&PKQ.key===key)return true;if(PKL&&PKL.key===key&&Date.now()-PKL.t<1500)return true;PKL={key,t:Date.now()};
+ const ret=opAsk0(u,v,mut,o);if(ret&&PKQ)PKQ.key=key;return ret}
+function opAsk0(u,v,mut,o){const t=byId[u],old=Math.round(pct(u)),lab=o.lab||v+" %",nm=esc(t.name),now=Date.now();
+ const und=opUndone(u),undo=()=>rerender();
+ if(und.length){const dir=t.pred.map(q=>q.uid).filter(y=>und.includes(y)).sort((a,b)=>+byId[b].F0-+byId[a].F0),l=dir[0]!=null?dir[0]:und[0],L=byId[l],ed=can("plan_edit")&&!PLANIDS.has(l);
+  pAsk({h:`«${nm}» — ${lab}, но предыдущая операция «${esc(L.name)}» не закончена${und.length>1?` (и ещё ${und.length-1} до неё)`:""}`,
+   p:`«${esc(L.name)}»: ${Math.round(pct(l))} %, по графику до ${fDH(L.F0)}. Операция не может идти, пока не закончена предыдущая.`,
+   date:ed?`Когда закончена предыдущая`:null,d0:pNow(),cancel:undo,
+   opts:[{l:und.length>1?`Закончить предыдущие (${und.length}) и поставить ${lab}`:`Предыдущая закончена — поставить ${lab}`,pri:true,fn:d=>need(()=>{
+     const lg=und.map(y=>{const w=Math.round(pct(y)),x=T(y);x.pct=100;x.pctAt=new Date().toISOString();x.pctBy=S.me;touch(y);return{act:"edit",uid:y,name:byId[y].name,field:"готовность",from:w+"%",to:"100%"}});
+     if(d!=null&&ed&&d<=+L.S0+36e5){   // предыдущая по графику ещё и не начиналась — значит, прошла раньше; эта идёт с d (03.11, скв. 235)
+      lg.push(mut());const r2=editStart(planOps(),u,d);if(!r2.error)return commitPlan(r2,u,[...lg,{act:"edit",uid:u,name:t.name,field:"начало",from:fmtDT(+t.S0),to:fmtDT(d)}])}
+     else{const res=d!=null&&ed&&Math.abs(d-+L.F0)>=36e5?editFinish(planOps(),l,d):null;   // сдвиг — пока у этой операции прежний процент (начатые движок не двигает)
+      lg.push(mut());
+      if(res&&!res.error)return commitPlan(res,u,[...lg,{act:"edit",uid:l,name:L.name,field:"окончание",from:fmtDT(+L.F0),to:fmtDT(d)}])}
+     lg.forEach(LOG);save();rerender()})},
+    {l:`Ошибся — оставить ${old} %`,date:false,fn:undo}]});return true}
+ if(!isP(u)&&can("plan_edit")&&+t.S0>now+36e5){   // предыдущие сделаны, но по графику операция ещё впереди
+  pAsk({h:`«${nm}» — ${lab}, но по графику начинается ${fDH(t.S0)}`,p:"Начало ещё впереди. Операция уже идёт?",date:"С какого числа идёт",d0:pNow(),cancel:undo,
+   opts:[{l:"Идёт с этой даты",pri:true,fn:d=>need(()=>{const lg=mut(),res=editStart(planOps(),u,d);   // с процентом > 0 движок принимает фактическое начало
+      if(!res.error)return commitPlan(res,u,[lg,{act:"edit",uid:u,name:t.name,field:"начало",from:fmtDT(+t.S0),to:fmtDT(d)}]);LOG(lg);save();rerender()})},
+    {l:`Ошибся — оставить ${old} %`,date:false,fn:undo}]});return true}
+ if(v>=100&&!o.no100&&!isP(u)&&can("plan_edit")&&+t.F0>now+36e5&&+t.S0<now){
+  pAsk({h:`«${nm}» — 100 %, а по графику кончается ${fDH(t.F0)}`,p:"Закончили раньше? Следующие операции сдвинутся раньше.",date:"Когда закончили",d0:Math.max(pNow(),+t.S0+36e5),dmin:+t.S0,cancel:undo,
+   opts:[{l:"Закончена этой датой",pri:true,fn:d=>need(()=>{const lg=mut(),res=editFinish(planOps(),u,d);
+      if(!res.error&&Math.abs(d-+t.F0)>=36e5)return commitPlan(res,u,[lg,{act:"edit",uid:u,name:t.name,field:"окончание",from:fmtDT(+t.F0),to:fmtDT(d)}]);LOG(lg);save();rerender()})},
+    {l:`Оставить окончание ${fDH(t.F0)}`,date:false,fn:()=>need(()=>{LOG(mut());save();rerender()})},
+    {l:`Ошибся — оставить ${old} %`,date:false,fn:undo}]});return true}
+ return false}
+function doneToday(u){const t=byId[u];if(!t)return;
+ if(opUndone(u).length&&opAsk(u,100,()=>{const w=Math.round(pct(u)),x=T(u);x.pct=100;x.pctAt=new Date().toISOString();x.pctBy=S.me;touch(u);return{act:"edit",uid:u,name:t.name,field:"готовность",from:w+"%",to:"100%"}},{no100:true}))return;
+ need(()=>{
  const was=Math.round(pct(u)),T0=T(u);T0.pct=100;T0.pctAt=new Date().toISOString();T0.pctBy=S.me;
  const lg={act:"edit",uid:u,name:t.name,field:"готовность",from:was+"%",to:"100% (выполнено сегодня)"};
  const now=new Date();now.setMinutes(0,0,0);
@@ -2759,6 +2852,7 @@ document.addEventListener("click",e=>{if(!e.target.closest(".more"))$("#menu").h
    case"sbreset":$("#menu").hidden=true;return sbReset();
    case"meok":{const v=meSel;if(!v)return;S.me=v;ME.set(v);const cb=meCb;meCb=null;$("#scrim").classList.remove("on");renderMe();if(cb)cb();return}
    case"mclose":return closeModal();
+   case"pkx":return pAskGo(+a.i);
    case"dclose":return closeDrawer();
    case"addiss":return addIssModal();
    case"log":return openLog();
@@ -2835,7 +2929,9 @@ document.addEventListener("change",e=>{const a=e.target.dataset;
  if(a.f){UI.flt[a.f]=a.f==="hz"?+e.target.value:e.target.value;saveUI();return renderTab(true)}
  if(a.opt){UI[a.opt]=e.target.checked;saveUI();return renderGnt(a.opt!=="compact")}
  if(a.pct||a.pctr){const u=+(a.pct||a.pctr),v=Math.max(0,Math.min(100,Math.round(+e.target.value||0)));
-  return need(()=>{const t=T(u);LOG({act:"edit",uid:u,name:byId[u].name,field:"готовность",from:Math.round(pct(u))+"%",to:v+"%"});t.pct=v;t.pctAt=new Date().toISOString();t.pctBy=S.me;touch(u);save();rerender()})}
+  const mut=()=>{const t=T(u),w=Math.round(pct(u));t.pct=v;t.pctAt=new Date().toISOString();t.pctBy=S.me;touch(u);return{act:"edit",uid:u,name:byId[u].name,field:"готовность",from:w+"%",to:v+"%"}};
+  if(v!==Math.round(pct(u))&&opAsk(u,v,mut))return;   // «так не бывает» (03.11)
+  return need(()=>{LOG(mut());save();rerender()})}
  if(a.iss){const[u,k]=a.iss.split(":");let dv=null;
   if(k==="due"){const x=e.target.value.trim();if(x){const ms=parseDT(x,+TODAY);if(ms==null){e.target.value=S.issues[u].due?fD(D(S.issues[u].due))+"."+S.issues[u].due.slice(2,4):"";return toast("Срок — дата вида 25.10.26")}dv=strOf(ms).slice(0,10)}else dv=""}   // срок — ДД.ММ.ГГ (20.10), хранится ГГГГ-ММ-ДД
   return need(()=>{let v=dv!=null?dv:e.target.value;v=k==="impact"?Math.max(0,+v||0):String(v).trim();
@@ -2845,6 +2941,7 @@ document.addEventListener("change",e=>{const a=e.target.dataset;
  if(a.step){const[u,k,f]=a.step.split(":");return need(()=>{let v=e.target.value;
   if(f==="dur")v=Math.max(.5,+v||1);
   if(f==="pct")v=Math.max(0,Math.min(100,Math.round(+v||0)));   // проценты следующих этапов не обнуляем (16.10): закрытые этапы и так считаются 0 (stepPlan)
+  if(f==="pct"&&+v>0&&pct(+u)===0&&opUndone(+u).length){const vv=v;if(opAsk(+u,vv,()=>{const e0={act:"edit",uid:+u,name:byId[u].name,field:"этап "+(+k+1)+": "+STF[f],from:trunc(ST(u)[k][f],80),to:trunc(vv,80)};ST(u)[k][f]=vv;touchSteps(+u);return e0},{no100:true,lab:`этап ${+k+1} — ${vv} %`}))return}
   LOG({act:"edit",uid:+u,name:byId[u].name,field:"этап "+(+k+1)+": "+STF[f],from:trunc(ST(u)[k][f],80),to:trunc(v,80)});
   ST(u)[k][f]=v;touchSteps(+u);save();rerender()})}});
 document.addEventListener("focusin",e=>{if(e.target.id!=="pfS")return;const S=e.target,F=$("#pfF"),r=(progRows()||[]).find(x=>x.uid===PEU),ref=r&&r.S?+r.S:Date.now(),a=pDT(S.value,ref),f=F&&pDT(F.value,ref);
@@ -2892,7 +2989,8 @@ addEventListener("beforeunload",e=>{if(SITE?SYNC&&(SYNC.busy()||SYNC.pending()):
 
 /* ================== печать A3 ================== */
 let PRINT=false;
-function buildPrint(){compute();const R=progRows();if(R){$("#print").innerHTML=progSheet(R,false);$("#print").classList.add("pa3");if(PSH>1030)$("#print .psheet").style.zoom=(.97*1030/PSH).toFixed(3);return}   // печать A3 — тот же лист; выше страницы — уменьшить$("#print").classList.remove("pa3");PRINT=true;const keep=UI.tab;UI.tab="sum";renderSum();const sum=$("#tab-sum").innerHTML;UI.tab=keep;PRINT=false;
+function buildPrint(){compute();const R=progRows();if(R){$("#print").innerHTML=progSheet(R,false);$("#print").classList.add("pa3");if(PSH>1030)$("#print .psheet").style.zoom=(.97*1030/PSH).toFixed(3);return}   // печать A3 — тот же лист; выше страницы — уменьшить
+ $("#print").classList.remove("pa3");PRINT=true;const keep=UI.tab;UI.tab="sum";renderSum();const sum=$("#tab-sum").innerHTML;UI.tab=keep;PRINT=false;
  $("#print").innerHTML=`<div class="pr-h"><h1>Статус проекта ГДТ</h1><div>на ${TODAY.getDate()} ${MONG[TODAY.getMonth()]} ${TODAY.getFullYear()} г.</div></div>${sum}`;
  renderTab(true)}
 addEventListener("beforeprint",buildPrint);
