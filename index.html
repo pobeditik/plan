@@ -740,8 +740,9 @@ body.hist main{margin-right:min(420px,94vw)}
 .cmp-add{padding:8px 4px}
 .apr{display:block;font-size:12px;color:var(--ink3);font-weight:400}
 /* панель операции при «Правке» (прогон 2, REDESIGN §4) */
-.dr-acts{display:flex;align-items:center;gap:6px;margin:-4px 0 14px}
+.dr-acts{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:-4px 0 14px}
 .dr-acts .sp{flex:1}.dr-acts .del{color:var(--red)}
+.dr-acts .br{flex-basis:100%;height:0}
 .pl2{display:grid;gap:2px;margin-top:4px}
 .cx2{border:0;background:none;padding:3px 6px;margin-left:-6px;border-radius:6px;text-align:left;font:inherit;font-size:12.5px;color:var(--ink2);cursor:pointer}
 .cx2:hover{background:var(--sunk);color:var(--ink)}.cx2 em{font-style:normal;color:var(--ink3)}
@@ -2199,7 +2200,7 @@ document.addEventListener("pointerdown",e=>{const g=e.target.closest&&e.target.c
 const PXD={week:64,month:24};
 function ganttRows(){const rows=[],F=fActive();
  UI.blocks.forEach(k=>{const b=BK[k];if(!b)return;const arr=[];
-  if(b.merge)b.merge.forEach(x=>{if(x.f){if(passF(x.f))arr.push({k:"task",id:x.f,p:UI.plan?x.p:null})}else if(UI.plan&&!F)arr.push({k:"gho",id:x.p})});
+  if(b.merge)b.merge.forEach(x=>{if(x.f){if(passF(x.f)){arr.push({k:"task",id:x.f,p:UI.plan?x.p:null});if(isP(x.f)&&S.open[x.f])FC[x.f].steps.forEach(y=>arr.push({k:"step",id:x.f,x:y}))}}else if(UI.plan&&!F)arr.push({k:"gho",id:x.p})});
   else b.ids.filter(passF).forEach(u=>{arr.push({k:"task",id:u});if(isP(u)&&S.open[u])FC[u].steps.forEach(x=>arr.push({k:"step",id:u,x}))});
   const L=S.lastImport;
   if(UI.showImp&&L&&!F)L.removed.filter(r=>r.block===k).forEach(r=>{const i=r.after?arr.findIndex(x=>x.id===r.after&&x.k==="task"):-1;
@@ -2345,7 +2346,7 @@ function renderGnt(keep){if(PORT())return renderFeed();compute();
   const pcc=isP(u)||PHONE()||!can("pct_edit")?`<span class="pc ${p>=100?"d":""}">${p}<small>%</small></span>`:`<span class="pc ${p>=100?"d":""}"><input type="number" min="0" max="100" step="5" value="${p}" data-pct="${u}"><small>%</small></span>`;
   R+=`<div class="row ${iss?"prob":""} ${UI.sel===u?"sel":""} ${UI.hot===u?"hot":""} ${impOf(u)}" data-id="${u}" id="r-${u}"><div class="lc"><span class="num">${t.id}</span><span class="nm">${tw}${ED?`<input class="ed nmi" data-ed="${u}:name" value="${esc(t.name)}" spellcheck="false">`:`<span class="t">${esc(t.name)}</span>`}${impBadges(u)}${icons}${ED?rowActs(u):""}</span>${cmp?"":ED?editCells(u,t,f):`<span class="rp" title="${esc(t.resp)}">${esc(t.resp)}</span><span class="dt">${fD(f.S)}</span><span class="dt ${shifted?"l":""}">${fD(f.F)}${shifted?`<small>+${fN(dd(f.F0,f.F))}</small>`:""}</span>`}${pcc}</div><div class="tc">${bars}${lab}</div></div>`;
   geo[u]={ri,L,R:x(f.F)}});
- let links="";const RH=[];let y=0;rows.forEach(r=>{const h=r.k==="blk"?48:42;RH.push([y,h]);y+=h});
+ let links="";const RH=[],cs=getComputedStyle(document.documentElement),rh0=parseFloat(cs.getPropertyValue("--rh"))||42;let y=0;rows.forEach(r=>{const h=r.k==="blk"?rh0+8:rh0;RH.push([y,h]);y+=h});   // высоты строк — из styles.css (--rh 36, блок 44), иначе стрелки связей сползают вниз
  if(UI.sel&&geo[UI.sel]){const t=byId[UI.sel],g=geo[UI.sel],succ=ORDER.filter(i=>byId[i].pred.some(q=>q.uid===UI.sel)&&geo[i]);
   links=[...t.pred.filter(q=>geo[q.uid]).map(q=>[geo[q.uid],g]),...succ.map(i=>[g,geo[i]])].map(([A,B])=>{
    const x1=A.R,y1=RH[A.ri][0]+RH[A.ri][1]/2,x2=B.L,y2=RH[B.ri][0]+RH[B.ri][1]/2,m=Math.max(14,Math.abs(x2-x1)/2);
@@ -2448,13 +2449,13 @@ function openDrawer(u){closeHist();if(UI.hot!==u){const o=UI.hot;UI.hot=null;if(
    ${pl?`<dt>План</dt><dd>${fD(FC[pl].S)} — ${fD(FC[pl].F)}</dd>`:""}
    ${t.pred.length&&!canEdit(u)?`<dt>После операций</dt><dd>${fmtPreds(t.pred,noOf).replace(/; /g,", ")||"—"}</dd>`:""}
    ${canEdit(u)?`<dt>Примечание</dt><dd><textarea class="ed" rows="1" data-ed="${u}:note" placeholder="—">${esc(t.note||"")}</textarea></dd>`:t.note?`<dt>Примечание</dt><dd>${esc(t.note)}</dd>`:""}</dl>
-  ${canEdit(u)?`<div class="dr-acts">${(()=>{const ids=BK[BOF[u]].ids,ix=ids.indexOf(u);return `<button class="lnk" data-addop="${ix>0?ids[ix-1]:""}:${u}">+ операция выше</button><button class="lnk" data-addop="${u}:${ix<ids.length-1?ids[ix+1]:""}">+ ниже</button><span class="sp"></span><button class="lnk del" data-delop="${u}">Удалить операцию</button>`})()}</div>`:""}
+  ${canEdit(u)?`<div class="dr-acts">${(()=>{const ids=BK[BOF[u]].ids,ix=ids.indexOf(u);return `<button class="lnk" data-addop="${ix>0?ids[ix-1]:""}:${u}">+ операция выше</button><button class="lnk" data-addop="${u}:${ix<ids.length-1?ids[ix+1]:""}">+ ниже</button><span class="sp"></span><button class="lnk del" data-delop="${u}">Удалить операцию</button>${!isP(u)&&can("steps_edit")?`<span class="br"></span><button class="lnk" data-stepadd="${u}" title="Операция разбивается на этапы; сроки и готовность считаются по ним">+ этапы решения</button>`:""}`})()}</div>`:""}
   ${lateHint(u)}
   ${PHONE()?ctxHTML(u):""}
   <div class="dr-sec"><h4>Готовность</h4>${isP(u)?`<div class="pctrl"><span style="flex:1;color:var(--ink3);font-size:13px">Считается по этапам решения</span><output>${p}%</output></div>`:PHONE()||!can("pct_edit")?`<div class="pctrl"><output>${p}%</output></div>`:`<div class="pctrl"><input type="range" min="0" max="100" step="5" value="${p}" data-pctr="${u}"><output id="pout">${p}%</output></div>`}${!isP(u)&&p<100&&can("pct_edit")&&!PLANIDS.has(u)?`<button class="btn ghost" data-done="${u}" title="${can("plan_edit")?"Готовность 100 % и фактическое окончание — сейчас":"Готовность 100 %"}">Выполнено сегодня</button>`:""}<div class="upd">${updText(u)}</div></div>
   ${iss?`<div class="dr-sec"><h4>Проблемный вопрос</h4><div class="pbox">${issueFields(u)}${!can("issue_edit")?"":`<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="gdt ${i.gd?"on":""}" data-gd="${u}">${i.gd?I.flagF:I.flag} Нужно решение ГД</button>${PHONE()?`<div class="seg">${["открыт","в работе","решён"].map(v=>`<button class="${i.status===v?"on "+(v==="решён"?"g":v==="открыт"?"r":""):""}" data-ist="${u}:${v}">${v[0].toUpperCase()+v.slice(1)}</button>`).join("")}</div>`:`<button class="btn" data-ist="${u}:решён">Решено</button><button class="btn ghost" data-go-iss="${u}">Открыть в списке</button>`}</div>`}</div></div>`
    :`<div class="dr-sec">${can("issue_edit")?`<button class="btn red" data-flag="${u}" style="justify-self:start">${I.flag} Отметить как проблемный вопрос</button>`:""}${i&&i.status==="решён"?`<div class="src">Был проблемный вопрос, решён: <q>${esc(i.problem)}</q></div>`:""}</div>`}
-  ${isP(u)?`<div class="dr-sec">${stepsHTML(u)}</div>`:canEdit(u)&&can("steps_edit")&&!PHONE()&&!PLANIDS.has(u)?`<div class="dr-sec"><button class="lnk" data-stepadd="${u}" style="justify-self:start" title="Операция разбивается на этапы; сроки и готовность считаются по ним">+ этапы решения</button></div>`:""}
+  ${isP(u)?`<div class="dr-sec">${stepsHTML(u)}</div>`:""}
   <div class="dr-sec">${commentsHTML(u)}</div></div>`;
  $("#drawer").classList.add("on");$("#dback").classList.add("on");$("#drawer").setAttribute("aria-hidden","false");growAll($("#drawer"));
  if(UI.tab==="gnt")renderGnt(true)}
