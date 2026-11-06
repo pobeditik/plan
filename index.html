@@ -826,6 +826,10 @@ body.hist main{margin-right:min(420px,94vw)}
 .pswm{position:absolute;top:calc(100% + 8px);z-index:90;background:var(--raised);border:1px solid var(--rule2);border-radius:12px;box-shadow:0 18px 40px -18px rgba(58,54,51,.45);padding:6px;min-width:300px;letter-spacing:0}
 .pswm a{display:flex;flex-direction:column;gap:1px;padding:8px 10px;border-radius:8px;text-decoration:none;color:var(--ink);font-size:14px}
 .pswm a span{font-size:12px;font-weight:500;color:var(--ink3)}.pswm a:hover,.pswm a.on{background:var(--sunk)}
+/* подэтапы монтажа ВТК — как этапы решения ГДТ (06.11, «криво»): светлее, с отступом */
+.row.msub .lc{background:color-mix(in srgb,var(--sunk) 30%,var(--surface))}
+.row.msub .nm{font-size:13px;font-weight:500;color:var(--ink2);padding-left:22px}
+.row.mgrp .nm .t{font-weight:600}
 
 </style>
 </head>
@@ -2241,13 +2245,15 @@ function mgOf(u){const t=byId[u],m=t&&GRP_RE.exec(t.note||"");if(!m)return null;
  const y0=t.S0?t.S0.getFullYear():TODAY.getFullYear(),mo=t.S0?t.S0.getMonth():0,yr=m_=>y0+(m_-1-mo>6?-1:mo-(m_-1)>6?1:0);
  const ws=new Date(yr(+m[4]),+m[4]-1,+m[3]),we=new Date(yr(+m[6]),+m[6]-1,+m[5]+1);   // окно до конца последних суток
  return{g:BOF[u]+":"+m[1],n:m[1]+". "+m[2],ws,we}}
-function mgFold(rows){if(PORT())return rows;const out=[];let cur=null,hide=false;
+let MGB=new Set();
+function mgFold(rows){if(PORT())return rows;const out=[];let cur=null,hide=false;MGB=new Set(rows.filter(r=>r.k==="task"&&mgOf(r.id)).map(r=>BOF[r.id]));
  for(const r of rows){
   if(r.k==="step"){if(!hide)out.push(r);continue}
   const g=r.k==="task"?mgOf(r.id):null;hide=false;
   if(g){if(!cur||cur.g!==g.g){cur={k:"mgrp",g:g.g,n:g.n,ws:g.ws,we:g.we,ids:[]};out.push(cur)}cur.ids.push(r.id);
-   if(MG.open.has(g.g))out.push(r);else hide=true;continue}
-  cur=null;out.push(r)}
+   if(MG.open.has(g.g))out.push({...r,mg:(/^(\d+\.\d+)\s/.exec(byId[r.id].name)||[])[1]||""});else hide=true;continue}
+  cur=null;const top=r.k==="task"&&MGB.has(BOF[r.id])&&/^(\d+)\.\s/.exec(byId[r.id].name);   // в блоке с группами — «2. …» тоже номером графика монтажа
+  out.push(top?{...r,mgt:top[1]}:r)}
  return out}
 document.addEventListener("click",e=>{const b=e.target.closest("[data-mg]");if(!b)return;e.stopPropagation();const g=b.dataset.mg;MG.open.has(g)?MG.open.delete(g):MG.open.add(g);renderGnt(true)},true);
 const LX=(L,k)=>(L&&L[k])||[];
@@ -2370,8 +2376,8 @@ function renderGnt(keep){if(PORT())return renderFeed();compute();
    R+=`<div class="row stp" data-id="${r.id}"><div class="lc"><span class="num">${byId[r.id].id}.${s.i+1}</span><span class="nm"><span class="t">${esc(s.n)}</span></span>${cmp?"":`<span class="rp">${esc(s.who)}</span><span class="dt">${fD(s.S)}</span><span class="dt">${fD(s.F)}</span>${EX}`}<span class="pc">${s.locked?'<span style="color:var(--ink3)">—</span>':`${PHONE()?s.pct+"%":`<input type="number" min="0" max="100" step="10" value="${s.raw}" data-step="${r.id}:${s.i}:pct">`}`}</span></div>
     <div class="tc"><div class="bar stp ${s.pct===0?"todo":""}" style="--oc:${col==="var(--ghost)"?"var(--work)":col};left:${x(s.S)}px;width:${Math.max(3,dd(s.S,s.F)*pxd)}px;--bt:color-mix(in srgb,${col} 30%,transparent);--bf:${col}"><i style="width:${s.pct}%"></i></div></div></div>`;return}
   if(r.k==="mgrp"){const fs=r.ids.map(i=>FC[i]),S0=new Date(Math.min(...fs.map(f=>+f.S))),F0=new Date(Math.max(...fs.map(f=>+f.F))),
-    p=Math.round(blockPct(r.ids)),o=MG.open.has(r.g),late=+F0>+r.we+36e5,n=new Set(r.ids.map(i=>byId[i].name.replace(/ \(\d-й этап\)$/,""))).size;
-   R+=`<div class="row mgrp"><div class="lc"><span class="num"></span><span class="nm"><button class="tw ${o?"o":""}" data-mg="${esc(r.g)}" title="${o?"Свернуть":"Показать"} подэтапы" aria-expanded="${o}">▸</button><span class="t" style="font-weight:600">${esc(r.n)}</span><span class="ic">${n} подэт.</span></span>${cmp?"":`<span class="rp"></span><span class="dt">${fD(S0)}</span><span class="dt ${late?"l":""}">${fD(F0)}</span>${EX}`}<span class="pc">${p}<small>%</small></span></div>
+    p=Math.round(blockPct(r.ids)),o=MG.open.has(r.g),late=+F0>+r.we+36e5,gn=(/^(\d+)\.\s*(.*)$/.exec(r.n)||[,"",r.n]);
+   R+=`<div class="row mgrp"><div class="lc"><span class="num">${esc(gn[1])}</span><span class="nm"><button class="tw ${o?"o":""}" data-mg="${esc(r.g)}" title="${o?"Свернуть":"Показать"} подэтапы" aria-expanded="${o}">▸</button><span class="t">${esc(gn[2])}</span></span>${cmp?"":`<span class="rp"></span><span class="dt">${fD(S0)}</span><span class="dt ${late?"l":""}">${fD(F0)}</span>${EX}`}<span class="pc">${p}<small>%</small></span></div>
     <div class="tc"><div class="gbar" style="left:${x(r.ws)}px;width:${Math.max(3,dd(r.ws,r.we)*pxd)}px" title="Окно по v6: ${fD(r.ws)} — ${fD(new Date(+r.we-DAY))}"></div><div class="bar sum" style="left:${x(S0)}px;width:${Math.max(3,dd(S0,F0)*pxd)}px;--bt:var(--ink3);--bf:var(--ink)"><i style="width:${p}%"></i></div><div class="blab" style="left:${x(F0)+8}px">${fD(F0)}${late?` <span style="color:var(--ochre)">окно v6 до ${fD(new Date(+r.we-DAY))}</span>`:""}</div></div></div>`;return}
   const u=r.id,t=byId[u],f=FC[u],s=stat(u),p=Math.round(pct(u)),c=ST_[s].c,iss=openIss(u),ncm=((S.tasks[u]||{}).cm||[]).length;
   const dur=dd(f.S,f.F),L=x(f.S),shifted=+f.F>+f.F0+36e5,cc=c==="var(--ghost)"?"var(--work)":c;
@@ -2390,7 +2396,8 @@ function renderGnt(keep){if(PORT())return renderFeed();compute();
   const icons=`${iss?`<span class="ic r" title="Проблемный вопрос">${I.flagF}</span>`:PHONE()||!can("issue_edit")?"":`<button class="fl" data-flag="${u}" title="Отметить как проблемный вопрос">${I.flag}</button>`}${ncm?`<span class="ic" title="Комментарии">${I.cm}${ncm}</span>`:""}`;
   const tw=isP(u)?`<button class="tw ${S.open[u]?"o":""}" data-tw="${u}" title="Этапы решения">▸</button>`:"";
   const pcc=isP(u)||PHONE()||!can("pct_edit")?`<span class="pc ${p>=100?"d":""}">${p}<small>%</small></span>`:`<span class="pc ${p>=100?"d":""}"><input type="number" min="0" max="100" step="5" value="${p}" data-pct="${u}"><small>%</small></span>`;
-  R+=`<div class="row ${iss?"prob":""} ${UI.sel===u?"sel":""} ${UI.hot===u?"hot":""} ${impOf(u)}" data-id="${u}" id="r-${u}"><div class="lc"><span class="num">${t.id}</span><span class="nm">${tw}${ED?`<input class="ed nmi" data-ed="${u}:name" value="${esc(t.name)}" spellcheck="false">`:`<span class="t">${esc(t.name)}</span>`}${impBadges(u)}${icons}${ED?rowActs(u):""}</span>${cmp?"":ED?editCells(u,t,f):`<span class="rp" title="${esc(t.resp)}">${esc(t.resp)}</span><span class="dt">${fD(f.S)}</span><span class="dt ${shifted?"l":""}">${fD(f.F)}${shifted?`<small>+${fN(dd(f.F0,f.F))}</small>`:""}</span>`}${pcc}</div><div class="tc">${bars}${lab}</div></div>`;
+  const ms=r.mg&&!ED,mt=r.mgt&&!ED;   // подэтап монтажа (mgFold): как этап решения на ГДТ — «3.1» вместо №, название без номера; mt — «2. …» в том же блоке
+  R+=`<div class="row ${ms?"msub":""} ${iss?"prob":""} ${UI.sel===u?"sel":""} ${UI.hot===u?"hot":""} ${impOf(u)}" data-id="${u}" id="r-${u}"><div class="lc"><span class="num"${ms||mt?` title="№ ${t.id}"`:""}>${ms?esc(r.mg):mt?esc(r.mgt):t.id}</span><span class="nm">${tw}${ED?`<input class="ed nmi" data-ed="${u}:name" value="${esc(t.name)}" spellcheck="false">`:`<span class="t"${ms||mt?` title="${esc(t.name)}"`:""}>${esc(ms?t.name.replace(/^\d+\.\d+\s+/,""):mt?t.name.replace(/^\d+\.\s+/,""):t.name)}</span>`}${impBadges(u)}${icons}${ED?rowActs(u):""}</span>${cmp?"":ED?editCells(u,t,f):`<span class="rp" title="${esc(t.resp)}">${esc(t.resp)}</span><span class="dt">${fD(f.S)}</span><span class="dt ${shifted?"l":""}">${fD(f.F)}${shifted?`<small>+${fN(dd(f.F0,f.F))}</small>`:""}</span>`}${pcc}</div><div class="tc">${bars}${lab}</div></div>`;
   geo[u]={ri,L,R:x(f.F)}});
  let links="";const RH=[],cs=getComputedStyle(document.documentElement),rh0=parseFloat(cs.getPropertyValue("--rh"))||42;let y=0;rows.forEach(r=>{const h=r.k==="blk"?rh0+8:rh0;RH.push([y,h]);y+=h});   // высоты строк — из styles.css (--rh 36, блок 44), иначе стрелки связей сползают вниз
  if(UI.sel&&geo[UI.sel]){const t=byId[UI.sel],g=geo[UI.sel],succ=ORDER.filter(i=>byId[i].pred.some(q=>q.uid===UI.sel)&&geo[i]);
