@@ -820,6 +820,12 @@ body.hist main{margin-right:min(420px,94vw)}
 .psheet .pgh{position:absolute;z-index:0;border:1.5px dashed #9A8F84;border-radius:3px;box-sizing:border-box;pointer-events:none}.psheet .pleg .pgh-l{width:18px;height:10px;border:1.5px dashed #9A8F84;background:none;box-sizing:border-box}
 .pkd{display:grid;gap:4px;margin:4px 20px 0;max-width:240px;font-size:12.5px;color:var(--ink3)}.pkd .ed{margin-left:0;padding:7px 9px;border:1px solid var(--rule2);border-radius:8px;background:var(--surface);font-size:14px;color:var(--ink)}
 .mfoot.pkb{flex-wrap:wrap;gap:8px;justify-content:flex-end}
+/* выбор проекта и куста в шапке (06.11, эскиз Антона) */
+.psw{position:relative}.psw>button{border:0;background:none;padding:0;margin-left:.25em;font:inherit;color:inherit;display:inline-flex;align-items:center;gap:5px;cursor:pointer}
+.psw>button svg{color:var(--ink3)}.psw>button:hover svg{color:var(--ink)}.psw>button+button{margin-left:.45em}
+.pswm{position:absolute;top:calc(100% + 8px);z-index:90;background:var(--raised);border:1px solid var(--rule2);border-radius:12px;box-shadow:0 18px 40px -18px rgba(58,54,51,.45);padding:6px;min-width:300px;letter-spacing:0}
+.pswm a{display:flex;flex-direction:column;gap:1px;padding:8px 10px;border-radius:8px;text-decoration:none;color:var(--ink);font-size:14px}
+.pswm a span{font-size:12px;font-weight:500;color:var(--ink3)}.pswm a:hover,.pswm a.on{background:var(--sunk)}
 
 </style>
 </head>
@@ -1268,7 +1274,9 @@ const SB_KEY = 'sb_publishable_wFI2_ijY2I2G6CvPifB4ag_Peg9Eg41'; // публич
 const DB_TABLES = ['plan_meta', 'tasks', 'task_state', 'issues', 'steps', 'comments', 'log'];
 
 // createClient — supabase.createClient (браузер) или мок (тесты).
-function makeDb(createClient, url = SB_URL, key = SB_KEY) {
+/* proj — проект (куст), с которым работает страница (06.11, core.js PROJS): читаются только его строки, в каждую
+   записываемую строку ставится он же, удаление — только среди его строк. pmId — номер строки plan_meta этого проекта. */
+function makeDb(createClient, url = SB_URL, key = SB_KEY, proj = 'gdt', pmId = 1) {
   const sb = createClient(url, key, { auth: { persistSession: true, autoRefreshToken: true } });
   let chanSeq = 0;
   const chk = ({ data, error }) => { if (error) throw new Error(error.message || String(error)); return data; };
@@ -1292,7 +1300,7 @@ function makeDb(createClient, url = SB_URL, key = SB_KEY) {
     async load() {
       const out = {};
       await Promise.all(DB_TABLES.map(async t => {
-        let q = sb.from(t).select('*');
+        let q = sb.from(t).select('*').eq('proj', proj);
         if (t === 'comments' || t === 'log') q = q.order('id', { ascending: true });
         out[t] = chk(await q);
       }));
@@ -1300,11 +1308,12 @@ function makeDb(createClient, url = SB_URL, key = SB_KEY) {
     },
     // Запросы из diffRows (src/dbmap.js) — по порядку; первая ошибка останавливает остальные.
     async write(ops) {
+      const own = (t, rows) => rows.map(r => t === 'plan_meta' ? { ...r, id: pmId, proj } : { ...r, proj });
       for (const o of ops) {
         const q = sb.from(o.table);
-        if (o.op === 'upsert') chk(await q.upsert(o.rows, { onConflict: o.key }));
-        else if (o.op === 'insert') chk(await q.insert(o.rows));
-        else if (o.op === 'delete') chk(await q.delete().in(o.key, o.vals));
+        if (o.op === 'upsert') chk(await q.upsert(own(o.table, o.rows), { onConflict: o.key }));
+        else if (o.op === 'insert') chk(await q.insert(own(o.table, o.rows)));
+        else if (o.op === 'delete') chk(await q.delete().eq('proj', proj).in(o.key, o.vals));
       }
     },
     /* onChange() — что-то изменилось в любой таблице (у кого угодно); onStatus(s) — 'SUBSCRIBED' | 'CHANNEL_ERROR' | …
@@ -1483,6 +1492,14 @@ const SRC=document.documentElement.outerHTML;
 let DATA=JSON.parse(document.getElementById("mpp").textContent);
 /* Сайт (сборка build.py --site): данные из базы после входа (src/sync.js, src/site.js); иначе — версия-файл. */
 const SITE=typeof makeSync==="function"&&DATA===null;   // «Скачать копию» с сайта — снова версия-файл (данные внутри)
+/* проекты и кусты (06.11): у каждого свой план в базе (столбец proj, src/db.js); выбор — ?p=… в адресе, без него — ГДТ.
+   id — строка plan_meta проекта; uid0 — откуда берутся uid новых операций (у проектов не пересекаются). */
+const PROJS=[{k:"gdt",org:"ГДТ",pad:"",full:"Газпром добыча Томск · Казанское НГКМ",place:"Казанское НГКМ",id:1,uid0:1e6},
+ {k:"vtk23",org:"ВТК",pad:"КП-23",full:"ООО «ВТК» · ЛУТО · куст КП-23",place:"КП-23",id:2,uid0:4e9},
+ {k:"vtk31",org:"ВТК",pad:"КП-31",full:"ООО «ВТК» · ЛУТО · куст КП-31",place:"КП-31",id:3,uid0:6e9}];
+const PROJ=(()=>{let k="";try{k=SITE?new URLSearchParams(location.search).get("p")||"":(JSON.parse(document.getElementById("state").textContent)||{}).proj||""}catch(e){}
+ return PROJS.find(p=>p.k===k)||PROJS[0]})();   // копия с сайта помнит свой проект (siteCopy)
+const PNAME=PROJ.org+(PROJ.pad?" · "+PROJ.pad:"");
 const DAY=864e5,$=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
 const D=s=>s?new Date(s.length>10?s:s+"T00:00"):null;
 let NOW=new Date(),TODAY=new Date(NOW.getFullYear(),NOW.getMonth(),NOW.getDate());
@@ -1538,7 +1555,7 @@ function buildModel(){
   used.add(o.s.uid);used.add(other.s.uid);
   BLOCKS.push(mk(o,{kind:"pair",key:slug(nm),title:/^\d+$/.test(nm)?"Скважина "+nm:nm,sub:o.ctx,main:fact.uid,plan:plan.uid,ids:(CH[fact.uid]||[]).map(c=>c.uid),pids:(CH[plan.uid]||[]).map(c=>c.uid)}))});
  cand.forEach(o=>{if(used.has(o.s.uid))return;BLOCKS.push(mk(o,{kind:"single",main:o.s.uid,ids:(CH[o.s.uid]||[]).map(c=>c.uid)}))});
- if(misc.length)BLOCKS.push({kind:"misc",key:"misc",title:"Общее по ГДТ",sub:"Операции вне блоков",main:null,plan:null,ids:misc,pids:[]});
+ if(misc.length)BLOCKS.push({kind:"misc",key:"misc",title:"Общее по "+PNAME,sub:"Операции вне блоков",main:null,plan:null,ids:misc,pids:[]});
  BK={};BOF={};PAIROF={};PLANIDS=new Set();
  BLOCKS.forEach(b=>{let k=b.key,n=2;while(BK[k])k=b.key+"-"+(n++);b.key=k;BK[k]=b;
   b.ids.forEach(i=>BOF[i]=k);b.pids.forEach(i=>PLANIDS.add(i));
@@ -1834,7 +1851,7 @@ function progSheet(R,ed){const SW=1520,SH=1030,LW=330,TW=SW-LW,HEAD=96,SC=46,LEG
    <div class="pn ${r.kind}" style="left:${x.toFixed(1)}px;top:${top-17}px">${esc(r.name)}</div>
    <div class="pd" style="left:${(x-6).toFixed(1)}px;top:${top}px;line-height:${bh}px;transform:translateX(-100%)">${pfd(r.S)}</div><div class="pd" style="left:${(x+w+6).toFixed(1)}px;top:${top}px;line-height:${bh}px">${pfd(r.F)}${lagT}</div></div></div>`}).join("");
  const hasPlan=R.some(r=>r.plan),fields=R.filter(r=>r.kind==="fld").map(r=>r.name);
- return `<div class="psheet"${PSH>SH?` style="height:${PSH}px"`:""}><div class="ph"><div><h1><b>ГДТ</b> — план работ до конца проекта</h1><p>${esc(R[0].name)}${fields.length?" · "+esc(fields.join(", ")):""} · <b>${pfd(pS)} — ${pfd(pF)}</b></p></div><span class="sp"></span>
+ return `<div class="psheet"${PSH>SH?` style="height:${PSH}px"`:""}><div class="ph"><div><h1><b>${esc(PNAME)}</b> — план работ до конца проекта</h1><p>${esc(R[0].name)}${fields.length?" · "+esc(fields.join(", ")):""} · <b>${pfd(pS)} — ${pfd(pF)}</b></p></div><span class="sp"></span>
   <div class="kp"><div class="big">${Math.round(dd(pS,pF))} сут</div><div class="cap">окончание проекта ${pfd(pF)}</div></div></div>
   <div class="pgt"><div class="psc"><div class="lh"><span>Работы</span><span>Длит.</span></div><div class="tl">${sc}</div></div>
   <div class="pbg">${bg}<div class="tdy" style="left:${X(TODAY).toFixed(1)}px"></div></div><div class="pbody">${body}${ed?plinks(RB,POS,yAcc):""}</div></div>
@@ -2213,7 +2230,26 @@ function ganttRows(){const rows=[],F=fActive();
    const row={k:"del",r};if(i>=0)arr.splice(i+1,0,row);else arr.push(row)});
   if(editing()&&!F&&b.ids.length)arr.push({k:"add",last:b.ids[b.ids.length-1]});
   if(!arr.length&&F)return;rows.push({k:"blk",b:k});rows.push(...arr)});
- return rows}
+ return mgFold(rows)}
+/* Подэтапы монтажа свёрнуты в строку этапа (06.11, эскиз Антона «Монтаж»): операции с пометкой в примечании
+   «Группа: 3. Монтаж ВЛБ — по v6 26.02–10.03.» идут одной строкой «3. Монтаж ВЛБ · N подэт.» с ▸; окно v6 — штриховка
+   за полосой, полоса — все подэтапы вместе. Группа и окно — из примечаний (данных в коде нет). Этапы решения
+   свёрнутой операции тоже скрыты; раскрыли группу — всё как обычно. На телефоне вертикально — лента, без свёртки. */
+const MG={open:new Set()};
+const GRP_RE=/^Группа:\s*(\d+)\.\s*(.+?)\s+—\s+по v6\s+(\d\d)\.(\d\d)–(\d\d)\.(\d\d)/m;
+function mgOf(u){const t=byId[u],m=t&&GRP_RE.exec(t.note||"");if(!m)return null;
+ const y0=t.S0?t.S0.getFullYear():TODAY.getFullYear(),mo=t.S0?t.S0.getMonth():0,yr=m_=>y0+(m_-1-mo>6?-1:mo-(m_-1)>6?1:0);
+ const ws=new Date(yr(+m[4]),+m[4]-1,+m[3]),we=new Date(yr(+m[6]),+m[6]-1,+m[5]+1);   // окно до конца последних суток
+ return{g:BOF[u]+":"+m[1],n:m[1]+". "+m[2],ws,we}}
+function mgFold(rows){if(PORT())return rows;const out=[];let cur=null,hide=false;
+ for(const r of rows){
+  if(r.k==="step"){if(!hide)out.push(r);continue}
+  const g=r.k==="task"?mgOf(r.id):null;hide=false;
+  if(g){if(!cur||cur.g!==g.g){cur={k:"mgrp",g:g.g,n:g.n,ws:g.ws,we:g.we,ids:[]};out.push(cur)}cur.ids.push(r.id);
+   if(MG.open.has(g.g))out.push(r);else hide=true;continue}
+  cur=null;out.push(r)}
+ return out}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-mg]");if(!b)return;e.stopPropagation();const g=b.dataset.mg;MG.open.has(g)?MG.open.delete(g):MG.open.add(g);renderGnt(true)},true);
 const LX=(L,k)=>(L&&L[k])||[];
 const impOther=L=>[...new Set([...LX(L,"pctC"),...LX(L,"renamed"),...LX(L,"respC"),...LX(L,"noteC"),...LX(L,"moved")])];
 const impOf=u=>{const L=S.lastImport;if(!UI.showImp||!L)return"";if(L.added.includes(u))return"imp-a";if(L.shifted.includes(u)||impOther(L).includes(u))return"imp-s";return""};
@@ -2299,7 +2335,7 @@ const PORT=()=>PHONE()&&!LAND();   // телефон вертикально — 
 function renderGnt(keep){if(PORT())return renderFeed();compute();
  const old=$("#gw"),sl=old?old.scrollLeft:0,stp=old?old.scrollTop:0;
  const rows=ganttRows();
- const ts=[+TODAY];rows.forEach(r=>{if(r.k==="del"){ts.push(+D(r.r.s),+D(r.r.f));return}if(r.k==="task"){const o=UI.showImp&&S.lastImport&&(S.lastImport.old||{})[r.id];if(o)ts.push(+D(o.s),+D(o.f));ts.push(+FC[r.id].S,+FC[r.id].F,+FC[r.id].S0,+FC[r.id].F0);if(r.p)ts.push(+FC[r.p].S,+FC[r.p].F)}else if(r.k==="gho")ts.push(+FC[r.id].S,+FC[r.id].F);else if(r.k==="step")ts.push(+r.x.S,+r.x.F)});
+ const ts=[+TODAY];rows.forEach(r=>{if(r.k==="del"){ts.push(+D(r.r.s),+D(r.r.f));return}if(r.k==="task"){const o=UI.showImp&&S.lastImport&&(S.lastImport.old||{})[r.id];if(o)ts.push(+D(o.s),+D(o.f));ts.push(+FC[r.id].S,+FC[r.id].F,+FC[r.id].S0,+FC[r.id].F0);if(r.p)ts.push(+FC[r.p].S,+FC[r.p].F)}else if(r.k==="gho")ts.push(+FC[r.id].S,+FC[r.id].F);else if(r.k==="step")ts.push(+r.x.S,+r.x.F);else if(r.k==="mgrp")r.ids.forEach(i=>ts.push(+FC[i].S,+FC[i].F))});
  const mn=new Date(Math.min(...ts));mn.setHours(0,0,0,0);const a0=new Date(+mn-2*DAY),a1=new Date(Math.max(...ts)+4*DAY);
  const nd=Math.max(4,Math.ceil(dd(a0,a1)));
 
@@ -2333,6 +2369,10 @@ function renderGnt(keep){if(PORT())return renderFeed();compute();
   if(r.k==="step"){const s=r.x,col=s.pct>=100?"var(--green)":s.pct>0?"var(--work)":"var(--ghost)";
    R+=`<div class="row stp" data-id="${r.id}"><div class="lc"><span class="num">${byId[r.id].id}.${s.i+1}</span><span class="nm"><span class="t">${esc(s.n)}</span></span>${cmp?"":`<span class="rp">${esc(s.who)}</span><span class="dt">${fD(s.S)}</span><span class="dt">${fD(s.F)}</span>${EX}`}<span class="pc">${s.locked?'<span style="color:var(--ink3)">—</span>':`${PHONE()?s.pct+"%":`<input type="number" min="0" max="100" step="10" value="${s.raw}" data-step="${r.id}:${s.i}:pct">`}`}</span></div>
     <div class="tc"><div class="bar stp ${s.pct===0?"todo":""}" style="--oc:${col==="var(--ghost)"?"var(--work)":col};left:${x(s.S)}px;width:${Math.max(3,dd(s.S,s.F)*pxd)}px;--bt:color-mix(in srgb,${col} 30%,transparent);--bf:${col}"><i style="width:${s.pct}%"></i></div></div></div>`;return}
+  if(r.k==="mgrp"){const fs=r.ids.map(i=>FC[i]),S0=new Date(Math.min(...fs.map(f=>+f.S))),F0=new Date(Math.max(...fs.map(f=>+f.F))),
+    p=Math.round(blockPct(r.ids)),o=MG.open.has(r.g),late=+F0>+r.we+36e5,n=new Set(r.ids.map(i=>byId[i].name.replace(/ \(\d-й этап\)$/,""))).size;
+   R+=`<div class="row mgrp"><div class="lc"><span class="num"></span><span class="nm"><button class="tw ${o?"o":""}" data-mg="${esc(r.g)}" title="${o?"Свернуть":"Показать"} подэтапы" aria-expanded="${o}">▸</button><span class="t" style="font-weight:600">${esc(r.n)}</span><span class="ic">${n} подэт.</span></span>${cmp?"":`<span class="rp"></span><span class="dt">${fD(S0)}</span><span class="dt ${late?"l":""}">${fD(F0)}</span>${EX}`}<span class="pc">${p}<small>%</small></span></div>
+    <div class="tc"><div class="gbar" style="left:${x(r.ws)}px;width:${Math.max(3,dd(r.ws,r.we)*pxd)}px" title="Окно по v6: ${fD(r.ws)} — ${fD(new Date(+r.we-DAY))}"></div><div class="bar sum" style="left:${x(S0)}px;width:${Math.max(3,dd(S0,F0)*pxd)}px;--bt:var(--ink3);--bf:var(--ink)"><i style="width:${p}%"></i></div><div class="blab" style="left:${x(F0)+8}px">${fD(F0)}${late?` <span style="color:var(--ochre)">окно v6 до ${fD(new Date(+r.we-DAY))}</span>`:""}</div></div></div>`;return}
   const u=r.id,t=byId[u],f=FC[u],s=stat(u),p=Math.round(pct(u)),c=ST_[s].c,iss=openIss(u),ncm=((S.tasks[u]||{}).cm||[]).length;
   const dur=dd(f.S,f.F),L=x(f.S),shifted=+f.F>+f.F0+36e5,cc=c==="var(--ghost)"?"var(--work)":c;
   let bars="";
@@ -2404,7 +2444,7 @@ function cmpHTML(b){let tp=0,tf=0;const ed=PE();
   <tr class="tot"><td>Окончание</td><td></td><td class="r">${fD(FC[b.plan].F)}</td><td></td><td></td><td class="r">${fD(FC[b.main].F)}</td><td></td><td class="r ${Lg>.05?"plus":"minus"}">${Lg>0?"+":""}${fN(Lg)}</td><td></td>${ed?"<td></td>":""}</tr></table>
   ${ed?`<div class="cmp-add"><button class="lnk" data-padd="${b.key}:">+ операция в план</button></div>`:""}</details>`}
 document.addEventListener("toggle",e=>{const d=e.target;if(d.dataset&&d.dataset.cmp)UI.cmpOpen[d.dataset.cmp]=d.open},true);
-const newUid=()=>{let uid;do{uid=1e6+Math.floor(Math.random()*2e9)}while(byId[uid]);return uid};
+const newUid=()=>{let uid;do{uid=PROJ.uid0+Math.floor(Math.random()*2e9)}while(byId[uid]);return uid};   // у каждого проекта свой диапазон (core.js PROJS)
 function planDone(){renumber(DATA.tasks);syncSums(DATA.tasks);buildModel();save();rerender()}
 function planField(el){if(!PE())return;const[us,k]=el.dataset.pe.split(":"),p=+us,t=byId[p];if(!t||!PLANIDS.has(p))return;const v=el.value;
  if(k==="name"){const n=v.replace(/\s+/g," ").trim();if(!n||n===t.name){el.value=t.name;return}
@@ -2727,7 +2767,7 @@ function earlyUnlink(){if(!EARLY)return;const{u,ms}=EARLY,t=byId[u];EARLY=null;c
 /* вставка между above и below (UID или null): новая строка с «Новая операция», курсор в названии */
 function addOp(aboveUid,belowUid){if(!editing())return;need(()=>{
  const A=aboveUid!=null?byId[aboveUid]:null,B=belowUid!=null?byId[belowUid]:null,anchor=A||B;if(!anchor)return;
- let uid;do{uid=1e6+Math.floor(Math.random()*2e9)}while(byId[uid]);
+ let uid;do{uid=PROJ.uid0+Math.floor(Math.random()*2e9)}while(byId[uid]);
  const res=insertBetween(planOps(),aboveUid,belowUid,{uid});if(res.error)return toast("Не получилось добавить операцию");
  const nx=res.ops.find(o=>o.uid===uid);
  DATA.tasks.splice(DATA.tasks.indexOf(anchor)+(A?1:0),0,{id:0,uid,lvl:anchor.lvl,name:"Новая операция",sum:false,s:strOf(nx.s),f:strOf(nx.f),pct:0,crit:false,pred:[],resp:"",note:""});
@@ -3059,7 +3099,7 @@ addEventListener("beforeunload",e=>{if(SITE?SYNC&&(SYNC.busy()||SYNC.pending()):
 let PRINT=false;
 function buildPrint(){compute();const R=progRows();if(R){$("#print").innerHTML=progSheet(R,false);$("#print").classList.add("pa3");if(PSH>1030)$("#print .psheet").style.zoom=(.97*1030/PSH).toFixed(3);return}   // печать A3 — тот же лист; выше страницы — уменьшить
  $("#print").classList.remove("pa3");PRINT=true;const keep=UI.tab;UI.tab="sum";renderSum();const sum=$("#tab-sum").innerHTML;UI.tab=keep;PRINT=false;
- $("#print").innerHTML=`<div class="pr-h"><h1>Статус проекта ГДТ</h1><div>на ${TODAY.getDate()} ${MONG[TODAY.getMonth()]} ${TODAY.getFullYear()} г.</div></div>${sum}`;
+ $("#print").innerHTML=`<div class="pr-h"><h1>Статус проекта ${esc(PNAME)}</h1><div>на ${TODAY.getDate()} ${MONG[TODAY.getMonth()]} ${TODAY.getFullYear()} г.</div></div>${sum}`;
  renderTab(true)}
 addEventListener("beforeprint",buildPrint);
 
@@ -3068,8 +3108,25 @@ addEventListener("beforeprint",buildPrint);
 /* Сведения о последней загрузке из Project — только тому, кто загружает (planner/admin), и неделю после загрузки
    (аудит 06.10, BACKLOG 1): через месяц «изменений при загрузке: 43» ни о чём не говорит. */
 const recentImp=L=>!!(impCount(L)&&L.at&&Date.now()-Date.parse(L.at)<7*DAY&&(!SITE||siteCan("import")));
+/* выбор проекта и куста в шапке (06.11, эскиз Антона): «ГДТ ▾» / «ВТК ▾», у ВТК — «КП-23 ▾»; смена — ?p= в адресе.
+   Только на сайте; в файле — просто название. */
+function projUI(){const h=$(".brand h1");document.title="Статус проекта "+PNAME;
+ if(!SITE){h.textContent="Статус проекта "+PNAME;return}
+ const ar='<svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+  pads=PROJS.filter(p=>p.org===PROJ.org&&p.pad);
+ h.classList.add("psw");
+ h.innerHTML=`Статус проекта <button data-psw="org" aria-haspopup="true" title="Выбрать проект">${esc(PROJ.org)}${ar}</button>${pads.length>1?`<button data-psw="pad" aria-haspopup="true" title="Выбрать куст">${esc(PROJ.pad)}${ar}</button>`:""}<div class="pswm" id="pswM" hidden></div>`}
+function pswMenu(kind,btn){const m=$("#pswM");if(!m.hidden&&m.dataset.k===kind){m.hidden=true;return}
+ const L=kind==="org"?[...new Set(PROJS.map(p=>p.org))].map(o=>PROJS.find(p=>p.org===o&&(o!==PROJ.org||p===PROJ))||PROJS.find(p=>p.org===o)):PROJS.filter(p=>p.org===PROJ.org&&p.pad);
+ m.innerHTML=L.map(p=>`<a href="?p=${p.k}${location.hash}" class="${(kind==="org"?p.org===PROJ.org:p===PROJ)?"on":""}"><b>${esc(kind==="org"?p.org:p.pad)}</b><span>${esc(kind==="org"?p.full.replace(/ · куст .*$/,""):p.full)}</span></a>`).join("");
+ m.dataset.k=kind;m.style.left=(btn.offsetLeft-8)+"px";m.hidden=false}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-psw]"),a=e.target.closest("#pswM a"),m=$("#pswM");
+ if(a&&SITE&&SYNC&&(SYNC.busy()||SYNC.pending())){e.preventDefault();m.hidden=true;return toast("Подождите: правки ещё сохраняются")}
+ if(b){e.stopPropagation();return pswMenu(b.dataset.psw,b)}
+ if(m&&!e.target.closest(".psw"))m.hidden=true});
+projUI();
 function asofHTML(){const L=S.lastImport;
- return `Казанское НГКМ · <b>${WD[TODAY.getDay()]}, ${TODAY.getDate()} ${MONG[TODAY.getMonth()]}</b>`+
+ return `${esc(PROJ.place)} · <b>${WD[TODAY.getDay()]}, ${TODAY.getDate()} ${MONG[TODAY.getMonth()]}</b>`+
   (recentImp(L)?` · <button class="srcline" data-act="impinfo">загрузка из Project ${fD(new Date(L.at))}: изменений ${impCount(L)}</button>`:"")}
 const setTop=()=>document.documentElement.style.setProperty('--toph',$('.top').offsetHeight+'px');setTop();addEventListener('resize',setTop);paintMode();
 /* Запуск: версия-файл — сразу; сайт — после входа и загрузки из базы (siteApply в src/site.js). */
@@ -3101,7 +3158,7 @@ $("#dback").addEventListener("click",closeDrawer);
    вошедший (имя из profiles, база ставит его сама). Данные — из базы (src/sync.js): правка уходит сразу,
    правки других приходят по realtime, а без него — при возврате на вкладку и раз в минуту. */
 // Мок — только в тестовой сборке (build.py --site --mock); проверка по функции, а не по window.MOCK_SB (его мог бы подменить элемент с таким id).
-const DB=SITE?makeDb(typeof makeMockSupabase==="function"?MOCK_SB.createClient:supabase.createClient):null;   // в «копии» базы нет
+const DB=SITE?makeDb(typeof makeMockSupabase==="function"?MOCK_SB.createClient:supabase.createClient,SB_URL,SB_KEY,PROJ.k,PROJ.id):null;   // в «копии» базы нет
 let ME_=null,SYNC=null,BOOTED=false,WAIT=false,rtOff=null,rtT=null;
 const siteCan=a=>!!(ME_&&ME_.can[a]);
 const siteWriter=()=>!!ME_&&Object.entries(ME_.can).some(([k,v])=>v&&k!=="log_clear");
@@ -3142,7 +3199,7 @@ function siteError(e,kind){
  toast("Не сохранено: "+dbErr(e))}
 
 /* ---- вход ---- */
-function loginHTML(msg){return `<div class="login-card"><h1>Статус проекта ГДТ</h1><p>Вход для сотрудников</p>
+function loginHTML(msg){return `<div class="login-card"><h1>Статус проекта ${esc(PNAME)}</h1><p>Вход для сотрудников</p>
  <form id="loginF"><label>Почта<input type="email" id="lgE" autocomplete="username" required></label>
  <label>Пароль<input type="password" id="lgP" autocomplete="current-password" required></label>
  <div class="login-err" id="lgErr">${esc(msg||"")}</div><button class="btn pri" id="lgB">Войти</button></form>
@@ -3175,11 +3232,11 @@ setInterval(()=>{if(SYNC&&!document.hidden)SYNC.run()},60000);
 
 /* ---- «Скачать копию»: автономный файл со снимком данных (на случай, если Supabase недоступен) ----
    Та же страница, но с данными внутри: открывается как версия-файл (SITE=false), без входа, с плашкой «копия от …». */
-function siteCopy(){const at=new Date(),st={...S,me:"",dirty:false,seeded:1,open:{},copyAt:at.toISOString()};
+function siteCopy(){const at=new Date(),st={...S,me:"",dirty:false,seeded:1,open:{},copyAt:at.toISOString(),proj:PROJ.k};
  const out="<!DOCTYPE html>\n"+SRC.replace(/(<script id="mpp"[^>]*>)[\s\S]*?(<\/script>)/,(m,a,b)=>a+j4(DATA)+b)
   .replace(/(<script id="state"[^>]*>)[\s\S]*?(<\/script>)/,(m,a,b)=>a+j4(st)+b);
  const blob=new Blob([out],{type:"text/html;charset=utf-8"}),a=document.createElement("a");
- a.href=URL.createObjectURL(blob);a.download=`СтатусСАЙТ-копия-${p2(at.getDate())}.${p2(at.getMonth()+1)}.${p2(at.getFullYear()%100)}.html`;
+ a.href=URL.createObjectURL(blob);a.download=`СтатусСАЙТ-${PROJ.k==="gdt"?"":PROJ.k+"-"}копия-${p2(at.getDate())}.${p2(at.getMonth()+1)}.${p2(at.getFullYear()%100)}.html`;
  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
  toast("Копия сохранена в «Загрузки» — открывается без интернета")}
 
