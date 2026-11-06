@@ -189,12 +189,12 @@ textarea.ed{line-height:1.45}
 /* этапы закупки */
 .steps{display:grid;gap:4px}
 .steps h4{margin:0 0 4px;font-size:13px;font-weight:600;color:var(--ink2)}
-.stp{display:grid;grid-template-columns:18px 1fr 120px 54px 76px 22px;gap:8px;align-items:center;font-size:13px;padding:5px 0;border-bottom:1px solid var(--rule)}
+.stp{display:grid;grid-template-columns:18px minmax(0,2.2fr) minmax(0,1fr) 54px 64px 22px;gap:8px;align-items:center;font-size:13px;padding:5px 0;border-bottom:1px solid var(--rule)}
 .stp .dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--ink3)}
 .stp.d .dot{background:var(--green);border-color:var(--green)}
 .stp.w .dot{background:conic-gradient(var(--ink2) var(--p),transparent 0);border-color:var(--ink2)}
 .stp.l{opacity:.55}
-.stp input{width:100%;border:1px solid var(--rule2);background:var(--surface);border-radius:6px;padding:4px 6px;min-height:30px}
+.stp input{min-width:0;width:100%;border:1px solid var(--rule2);background:var(--surface);border-radius:6px;padding:4px 6px;min-height:30px}
 .stp input:hover{border-color:var(--ink3)}
 .stp input:disabled{background:transparent;border-color:var(--rule)}
 .stp.sh{font-size:11.5px;font-weight:600;color:var(--ink3);padding:0 0 2px;border-bottom:1px solid var(--rule2)}.stp.sh span:nth-child(4),.stp.sh span:nth-child(5){text-align:right}
@@ -1593,22 +1593,25 @@ const upd=u=>{const t=S.tasks[u];return t&&t.at?{who:t.by,at:new Date(t.at)}:nul
 const updText=u=>{const x=upd(u);return x?`Обновлено: ${x.who||"—"}, ${fDT(x.at)}`:"Обновлений ещё не было"};
 
 /* ================== расчёт: проценты и прогноз ================== */
-function stepPlan(u){const t=byId[u],items=ST(u);let cur=+t.S0,base=+t.S0;
+/* s0 — прогнозное начало (не раньше конца предшественников, compute); план (S0/F0 этапов) — всегда от начала операции */
+function stepPlan(u,s0){const t=byId[u],items=ST(u);let cur=s0!=null?Math.max(+t.S0,s0):+t.S0,base=+t.S0;
  return items.map((x,i)=>{const ok=i===0||items[i-1].pct>=100,pc=ok?+x.pct||0:0,du=Math.max(.5,+x.dur||1)*DAY;
   let s=new Date(cur),f=new Date(cur+du);const b0=base;base+=du;
   if(pc<100){if(pc===0&&s<TODAY){s=new Date(TODAY);f=new Date(+s+du)}else if(pc>0&&f<TODAY)f=new Date(+TODAY+du*(1-pc/100))}
   cur=+f;return{i,n:x.n,who:x.who,dur:x.dur,pct:pc,raw:+x.pct||0,locked:!ok,S:s,F:f,S0:new Date(b0),F0:new Date(base)}})}
-function pct(u){if(isP(u)){const sp=stepPlan(u);return sp.reduce((a,x)=>a+x.pct,0)/sp.length}
+const stDur=x=>Math.max(.5,+x.dur||1);
+/* готовность операции с этапами — по суткам (как в Project), 06.11 */
+function pct(u){if(isP(u)){const sp=stepPlan(u),d=sp.reduce((a,x)=>a+stDur(x),0);return sp.reduce((a,x)=>a+x.pct*stDur(x),0)/d}
  const v=S.tasks[u]&&S.tasks[u].pct;return v==null?byId[u].pct:v}
 let FC={};
 function compute(){FC={};
  for(const u of ORDER){const t=byId[u];
-  if(isP(u)){const sp=stepPlan(u);FC[u]={S:sp[0].S,F:sp[sp.length-1].F,S0:t.S0,F0:sp[sp.length-1].F0,steps:sp};continue}
   const p=pct(u),du=t.F0-t.S0;
-  if(p>=100){FC[u]={S:t.S0,F:t.F0,S0:t.S0,F0:t.F0};continue}
+  if(p>=100&&!isP(u)){FC[u]={S:t.S0,F:t.F0,S0:t.S0,F0:t.F0};continue}
   /* прогноз начала — не раньше прогнозного конца предшественников (с задержкой); запас (пауза, «не раньше») съедает
      отставание, а не прибавляется к нему (03.11, проверка «Пашей»: +58 сут у 688 №101 с «не раньше») */
   let s0=+t.S0;t.pred.forEach(q=>{const c=FC[q.uid];if(c)s0=Math.max(s0,+c.F+(+q.lag||0)*36e5)});
+  if(isP(u)){const sp=stepPlan(u,p>=100?null:s0);FC[u]={S:sp[0].S,F:sp[sp.length-1].F,S0:t.S0,F0:sp[sp.length-1].F0,steps:sp};continue}   // этапы тоже ждут предшественников (06.11, «Паша»: №101 лез под №100)
   let s=new Date(s0),f=new Date(+s+du);
   if(p===0&&s<TODAY){s=new Date(TODAY);f=new Date(+s+du)}
   else if(p>0&&f<TODAY)f=new Date(+TODAY+du*(1-p/100));
@@ -2080,21 +2083,21 @@ function pliHTML(u){const i=S.issues[u],t=byId[u];
  return `<div class="pli ${i.gd?"gd":""}" data-go-iss="${u}">
   <div><div class="op">${esc(t.name)}<em>${esc(BK[BOF[u]].title)}</em>${i.gd?'<span class="tag-gd">решение ГД</span>':""}</div><div class="pr">${esc(i.problem||"Суть проблемы не описана")}</div>${PRINT&&i.solution?`<div class="pr" style="color:var(--ink)">Решение: ${esc(i.solution)}</div>`:""}</div>
   <div><div class="k">Ответственный</div><div class="v2">${esc(i.who||t.resp||"—")}</div></div>
-  <div><div class="k">Срок решения</div><div class="v2">${i.due?fD(D(i.due)):"—"}</div></div>
+  <div><div class="k">Срок решения</div><div class="v2">${dueOf(u)?fD(D(dueOf(u))):"—"}</div></div>
   <div><div class="k">Влияние</div><div class="v2">${+i.impact?"+"+fN(+i.impact)+" сут":"не оценено"}</div></div></div>`}
 
 /* ================== ПРОБЛЕМНЫЕ ВОПРОСЫ ================== */
 let litId=null;const EDS=new Set();
-function stepsHTML(u){const sp=stepPlan(u),cur=sp.find(x=>!x.locked&&x.pct<100);
+function stepsHTML(u){const sp=(FC[u]&&FC[u].steps)||stepPlan(u),cur=sp.find(x=>!x.locked&&x.pct<100);
  if(!EDS.has(u)||!can("steps_edit"))return `<div class="pipe"><div class="pipe-h"><h4>Этапы решения</h4>${can("steps_edit")?`<button data-eds="${u}">Изменить этапы</button>`:""}</div>
   <div class="segs">${sp.map(x=>`<div class="sg ${x.pct>=100?"d":""} ${x.locked?"l":""} ${cur&&cur.i===x.i?"cur":""}"><div class="b"><i style="width:${x.pct}%"></i></div><div class="n">${esc(x.n)}</div><div class="m">${esc(x.who||"—")}, ${fN(+x.dur)} сут, ${x.pct}%</div><div class="m">${fD(x.S)}–${fD(x.F)}</div></div>`).join("")}</div></div>`;
  return `<div class="steps"><div class="pipe-h"><h4>Этапы решения</h4><button data-eds="${u}">Готово</button></div>
  ${sp.length?`<div class="stp sh"><span></span><span>Этап</span><span>Исполнитель</span><span>Сут</span><span>Готово, %</span><span></span></div>`:""}
  ${sp.map(x=>`<div class="stp ${x.pct>=100?"d":x.pct>0?"w":""} ${x.locked?"l":""}" style="--p:${x.pct}%">
   <span class="dot"></span>
-  <input value="${esc(x.n)}" data-step="${u}:${x.i}:n" title="Название этапа" placeholder="Что сделать">
+  <input value="${esc(x.n)}" data-step="${u}:${x.i}:n" title="${esc(x.n)}" placeholder="Что сделать">
   <input value="${esc(x.who)}" data-step="${u}:${x.i}:who" title="Исполнитель" placeholder="Кто">
-  <input type="number" min="0.5" step="0.5" value="${x.dur}" data-step="${u}:${x.i}:dur" title="Длительность, сут">
+  <input inputmode="decimal" value="${String(x.dur).replace(".",",")}" data-step="${u}:${x.i}:dur" title="Длительность, сут (2,5 — с запятой)" autocomplete="off">
   <input type="number" min="0" max="100" step="10" value="${x.raw}" data-step="${u}:${x.i}:pct" ${x.locked?'disabled title="Сначала завершите предыдущий этап"':'title="Готовность, %"'}>
   <button class="x" data-stepdel="${u}:${x.i}" title="Удалить этап">×</button></div>`).join("")}
  <button class="addstep" data-stepadd="${u}">+ этап</button>
@@ -2105,12 +2108,12 @@ function commentsHTML(u){const c=(S.tasks[u]&&S.tasks[u].cm)||[];
   ${!can("comment")?"":`<div class="cmadd"><textarea placeholder="Написать комментарий…" data-cmin="${u}" rows="1"></textarea><button class="btn" data-cmadd="${u}">Добавить</button></div>`}</div>`}
 function issueFields(u){const i=S.issues[u],t=byId[u];
  if(PHONE()||!can("issue_edit")){const F=(l,v)=>`<div class="fld"><label>${l}</label><div class="tv">${esc(v)||"—"}</div></div>`;
-  return F("Проблема",i.problem)+F("Решение, что нужно и от кого",i.solution)+`<div class="frow">${F("Ответственный за решение",i.who||t.resp)}${F("Срок решения",i.due?fD(D(i.due)):"")}${F("Влияние на план, сут",+i.impact?String(+i.impact):"не оценено")}</div>`}
+  return F("Проблема",i.problem)+F("Решение, что нужно и от кого",i.solution)+`<div class="frow">${F("Ответственный за решение",i.who||t.resp)}${F("Срок решения",dueOf(u)?fD(D(dueOf(u)))+(isP(u)?" — по этапам":""):"")}${F("Влияние на план, сут",+i.impact?String(+i.impact):"не оценено")}</div>`}
  return `<div class="fld"><label>Проблема</label><textarea class="ed prob" rows="1" data-iss="${u}:problem" placeholder="Что случилось">${esc(i.problem)}</textarea></div>
   <div class="fld"><label>Решение, что нужно и от кого</label><textarea class="ed sol" rows="1" data-iss="${u}:solution" placeholder="Что делаем">${esc(i.solution)}</textarea></div>
   <div class="frow">
    <div class="fld"><label>Ответственный за решение</label>${pickHTML(`data-iss="${u}:who"`,i.who,t.resp||"—")}</div>
-   <div class="fld"><label>Срок решения</label><input class="ed" data-iss="${u}:due" value="${i.due?esc(fD(D(i.due))+"."+i.due.slice(2,4)):""}" placeholder="ДД.ММ.ГГ" inputmode="numeric" autocomplete="off"></div>
+   <div class="fld"><label>Срок решения</label>${isP(u)?`<div class="tv" title="Срок — окончание последнего этапа; меняется сутками этапов">${fD(D(dueOf(u)))}.${dueOf(u).slice(2,4)} — по этапам</div>`:`<input class="ed" data-iss="${u}:due" value="${i.due?esc(fD(D(i.due))+"."+i.due.slice(2,4)):""}" placeholder="ДД.ММ.ГГ" inputmode="numeric" autocomplete="off">`}</div>
    <div class="fld"><label>Влияние на план, сут</label><input class="ed" type="number" min="0" step="0.5" data-iss="${u}:impact" value="${+i.impact||""}" placeholder="не оценено"></div></div>`}
 function cardHTML(u){const i=S.issues[u],t=byId[u],f=FC[u],done=i.status==="решён";
  const late=f.F>f.F0?` <span class="late">прогноз ${fD(f.F)}</span>`:"";
@@ -2137,7 +2140,9 @@ function goneHTML(u){const i=S.issues[u];
    (planner/admin), «Нужно решение ГД» — своя группа сверху. Фильтры — только вопросные. */
 const IOPEN=new Set();UI.ifl={who:"",blk:"",late:false};
 const issWho=u=>S.issues[u].who||byId[u].resp||"";
-const issLate=u=>{const i=S.issues[u];return!!i.due&&i.status!=="решён"&&+D(i.due)<+TODAY};
+/* срок решения: у вопроса с этапами — плановое окончание последнего этапа (06.11, «Паша»: этапы до 16.11, а срок 06.11) */
+const dueOf=u=>{const i=S.issues[u];return isP(+u)?strOf(endOf(+u)).slice(0,10):(i&&i.due)||""};
+const issLate=u=>{const i=S.issues[u],d=dueOf(u);return!!d&&i.status!=="решён"&&+D(d)<+TODAY};
 const iflActive=()=>!!(UI.ifl.who||UI.ifl.blk||UI.ifl.late);
 const passI=u=>{const f=UI.ifl;return(!f.who||issWho(u)===f.who)&&(!f.blk||BOF[u]===f.blk)&&(!f.late||issLate(u))};
 const ST_C={"открыт":"var(--red)","в работе":"var(--ochre)","решён":"var(--green)"};
@@ -2156,7 +2161,7 @@ function irowHTML(u,drag){const i=S.issues[u],t=byId[u],op=IOPEN.has(u),ncm=((S.
    <span class="itx"><b>${esc(t.name)}</b><span class="ipr">${esc(firstSentence(i.problem)||"суть не описана")}</span></span>
    <span class="iblk">${esc(BK[BOF[u]].title)}</span>
    <span class="iwho">${esc(issWho(u)||"—")}</span>
-   <span class="idue ${issLate(u)?"l":""}">${i.due?fD(D(i.due)):"—"}</span>
+   <span class="idue ${issLate(u)?"l":""}">${dueOf(u)?fD(D(dueOf(u))):"—"}</span>
    <span class="iimp ${+i.impact?"":"z"}">${+i.impact?"+"+fN(+i.impact)+" сут":"не оценено"}</span>
    <span class="ist" style="--c:${ST_C[i.status]||"var(--ink3)"}">${esc(i.status)}</span>
    <span class="icm">${ncm?I.cm+ncm:""}</span>
@@ -2635,10 +2640,48 @@ function planGo(res,u,lg){const f=futDone(res);if(!f.length)return need(()=>comm
  openModal(`<h3>Выполненные операции окажутся позже сегодняшнего дня</h3><p>${f.slice(0,4).map(x=>`№${byId[x].id} «${esc(trunc(byId[x].name,60))}» — 100 %, кончится ${fe(x)}`).join("<br>")}${f.length>4?`<br>и ещё ${f.length-4}`:""}</p>
   <p class="m">Сделанная работа не может кончиться в будущем. Если дата верная — у этих операций, видимо, не 100 %: поправьте готовность.</p>
   <div class="mfoot"><button class="btn ghost" data-act="fut-no">Отмена</button><button class="btn pri" data-act="fut-ok">Сдвинуть всё равно</button></div>`)}
+function issStatus(u,v){need(()=>{const was=S.issues[u].status;LOG({act:"issue",uid:+u,name:byId[u].name,field:"статус",from:was,to:v});S.issues[u].status=v;
+   if(v==="решён")S.order=S.order.filter(x=>x!==+u);else if(was==="решён")S.order=bumpTop(S.order,+u);   // решённый выпадает из порядка, переоткрытый — наверх
+   touchIss(+u);save();if(v==="решён")toast("Вопрос закрыт и перенесён в решённые");rerender()});}
+/* поля этапа (06.11, «Паши»): Tab после правки — в следующее поле (перерисовка теряла фокус, он уходил наверх панели);
+   Enter — остаться в поле; Esc — вернуть, что было, панель не закрывать */
+let STAB=null;
+document.addEventListener("keydown",e=>{const d=e.target.dataset;if(!d||d.step===undefined)return;const box=(e.target.closest("#drawer,#tab-iss,#tab-gnt")||{}).id||"";
+ if(e.key==="Tab")STAB={k:d.step,box,dir:e.shiftKey?-1:1,t:Date.now()};
+ else if(e.key==="Enter")STAB={k:d.step,box,dir:0,t:Date.now()};
+ else if(e.key==="Escape"){e.target.value=e.target.defaultValue;STAB=null;e.stopPropagation();e.preventDefault();e.target.blur()}},true);
+function stepRefocus(){const q=STAB;STAB=null;if(!q||Date.now()-q.t>2000)return;
+ setTimeout(()=>{const box=(q.box&&document.getElementById(q.box))||document,el=box.querySelector(`[data-step="${q.k}"]`);if(!el)return;
+  const L=[...box.querySelectorAll("input,textarea,button,select")].filter(x=>!x.disabled&&x.offsetParent),n=L[L.indexOf(el)+q.dir]||el;
+  n.focus();if(n.tagName==="INPUT"&&n.select)n.select()},0)}
+/* этапы решения: добавить / удалить (06.11, «Паши»): у выполненной операции новый этап — спросить; удалить незаконченный,
+   когда остальные готовы, — спросить (операция станет 100 %); удалить последний — операция снова обычная со своими
+   сроками (окончание = конец этапов) и готовностью, без отката к старым датам и 0 % */
+function stepAdd(u){const t=byId[u],first=!isP(u);
+ const go=()=>need(()=>{S.steps[u]=S.steps[u]||{items:[]};
+  LOG({act:"edit",uid:u,name:t.name,field:first?"этапы решения":"этап",to:first?"добавлены":"добавлен"});
+  S.steps[u].items.push(first?{n:t.name,who:t.resp||"",dur:Math.max(.5,Math.round(dd(t.S0,t.F0)*100)/100),pct:Math.round(pct(u))}:{n:"Новый этап",who:"",dur:1,pct:0});
+  EDS.add(u);touchSteps(u);save();rerender()});
+ if(first||pct(u)<100)return go();
+ const it=ST(u),d=it.reduce((a,x)=>a+stDur(x),0),np=Math.round(it.reduce((a,x)=>a+(+x.pct||0)*stDur(x),0)/(d+1));
+ pAsk({h:`«${esc(trunc(t.name,70))}» выполнена — новый этап снова откроет её`,p:`Сейчас 100 %. С новым этапом (1 сут, 0 %) готовность станет ${np} %, операция снова будет в работе.`,
+  opts:[{l:"Отмена",fn:()=>{}},{l:"Добавить этап",pri:true,fn:go}]})}
+function stepDel(u,k){const t=byId[u],it=ST(u),x=it[k];if(!x)return;
+ const del=()=>need(()=>{const last=it.length===1,e=endOf(u),p=Math.round(pct(u));
+  LOG({act:"edit",uid:u,name:t.name,field:"этап",to:"«"+trunc(x.n,60)+"» удалён"+(last?", операция снова без этапов":"")});
+  it.splice(k,1);touchSteps(u);
+  if(last){t.f=strOf(e);const o=T(u);o.pct=p;o.pctAt=new Date().toISOString();o.pctBy=S.me;EDS.delete(u);buildModel()}
+  save();rerender()});
+ const rest=it.filter((_,i)=>i!==k);
+ if((+x.pct||0)<100&&rest.length&&rest.every(y=>(+y.pct||0)>=100))
+  return pAsk({h:`Удалить этап «${esc(trunc(x.n,60))}» (${+x.pct||0} %)?`,p:`Остальные этапы выполнены — операция «${esc(trunc(t.name,60))}» станет выполненной (100 %).`,
+   opts:[{l:"Отмена",fn:()=>{}},{l:"Удалить этап",pri:true,fn:del}]});
+ del()}
 /* операция с этапами решения: окончание = начало + сумма этапов (stepPlan) */
 const endOf=u=>isP(u)?+stepPlan(u).slice(-1)[0].F0:+byId[u].F0;
-/* окончание в поле: у операции с этапами — конец этапов, как на полосе (03.11, «Паша»: в ячейке 11.10, а этапы до 08.11) */
-const shownEnd=u=>isP(u)&&FC[u]?+FC[u].F:endOf(u);
+/* окончание в поле — плановое (начало + сутки этапов), как у всех операций; прогноз — на полосе «+N сут» и в «Прогноз» панели
+   (06.11, «Паши»: прогноз в поле «Окончание» при «Длительность 2,0 сут» сбивал; было 03.11 — прогноз в поле) */
+const shownEnd=u=>endOf(u);
 /* новое окончание операции с этапами — меняется длительность последнего этапа; сначала спросить (Паша, 03.11) */
 function stepFinish(el,u,cur,ms){const it=ST(u),k=it.length-1,x=it[k],dl=(ms-cur)/DAY,nd=Math.round((+x.dur+dl)*100)/100;
  if(ms<=+byId[u].S0)return fieldErr(el,"Окончание раньше начала");
@@ -2842,15 +2885,16 @@ document.addEventListener("click",e=>{if(!e.target.closest(".more"))$("#menu").h
   if(a.done)return doneToday(+a.done);
   if(a.goIss){closeDrawer();IOPEN.add(+a.goIss);go("iss");return requestAnimationFrame(()=>{const c=$("#card-"+a.goIss);if(c){c.scrollIntoView({behavior:"smooth",block:"center"});c.classList.add("lit")}})}
   if(a.gd)return need(()=>{const i=S.issues[a.gd];LOG({act:"issue",uid:+a.gd,name:byId[a.gd].name,field:"решение ГД",from:i.gd?"да":"нет",to:i.gd?"нет":"да"});i.gd=!i.gd;touchIss(+a.gd);save();rerender()});
-  if(a.ist)return need(()=>{const[u,v]=a.ist.split(":"),was=S.issues[u].status;LOG({act:"issue",uid:+u,name:byId[u].name,field:"статус",from:was,to:v});S.issues[u].status=v;
-   if(v==="решён")S.order=S.order.filter(x=>x!==+u);else if(was==="решён")S.order=bumpTop(S.order,+u);   // решённый выпадает из порядка, переоткрытый — наверх
-   touchIss(+u);save();if(v==="решён")toast("Вопрос закрыт и перенесён в решённые");rerender()});
+  if(a.ist){const[u,v]=a.ist.split(":");if(v==="решён"&&isP(+u)&&pct(+u)<100&&S.issues[u].status!=="решён"){const nm=esc(trunc(byId[u].name,70)),left=ST(+u).filter(x=>(+x.pct||0)<100).map(x=>"«"+esc(trunc(x.n,40))+"»");   // 06.11, «Паша»: закрыл вопрос при незаконченных этапах молча
+    return pAsk({h:`«${nm}» — этапы решения не закончены (${Math.round(pct(+u))} %)`,p:`Не готовы: ${left.slice(0,4).join(", ")}${left.length>4?` и ещё ${left.length-4}`:""}. Закрыть вопрос всё равно? Этапы останутся у операции.`,
+     opts:[{l:"Отмена",fn:()=>{}},{l:"Закрыть вопрос",pri:true,fn:()=>issStatus(u,v)}]})}}
+  if(a.ist){const[u,v]=a.ist.split(":");return issStatus(u,v)}
   if(a.cmadd)return need(()=>{const ta=$(`[data-cmin="${a.cmadd}"]`,el.closest(".cm")),v=ta.value.trim();if(!v)return ta.focus();
    LOG({act:"comment",uid:+a.cmadd,name:byId[a.cmadd].name,to:trunc(v,120)});
    (T(a.cmadd).cm=T(a.cmadd).cm||[]).push({who:S.me,at:new Date().toISOString(),t:v,...(SITE?{ck:newKey()}:{})});touch(+a.cmadd);save();rerender()});
   if(a.cmdel){const[u,k]=a.cmdel.split(":");{LOG({act:"comment",uid:+u,name:byId[u].name,t:"комментарий удалён"});S.tasks[u].cm.splice(+k,1);save();rerender()}return}
-  if(a.stepadd)return need(()=>{const u=+a.stepadd;const t=byId[u],first=!isP(u),p0=first?Math.round(pct(u)):0;S.steps[u]=S.steps[u]||{items:[]};LOG({act:"edit",uid:u,name:t.name,field:"этапы",to:first?"добавлены этапы решения":"добавлен этап"});S.steps[u].items.push(first?{n:t.name,who:t.resp||"",dur:Math.max(.5,Math.round(dd(t.S0,t.F0)*100)/100),pct:p0}:{n:"Новый этап",who:"",dur:1,pct:0});EDS.add(u);touchSteps(u);save();rerender()});
-  if(a.stepdel){const[u,k]=a.stepdel.split(":");need(()=>{LOG({act:"edit",uid:+u,name:byId[u].name,field:"этапы",to:"удалён этап «"+S.steps[u].items[+k].n+"»"});S.steps[u].items.splice(+k,1);touchSteps(+u);save();rerender()});return}
+  if(a.stepadd)return stepAdd(+a.stepadd);
+  if(a.stepdel){const[u,k]=a.stepdel.split(":");return stepDel(+u,+k)}
   if(a.issdel){need(()=>{LOG({act:"issue",uid:+a.issdel,name:(S.issues[a.issdel].gone||{}).name||"",field:"вопрос",to:"убран из списка"});delete S.issues[a.issdel];S.order=S.order.filter(x=>x!==+a.issdel);save();rerender()});return}
   if(a.eds){const u=+a.eds;EDS.has(u)?EDS.delete(u):EDS.add(u);return rerender()}
   if(a.tw){e.stopPropagation();S.open[a.tw]=!S.open[a.tw];return renderGnt(true)}
@@ -2960,11 +3004,13 @@ document.addEventListener("change",e=>{const a=e.target.dataset;
   LOG({act:"issue",uid:+u,name:byId[u].name,field:ISSF[k],from:trunc(S.issues[u][k]),to:trunc(v)});S.issues[u][k]=v;touchIss(+u);save();
   if(k==="impact"||k==="due"||UI.tab!=="iss")rerender();else{const el=$("#card-"+u+" .upd");if(el)el.textContent=updText(+u)}})}
  if(a.step){const[u,k,f]=a.step.split(":");return need(()=>{let v=e.target.value;
-  if(f==="dur")v=Math.max(.5,+v||1);
+  if(f==="dur"){const n=parseFloat(String(v).replace(/\s/g,"").replace(",","."));   // «2,5» — с запятой (06.11: было 25)
+   if(!(n>=.5)){e.target.value=e.target.defaultValue;return toast("Сутки этапа — число не меньше 0,5, например 2,5",false)}
+   v=Math.round(n*100)/100;if(v===+ST(u)[k].dur){e.target.value=e.target.defaultValue;return}}
   if(f==="pct")v=Math.max(0,Math.min(100,Math.round(+v||0)));   // проценты следующих этапов не обнуляем (16.10): закрытые этапы и так считаются 0 (stepPlan)
   if(f==="pct"&&+v>0&&pct(+u)===0&&opUndone(+u).length){const vv=v;if(opAsk(+u,vv,()=>{const e0={act:"edit",uid:+u,name:byId[u].name,field:"этап "+(+k+1)+": "+STF[f],from:trunc(ST(u)[k][f],80),to:trunc(vv,80)};ST(u)[k][f]=vv;touchSteps(+u);return e0},{no100:true,lab:`этап ${+k+1} — ${vv} %`}))return}
   LOG({act:"edit",uid:+u,name:byId[u].name,field:"этап "+(+k+1)+": "+STF[f],from:trunc(ST(u)[k][f],80),to:trunc(v,80)});
-  ST(u)[k][f]=v;touchSteps(+u);save();rerender()})}});
+  ST(u)[k][f]=v;touchSteps(+u);save();rerender();stepRefocus()})}});
 document.addEventListener("focusin",e=>{if(e.target.id!=="pfS")return;const S=e.target,F=$("#pfF"),r=(progRows()||[]).find(x=>x.uid===PEU),ref=r&&r.S?+r.S:Date.now(),a=pDT(S.value,ref),f=F&&pDT(F.value,ref);
  S.dataset.ref=a!=null?a:ref;S.dataset.dur=a!=null&&f!=null&&f>=a?f-a:r&&r.S&&r.F?+r.F-+r.S:"";});
 document.addEventListener("input",e=>{if(e.target.id==="lgq"){LGF.q=e.target.value;$("#lgl").innerHTML=logRows()}
