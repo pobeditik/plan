@@ -1807,7 +1807,8 @@ function progSheet(R,ed){const SW=1520,SH=1030,LW=330,TW=SW-LW,HEAD=96,SC=46,LEG
   const mw=X(b)-X(a),ml=mw>=118?PMON[m.getMonth()]+" "+m.getFullYear():mw>=62?PMON[m.getMonth()].slice(0,3)+" "+String(m.getFullYear()).slice(2):"";   // узкий месяц — коротко (03.11: слипались)
   if(ml)sc+=`<div class="mn" style="left:${X(a).toFixed(1)}px;width:${mw.toFixed(1)}px">${ml}</div>`;
   if(+m>=+a0)bg+=`<div class="mo" style="left:${X(m).toFixed(1)}px"></div>`;m=n}
- for(let q=new Date(+a0);+q<+a1;q=new Date(+q+7*DAY)){sc+=`<div class="dy" style="left:${X(q).toFixed(1)}px">${q.getDate()}</div>`;bg+=`<div class="wk" style="left:${X(q).toFixed(1)}px"></div>`}
+ let q0=new Date(a0.getFullYear(),a0.getMonth(),a0.getDate());if(+q0<+a0)q0=new Date(q0.getFullYear(),q0.getMonth(),q0.getDate()+1);   // недели — с полуночи: иначе линия недели в полсуток от линии «сегодня» (06.11, «криво»)
+ for(let q=q0;+q<+a1;q=new Date(q.getFullYear(),q.getMonth(),q.getDate()+7)){sc+=`<div class="dy" style="left:${X(q).toFixed(1)}px">${q.getDate()}</div>`;bg+=`<div class="wk" style="left:${X(q).toFixed(1)}px"></div>`}
  let yAcc=0,LATE=false,LAGS=false,GH=false;const POS={};   // положение полос — для стрелок связей строк в «Правке» (20.10)
  const OV=ed?progOverlaps(progPlanned(R)):new Map(),nmO=u=>(OV.get(u)||[]).map(x=>(R.find(z=>z.uid===x)||{}).name).join(", ");
  const nmH=r=>`<span class="nm">${OV.has(r.uid)?`<i class="pov" title="По вписанным датам идёт одновременно с: ${esc(nmO(r.uid))} — а бригада одна; прогноз сдвинут. Если это делает другая бригада — отметьте в окне строки">!</i>`:""}${ed&&r.linked?`<i class="plk" title="Даты и готовность — из операций графика"><svg viewBox="0 0 16 16" width="13" height="13"><path d="M6.5 9.5l3-3M7 4.5l1.2-1.2a2.5 2.5 0 013.5 3.5L10.5 8M9 11.5l-1.2 1.2a2.5 2.5 0 01-3.5-3.5L5.5 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></i>`:""}${esc(r.name)}</span>`;
