@@ -830,6 +830,50 @@ body.hist main{margin-right:min(420px,94vw)}
 .row.msub .lc{background:color-mix(in srgb,var(--sunk) 30%,var(--surface))}
 .row.msub .nm{font-size:13px;font-weight:500;color:var(--ink2);padding-left:22px}
 .row.mgrp .nm .t{font-weight:600}
+/* ===== выбор блоков (06.11, «Паша» + дизайнер): поиск, «Все / Снять», разделы, одна строка на блок ===== */
+.pblk>.btn{max-width:420px}.pblk>.btn .bt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.pblk>.btn .mu{color:var(--ink3);font-weight:500}
+.pblk .popb{width:400px;max-width:calc(100vw - 32px);padding:0;display:flex;flex-direction:column;max-height:min(560px,calc(100vh - 220px))}
+.pblk .popb[hidden]{display:none}
+.pbh{display:flex;align-items:center;gap:4px;padding:8px;border-bottom:1px solid var(--rule)}
+.pbh .sp{flex:1}
+.psr{flex:1;display:flex;align-items:center;gap:7px;padding:0 10px;height:34px;border:1px solid var(--rule2);border-radius:9px;background:var(--surface);color:var(--ink3)}
+.psr:focus-within{border-color:var(--ink3)}
+.psr input{flex:1;min-width:0;border:0;background:none;outline:0;font-size:14px;color:var(--ink)}
+.pba{border:0;background:none;padding:7px 9px;border-radius:8px;font-size:13.5px;font-weight:600;color:var(--ink2);white-space:nowrap}
+.pba:hover{background:var(--sunk);color:var(--ink)}.pba.pri{color:var(--ink)}
+.pbl{overflow:auto;padding:6px;gap:0;overscroll-behavior:contain;flex:1;min-height:0}
+.pblk .pi{gap:2px;padding:0 6px 0 0;min-height:36px;cursor:default}
+.pblk .pi[hidden]{display:none}
+.pblk .pi.sub{padding-left:24px}
+.pblk .pck{flex:none;width:32px;height:32px;display:grid;place-items:center;border:0;background:none;padding:0;border-radius:7px}
+.pblk .pck i{width:16px;height:16px;border-radius:5px;border:1.5px solid var(--rule2)}
+.pblk .pck:hover i{border-color:var(--ink3)}
+.pblk .pi.on .pck i{background:var(--ink);border-color:var(--ink);box-shadow:inset 0 0 0 3px var(--raised)}
+.pblk .pg.part .pck i{background:linear-gradient(var(--ink),var(--ink)) center/8px 2px no-repeat}
+.pblk .pg.on .pck i{background:var(--ink);border-color:var(--ink);box-shadow:inset 0 0 0 3px var(--raised)}
+.pblk .pnm{flex:1;min-width:0;border:0;background:none;padding:8px 4px;text-align:left;font-size:14px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
+.pblk .pg .pnm{font-size:12.5px;font-weight:700;color:var(--ink2)}
+.pblk .pgr+.pgr,.pblk .pi:not(.sub)+.pgr,.pblk .pgr+.pi:not(.sub){margin-top:6px}
+.pst{flex:none;display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:700;color:var(--ochre)}
+.pst:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--green)}
+.pst.l:before{background:var(--ochre)}
+.pnf{padding:18px;text-align:center;color:var(--ink3);font-size:13.5px}
+.pblk .pi.new{margin:0;border-radius:0;padding:10px 14px;min-height:0}
+.pft{padding:8px 14px;border-top:1px solid var(--rule);font-size:12px;color:var(--ink3)}
+.lnk{border:0;background:none;padding:0;font:inherit;font-weight:700;color:var(--ink);text-decoration:underline;cursor:pointer}
+/* заголовок блока в таблице: название крупно (до дат), раздел мелко второй строкой; прилипает под шапкой таблицы */
+.row.blk{position:sticky;top:var(--hd);z-index:6}
+.row.blk .tc{background:var(--surface)}
+.row.blk .nm{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:1px;min-width:0}
+.row.blk .nm .t{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row.blk .nm .bg{max-width:100%;font-size:11.5px;font-weight:500;color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* телефон: одна кнопка, список — лист снизу */
+.pblk.ph>.btn{min-height:44px;font-size:15px;max-width:calc(100vw - 32px)}
+.pblk.ph .popb{position:fixed;left:50%;transform:translateX(-50%);right:auto;top:auto;bottom:0;width:min(560px,100vw);max-width:100vw;max-height:88vh;border-radius:16px 16px 0 0;z-index:200}
+.pblk.ph .pnm{font-size:15px;padding:11px 4px}.pblk.ph .pi{min-height:44px}.pblk.ph .pft{display:none}
+.pblk .pi .pst{flex:none;margin-left:auto;padding-left:8px}
+.pblk .pl,.pblk .pgr{display:grid;grid-template-columns:minmax(0,1fr)}
 
 </style>
 </head>
@@ -1552,14 +1596,14 @@ function buildModel(){
  const pre=n=>{const m=n.match(/^(.*?)[\s.,-]*(ПЛАН|ФАКТ)$/i);return m?[m[1].trim(),m[2].toUpperCase()]:null};
  const used=new Set();BLOCKS=[];
  const mk=(o,extra)=>{const nm=o.s.name.replace(/\s*\([^)]*\)\s*$/,"").trim()||o.s.name,par=(o.s.name.match(/\(([^)]*)\)\s*$/)||[])[1];
-  return Object.assign({key:slug(extra.title||nm),title:nm,sub:[par,o.ctx].filter(Boolean).join(", "),plan:null,pids:[]},extra)};
+  return Object.assign({key:slug(extra.title||nm),title:nm,sub:[par,o.ctx].filter(Boolean).join(", "),grp:o.ctx||"",hint:par||"",plan:null,pids:[]},extra)};   // grp — раздел плана (выбор блоков, заголовок блока)
  cand.forEach(o=>{const p=pre(o.s.name);if(!p||used.has(o.s.uid))return;
   const[nm,kind]=p,other=cand.find(q=>q.s.uid!==o.s.uid&&pre(q.s.name)&&pre(q.s.name)[0]===nm&&pre(q.s.name)[1]!==kind);
   if(!other)return;const fact=kind==="ФАКТ"?o.s:other.s,plan=kind==="ФАКТ"?other.s:o.s;
   used.add(o.s.uid);used.add(other.s.uid);
   BLOCKS.push(mk(o,{kind:"pair",key:slug(nm),title:/^\d+$/.test(nm)?"Скважина "+nm:nm,sub:o.ctx,main:fact.uid,plan:plan.uid,ids:(CH[fact.uid]||[]).map(c=>c.uid),pids:(CH[plan.uid]||[]).map(c=>c.uid)}))});
  cand.forEach(o=>{if(used.has(o.s.uid))return;BLOCKS.push(mk(o,{kind:"single",main:o.s.uid,ids:(CH[o.s.uid]||[]).map(c=>c.uid)}))});
- if(misc.length)BLOCKS.push({kind:"misc",key:"misc",title:"Общее по "+PNAME,sub:"Операции вне блоков",main:null,plan:null,ids:misc,pids:[]});
+ if(misc.length)BLOCKS.push({kind:"misc",key:"misc",title:"Общее по "+PNAME,sub:"Операции вне блоков",grp:"",hint:"",main:null,plan:null,ids:misc,pids:[]});
  BK={};BOF={};PAIROF={};PLANIDS=new Set();
  BLOCKS.forEach(b=>{let k=b.key,n=2;while(BK[k])k=b.key+"-"+(n++);b.key=k;BK[k]=b;
   b.ids.forEach(i=>BOF[i]=k);b.pids.forEach(i=>PLANIDS.add(i));
@@ -1673,7 +1717,7 @@ const undoText=q=>{const e=q[0],t=e.uid&&byId[e.uid],sh=q.find(x=>x.act==="shift
  return trunc((t?"№"+t.id+" ":"")+logText(e)+(sh&&sh.n?", сдвинуто "+sh.n+" "+plural(sh.n,"операция","операции","операций"):"")+(r?" и ещё "+r+" "+plural(r,"правка","правки","правок"):""),140)};
 function restoreSnap(str){const x=JSON.parse(str),keep={me:S.me,log:S.log,rev:S.rev,fileId:S.fileId,open:S.open};
  DATA=x.d;S={...x.s,...keep};buildModel();S.dirty=!HIST.isClean();
- UI.blocks=UI.blocks.filter(k=>BK[k]);if(!UI.blocks.length){const b=BLOCKS.find(y=>y.def&&y.kind!=="misc")||BLOCKS[0];if(b)UI.blocks=[b.key]}
+ UI.blocks=UI.blocks.filter(k=>BK[k]);if(!UI.blocks.length&&!UI.none){const b=BLOCKS.find(y=>y.def&&y.kind!=="misc")||BLOCKS[0];if(b)UI.blocks=[b.key]}
  if(!S.lastImport)UI.showImp=false;
  if(UI.sel&&!byId[UI.sel])closeDrawer();$("#asof").innerHTML=asofHTML();rerender();if(SITE)SYNC.run()}
 /* пометить записи шага в журнале отменёнными (или снять пометку); на сайте после записи в базу в S.log — уже другие
@@ -2289,23 +2333,62 @@ function ctxHTML(u){const t=byId[u],pr=t.pred.map(q=>q.uid).filter(i=>byId[i]&&F
  return `<div class="dr-sec"><h4>Связи</h4><div class="cxl">${pr.map(i=>row(i,"до")).join("")}${row(u,"")}${su.map(i=>row(i,"после")).join("")}</div></div>`}
 /* Телефон: вместо таблицы Ганта — лента операций выбранных блоков; тап по карточке открывает лист снизу (drawer). */
 function renderFeed(){compute();const y=scrollY;
- const chips=BLOCKS.map(b=>`<button class="chip ${UI.blocks.includes(b.key)?"on":""}" data-blkt="${b.key}">${esc(b.title)}</button>`).join("");
  let h="";const rows=ganttRows(),RG={};let bk=null;
  rows.forEach(r=>{if(r.k==="blk"){bk=r.b;RG[bk]=[]}else if(r.k==="task"&&bk)RG[bk].push(r.id)});Object.keys(RG).forEach(k=>RG[k]=miniRange(RG[k]));bk=null;
  rows.forEach(r=>{
   if(r.k==="blk"){bk=r.b;const b=BK[r.b],f=b.main!=null&&FC[b.main];
-   h+=`<div class="fh"><h3>${esc(b.title)}</h3><span class="fhp">${Math.round(blockPct(b.ids))}%</span>${f?`<div class="fhs">${fD(f.S)} – ${fD(f.F)}${b.sub?" · "+esc(b.sub):""}</div>`:""}</div>`;return}
+   h+=`<div class="fh" data-blk="${r.b}"><h3>${esc(bnm(b.title))}</h3><span class="fhp">${Math.round(blockPct(b.ids))}%</span>${f?`<div class="fhs">${fD(f.S)} – ${fD(f.F)}${b.grp?" · "+esc(bnm(b.grp)):""}</div>`:""}</div>`;return}
   if(r.k!=="task")return;
   const u=r.id,t=byId[u],f=FC[u],s=stat(u),p=Math.round(pct(u)),shifted=+f.F>+f.F0+36e5,iss=openIss(u),ncm=((S.tasks[u]||{}).cm||[]).length;
   h+=`<button class="fi ${iss?"prob":""} ${UI.sel===u?"sel":""} ${UI.hot===u?"hot":""}" data-id="${u}" id="r-${u}" style="--c:${ST_[s].c}">
    <span class="ft">${iss?I.flagF:""}${esc(t.name)}</span><span class="fq ${p>=100?"d":""}">${p}%</span>
    <span class="fm">№${t.id} · ${fD(f.S)} – ${fD(f.F)}${shifted?` <b>+${fN(dd(f.F0,f.F))} сут</b>`:""}${t.resp?" · "+esc(t.resp):""}${ncm?` · ${I.cm}${ncm}`:""}</span>
    ${miniBar(u,RG[bk])}</button>`});
- $("#tab-gnt").innerHTML=`<div class="fchips">${chips}</div><div class="feed">${h||`<div class="empty">Нет операций</div>`}</div>`;
+ $("#tab-gnt").innerHTML=`<div class="fchips">${blkPopHTML(false)}</div><div class="feed">${h||`<div class="empty">Нет операций</div>`}</div>`;
  scrollTo(0,y)}
 /* Панель графика одной строкой (прогон 2, REDESIGN.md §3): блоки, масштаб, «Сегодня», «Фильтры», «?» — во всплывающих окнах */
 const fCount=()=>{const f=UI.flt;return(f.who?1:0)+f.st.length+(f.open?1:0)+(f.prob?1:0)+(f.crit?1:0)+(f.hz?1:0)};
 const shiftT=b=>{const s=blockShift(b);return s>.05?`<b class="sh">+${fN(s)} сут</b>`:""};
+/* ================== выбор блоков (06.11, «Паша» + дизайнер, DECISIONS «Выбор блоков») ==================
+   Одна кнопка; внутри — поиск (от 9 блоков), «Все / Снять», разделы плана заголовками, вложенные сдвинуты, номера
+   из Project не показываем. Название — только этот блок (панель закрывается, таблица переходит к нему);
+   галочка — добавить / убрать (панель остаётся). Отставание — точкой цвета: зелёная — в графике, рыжая с «+N». */
+const bnm=s=>String(s||"").replace(/^\d+(?:\.\d+)*\.?\s+/,"");   // «2.2 Тендеры» → «Тендеры»: номер — в данных, не на экране
+const blkGroups=()=>{const out=[];BLOCKS.forEach(b=>{const g=b.grp||"",L=out[out.length-1];if(L&&L.g===g)L.bs.push(b);else out.push({g,bs:[b]})});
+ return new Set(BLOCKS.map(b=>b.grp||"")).size<2?[{g:"",bs:BLOCKS.slice()}]:out};   // у всех один раздел (ГДТ) — без заголовков
+function blkBtn(){const sel=UI.blocks.map(k=>BK[k]).filter(Boolean);
+ if(!sel.length)return"Блоки не выбраны";if(sel.length===BLOCKS.length&&sel.length>1)return"Все блоки";
+ return `<span class="bt">${esc(bnm(sel[0].title))}</span>${sel.length>1?`<span class="mu">+ ещё ${sel.length-1}</span>`:shiftT(sel[0])}`}
+function blkRow(b,sub){const on=UI.blocks.includes(b.key),s=blockShift(b),q=(bnm(b.title)+" "+(b.grp||"")).toLowerCase();
+ return `<div class="pi ${on?"on":""} ${sub?"sub":""}" data-q="${esc(q)}"><button class="pck" data-blkt="${b.key}" aria-pressed="${on}" title="${on?"Убрать":"Добавить к выбранным"}"><i></i></button><button class="pnm" data-blk1="${b.key}" title="${esc(b.title)}${b.hint?" ("+esc(b.hint)+")":""}">${esc(bnm(b.title))}</button>${s>.05?`<span class="pst l" title="Отстаёт на ${fN(s)} сут">+${fN(s)}</span>`:`<span class="pst" title="В графике"></span>`}</div>`}
+function blkPop(ED){const G=blkGroups(),many=BLOCKS.length>=9,ph=PHONE();
+ const list=G.map((g,gi)=>{if(!g.g)return g.bs.map(b=>blkRow(b,false)).join("");
+  const n=g.bs.filter(b=>UI.blocks.includes(b.key)).length,st=n===0?"":n===g.bs.length?"on":"part";
+  return `<div class="pgr"><div class="pi pg ${st}" data-q="${esc(g.g.toLowerCase())}"><button class="pck" data-blkg="${gi}" title="Весь раздел"><i></i></button><button class="pnm" data-blkg1="${gi}" title="${esc(g.g)}">${esc(bnm(g.g))}</button></div>${g.bs.map(b=>blkRow(b,true)).join("")}</div>`}).join("");
+ return `<div class="pbh">${many?`<label class="psr"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.5 10.5 14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><input id="blkQ" placeholder="Найти блок" value="${esc(UI.bq||"")}" autocomplete="off" spellcheck="false"></label>`:`<span class="sp"></span>`}
+  <button class="pba" data-blkall>${UI.bq?"Все найденные":"Все"}</button><button class="pba" data-blknone>Снять</button>${ph?`<button class="pba pri" data-blkdone>Готово</button>`:""}</div>
+  <div class="pl pbl" id="blkL">${list}<div class="pnf" hidden>Нет блока «<span></span>»</div></div>
+  ${ED&&can("plan_edit")?`<button class="pi new" data-act="newblk">+ Новый блок</button>`:""}<div class="pft">Название — только этот · галочка — добавить</div>`}
+const blkPopHTML=ED=>popHTML("blk",`${blkBtn()}<i class="cv">▾</i>`,blkPop(ED)).replace('class="pop ',`class="pop pblk ${PHONE()?"ph":""} `);
+/* поиск в списке — без перерисовки (фокус не теряется) */
+function blkFilter(){const L=$("#blkL");if(!L)return;const q=(UI.bq||"").trim().toLowerCase();let any=false;
+ L.querySelectorAll(".pgr").forEach(g=>{const hd=g.querySelector(".pg"),hit=!q||hd.dataset.q.includes(q);let n=0;
+  g.querySelectorAll(".pi:not(.pg)").forEach(r=>{const v=hit||r.dataset.q.includes(q);r.hidden=!v;if(v)n++});hd.hidden=!n;if(n)any=true});
+ L.querySelectorAll(":scope>.pi").forEach(r=>{const v=!q||r.dataset.q.includes(q);r.hidden=!v;if(v)any=true});
+ const nf=L.querySelector(".pnf");nf.hidden=any;nf.querySelector("span").textContent=UI.bq||"";
+ const a=$("[data-blkall]");if(a)a.textContent=q?"Все найденные":"Все"}
+document.addEventListener("input",e=>{if(e.target.id!=="blkQ")return;UI.bq=e.target.value;blkFilter()});
+document.addEventListener("keydown",e=>{if(e.target.id==="blkQ"&&e.key==="Enter"){const f=$("#blkL .pi:not([hidden]):not(.pg) .pnm");if(f)f.click();return}
+ if(e.key==="Escape"&&UI.pop){e.preventDefault();e.stopPropagation();closePop()}},true);
+function closePop(){UI.pop=null;$$(".popb").forEach(x=>x.hidden=true);$$('[data-act="pop"]').forEach(x=>x.classList.remove("on"))}
+/* клик мимо открытой панели по Ганту только закрывает её (06.11, «Паша»: открывалась карточка операции) */
+document.addEventListener("click",e=>{if(!UI.pop||e.target.closest(".pop"))return;closePop();if(e.target.closest("#gw,.feed")){e.stopPropagation();e.preventDefault()}},true);   // по Ганту — только закрыть; по шапке и кнопкам — закрыть и нажать
+/* выбранный блок — таблица к нему (заголовок блока под шапкой таблицы) */
+function blkScroll(k){requestAnimationFrame(()=>{const gw=$("#gw"),r=gw&&gw.querySelector(`.row.blk[data-blk="${k}"]`),hd=gw&&gw.querySelector(".ghd");
+ if(r)gw.scrollTop=Math.max(0,r.offsetTop-(hd?hd.offsetHeight:0));else if(PORT()){const f=$(`#tab-gnt .fh[data-blk="${k}"]`);if(f)f.scrollIntoView({block:"start"})}})}
+function blkSet(keys,{close=false,to=null}={}){UI.blocks=BLOCKS.map(b=>b.key).filter(k=>keys.includes(k));UI.none=!UI.blocks.length;
+ const L=$("#blkL"),st=L?L.scrollTop:0;if(close){UI.pop=null;UI.bq=""}saveUI();renderGnt();
+ const L2=$("#blkL");if(L2){L2.scrollTop=st;blkFilter()}if(to)blkScroll(to)}
 const popHTML=(k,btn,body,right)=>`<div class="pop ${right?"r":""}"><button class="btn ${UI.pop===k?"on":""}" data-act="pop" data-pop="${k}">${btn}</button><div class="popb" ${UI.pop===k?"":"hidden"}>${body}</div></div>`;
 /* «+ Новый блок» (06.10: не выпячивать) — последней блёклой строкой списка блоков, только при «Правке». Блок — сводная
    строка с одной операцией «Новая операция» с сегодняшнего дня; дальше Паша правит как обычно. */
@@ -2323,13 +2406,11 @@ function newBlock(){closeDrawer();const n=(($("#nbn")||{}).value||"").replace(/\
   const k=BOF[op.uid];if(k)UI.blocks=[k];touch(op.uid);save();rerender();
   requestAnimationFrame(()=>{const i=$(`[data-ed="${op.uid}:name"]`);if(i){i.focus();i.select()}})})}
 function gtoolsHTML(pairSel,scaleSeg,ED){const L=S.lastImport,sel=UI.blocks.map(k=>BK[k]).filter(Boolean),n=fCount();
- const bl=sel.length===1?`${esc(sel[0].title)}${shiftT(sel[0])}`:`Блоков: ${sel.length}`;
- const blocks=BLOCKS.map(b=>`<button class="pi ${UI.blocks.includes(b.key)?"on":""}" data-blkt="${b.key}"><i></i><span>${esc(b.title)}</span>${shiftT(b)}</button>`).join("");
  const leg=`<div class="gleg pl"><span><i class="s" style="background:var(--work)"></i>в работе</span><span><i class="s" style="background:var(--green)"></i>выполнено</span><span><i class="s" style="background:var(--ochre)"></i>срок прошёл</span><span><i class="s" style="background:var(--red)"></i>проблемный вопрос</span><span><i class="s" style="box-shadow:inset 0 0 0 1.5px var(--work)"></i>не начато</span><span><i class="s" style="background:repeating-linear-gradient(-45deg,var(--ink3) 0 2px,transparent 2px 5px)"></i>прогнозный сдвиг</span>${pairSel.length&&UI.plan?`<span><i class="s" style="background:var(--ghost)"></i>план</span>`:""}<span><i class="s" style="width:2px;background:var(--ink)"></i>сегодня</span><span class="m">Клик по строке — подробности, связи и комментарии</span></div>`;
  const flt=`${filtersHTML()}${ED?"":`<label class="tgl"><input type="checkbox" data-opt="compact" ${UI.compact?"checked":""}><span></span>Краткая таблица</label>`}
   ${recentImp(L)?`<button class="chip imp ${UI.showImp?"on":""}" data-act="showimp" title="Показать в графике, что изменилось при последней загрузке из Project">Изменения последней загрузки<b>${impCount(L)}</b></button>`:""}`;
  return `<div class="gtools one">
-  ${popHTML("blk",`${bl}<i class="cv">▾</i>`,`<div class="pl">${blocks}${ED&&can("plan_edit")?`<button class="pi new" data-act="newblk">+ Новый блок</button>`:""}</div>`)}
+  ${blkPopHTML(ED)}
   ${scaleSeg}<button class="btn" data-act="today">Сегодня</button>
   ${popHTML("flt",`Фильтры${n?` · ${n}`:""}<i class="cv">▾</i>`,flt)}${n?`<button class="freset" data-fr title="Сбросить фильтры">×</button>`:""}
   <span class="sp"></span>
@@ -2365,7 +2446,7 @@ function renderGnt(keep){if(PORT())return renderFeed();compute();
     dates=`<span class="dt">${fD(f.S)}</span><span class="dt ${f.F>f.F0?"l":""}">${fD(f.F)}</span>`;
     if(b.plan!=null)lab=`<div class="blab" style="left:${x(f.F)+8}px">прогноз ${fD(f.F)}, план ${fD(byId[b.plan].F0)}</div>`}
    else dates=`<span></span><span></span>`;
-   R+=`<div class="row blk"><div class="lc"><span class="num"></span><span class="nm"><span class="t">${esc(b.title)}</span><span class="ic" style="font-weight:500">${esc(b.sub||"")}</span></span>${cmp?"":`<span></span>${dates}${EX}`}<span class="pc">${p}%</span></div><div class="tc">${bar}${lab}</div></div>`;return}
+   R+=`${ri?"</div>":""}<div class="bgrp"><div class="row blk" data-blk="${r.b}"><div class="lc"><span class="num"></span><span class="nm"${cmp?"":` style="grid-column:span 2"`} title="${esc(b.title)}${b.hint?" ("+esc(b.hint)+")":""}"><span class="t">${esc(bnm(b.title))}</span>${b.grp?`<span class="bg">${esc(bnm(b.grp))}</span>`:""}</span>${cmp?"":`${dates}${EX}`}<span class="pc">${p}%</span></div><div class="tc">${bar}${lab}</div></div>`;return}
   if(r.k==="add"){R+=`<div class="row add"><div class="lc"><span></span><span class="nm"><button class="btn ghost addb" data-addop="${r.last}:">+ Операция</button></span><span></span><span></span><span></span><span></span><span></span></div><div class="tc"></div></div>`;return}
   if(r.k==="del"){const o=r.r,s=D(o.s),f=D(o.f);
    R+=`<div class="row del"><div class="lc"><span class="num">${o.id||""}</span><span class="nm"><span class="t">${esc(o.name)}</span><span class="ib" style="--c:var(--red)">удалена</span></span>${cmp?"":`<span class="rp">${esc(o.resp||"")}</span><span class="dt">${fD(s)}</span><span class="dt">${fD(f)}</span>${EX}`}<span class="pc"></span></div>
@@ -2404,15 +2485,14 @@ function renderGnt(keep){if(PORT())return renderFeed();compute();
   links=[...t.pred.filter(q=>geo[q.uid]).map(q=>[geo[q.uid],g]),...succ.map(i=>[g,geo[i]])].map(([A,B])=>{
    const x1=A.R,y1=RH[A.ri][0]+RH[A.ri][1]/2,x2=B.L,y2=RH[B.ri][0]+RH[B.ri][1]/2,m=Math.max(14,Math.abs(x2-x1)/2);
    return `<path d="M${x1} ${y1} C${x1+m} ${y1} ${x2-m} ${y2} ${x2-3} ${y2}" fill="none" stroke="var(--ink)" stroke-width="1.6" opacity=".7" marker-end="url(#ar)"/>`}).join("")}
- const chips=BLOCKS.map(b=>`<button class="chip ${UI.blocks.includes(b.key)?"on":""}" data-blkt="${b.key}">${esc(b.title)}</button>`).join("");
  const L=S.lastImport;
  const pairSel=UI.blocks.map(k=>BK[k]).filter(b=>b&&b.merge);
  const scaleSeg=`<div class="seg">${[["week","Неделя"],["month","Месяц"],["all","Весь период"]].map(([k,v])=>`<button class="${UI.scale===k?"on":""}" data-scale="${k}">${v}</button>`).join("")}</div>`;
- $("#tab-gnt").innerHTML=`${narrow?`<div class="gtools">${chips}</div><div class="gtools g2">${scaleSeg}<button class="btn" data-act="today">Сегодня</button></div>`:gtoolsHTML(pairSel,scaleSeg,ED)}
+ $("#tab-gnt").innerHTML=`${narrow?`<div class="gtools">${blkPopHTML(false)}</div><div class="gtools g2">${scaleSeg}<button class="btn" data-act="today">Сегодня</button></div>`:gtoolsHTML(pairSel,scaleSeg,ED)}
   <div class="gcard"><div class="gw" id="gw" style="--lw:${lw}px;--W:${W}px;--cols:${cols}"><div class="gin">
    <div class="gbg">${bg}</div>
    <div class="ghd"><div class="lc">${hl}</div><div class="tc">${hd}</div></div>
-   ${rows.length?R:`<div class="empty" style="margin:30px;position:sticky;left:30px;width:520px">Под фильтр ничего не попало</div>`}
+   ${rows.length?R+(rows[0].k==="blk"?"</div>":""):`<div class="empty" style="margin:30px;position:sticky;left:30px;width:520px">${UI.blocks.length?"Под фильтр ничего не попало":`Блоки не выбраны. Выберите в списке или <button class="lnk" data-blkall>покажите все</button>`}</div>`}
    <svg class="links" width="${W}" height="${y}"><defs><marker id="ar" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8z" fill="var(--ink)"/></marker></defs>${links}</svg>
   </div></div>
   ${narrow?`<div class="gleg"><span><i class="s" style="background:var(--work)"></i>в работе</span><span><i class="s" style="background:var(--green)"></i>выполнено</span><span><i class="s" style="background:var(--ochre)"></i>срок прошёл</span><span><i class="s" style="background:var(--red)"></i>проблемный вопрос</span><span><i class="s" style="box-shadow:inset 0 0 0 1.5px var(--work)"></i>не начато</span><span><i class="s" style="background:repeating-linear-gradient(-45deg,var(--ink3) 0 2px,transparent 2px 5px)"></i>прогнозный сдвиг</span>${pairSel.length&&UI.plan?`<span><i class="s" style="background:var(--ghost)"></i>план</span>`:""}<span><i class="s" style="width:2px;background:var(--ink)"></i>сегодня</span><span style="margin-left:auto">Клик по строке — подробности, связи и комментарии</span>`:""}</div></div>
@@ -2591,7 +2671,7 @@ function applyXML(){if(!PEND)return;const{nd,d,fname}=PEND;
  const old={};[...d.shifted,...d.pctC,...d.renamed,...d.respC,...d.noteC,...d.moved].forEach(x=>{const o=d.A[x];if(o)old[x]={s:o.s,f:o.f,pct:o.pct,name:o.name,resp:o.resp,note:o.note}});
 LOG({act:"import",t:`${fname}: новых ${d.added.length}, удалено ${d.removed.length}, сдвинуто ${d.shifted.length}`});
  DATA=nd;buildModel();
- UI.blocks=UI.blocks.filter(k=>BK[k]);if(!UI.blocks.length){const b=BLOCKS.find(x=>x.def&&x.kind!=="misc")||BLOCKS[0];if(b)UI.blocks=[b.key]}
+ UI.blocks=UI.blocks.filter(k=>BK[k]);if(!UI.blocks.length&&!UI.none){const b=BLOCKS.find(x=>x.def&&x.kind!=="misc")||BLOCKS[0];if(b)UI.blocks=[b.key]}
  S.lastImport={at:new Date().toISOString(),by:S.me,file:fname,saved:nd.saved,added:d.added,shifted:d.shifted,removed:rem,pctC:d.pctC,renamed:d.renamed,respC:d.respC,noteC:d.noteC,moved:d.moved,old};
  save();PEND=null;$("#scrim").classList.remove("on");
  if(UI.sel&&!byId[UI.sel])closeDrawer();
@@ -2890,7 +2970,7 @@ function flag(u){need(()=>{const cur=S.issues[u];
  S.order=bumpTop(S.order,u);touchIss(u);save();litId=u;toast("Операция отмечена как проблемный вопрос");closeDrawer();go("iss",false);
  requestAnimationFrame(()=>{const c=$("#card-"+u);if(c){c.scrollIntoView({behavior:"smooth",block:"center"});const ta=$(`[data-iss="${u}:problem"]`,c);if(ta&&!ta.value)setTimeout(()=>ta.focus(),350)}})})}
 /* «Показать в графике»: строка горит (UI.hot), пока открыта её панель; закрыли панель или открыли другую — гаснет (16.10) */
-function goto(u){const k=BOF[u];if(k&&!UI.blocks.includes(k))UI.blocks=[k];UI.sel=u;UI.hot=u;go("gnt",false);
+function goto(u){const k=BOF[u];if(k&&!UI.blocks.includes(k)){UI.blocks=[k];UI.none=false}UI.sel=u;UI.hot=u;go("gnt",false);
  requestAnimationFrame(()=>{const r=$("#r-"+u),gw=$("#gw");if(PHONE()&&!LAND()&&r){r.scrollIntoView({block:"center"});openDrawer(u);return}if(!r||!gw)return;gw.scrollTop=Math.max(0,r.offsetTop-gw.clientHeight/2);
   if(geoCache)gw.scrollLeft=Math.max(0,geoCache.x(FC[u].S)-(gw.clientWidth-geoCache.lw)*.3);
   openDrawer(u)})}
@@ -2912,7 +2992,7 @@ function readFile(file){const r=new FileReader();
  else openModal(`<h3>Непонятный файл</h3><p>Нужен XML из Project: Файл → Сохранить как → тип «Формат XML».</p><div class="mfoot"><button class="btn pri" data-act="mclose">Понятно</button></div>`)};
  r.readAsText(file,"utf-8")}
 
-document.addEventListener("click",e=>{if(!e.target.closest(".more"))$("#menu").hidden=true;if(UI.pop&&!e.target.closest(".pop")){UI.pop=null;$$(".popb").forEach(x=>x.hidden=true);$$('[data-act="pop"]').forEach(x=>x.classList.remove("on"))}const el=e.target.closest("[data-act],[data-tab],[data-pu],[data-approve],[data-padd],[data-pdel],[data-itog],[data-ifl],[data-ifr],[data-done],[data-flag],[data-goto],[data-go-iss],[data-gd],[data-ist],[data-cmadd],[data-cmdel],[data-stepadd],[data-stepdel],[data-issdel],[data-tw],[data-eds],[data-blkt],[data-scale],[data-fs],[data-fb],[data-fr],[data-me],[data-pick],[data-cfv],[data-addop],[data-delop],[data-lgo],[data-lgdel],[data-lgrev],[data-lgok],[data-lgx],[data-sbr]");
+document.addEventListener("click",e=>{if(!e.target.closest(".more"))$("#menu").hidden=true;if(UI.pop&&!e.target.closest(".pop")){UI.pop=null;$$(".popb").forEach(x=>x.hidden=true);$$('[data-act="pop"]').forEach(x=>x.classList.remove("on"))}const el=e.target.closest("[data-act],[data-tab],[data-pu],[data-approve],[data-padd],[data-pdel],[data-itog],[data-ifl],[data-ifr],[data-done],[data-flag],[data-goto],[data-go-iss],[data-gd],[data-ist],[data-cmadd],[data-cmdel],[data-stepadd],[data-stepdel],[data-issdel],[data-tw],[data-eds],[data-blkt],[data-blk1],[data-blkg],[data-blkg1],[data-blkall],[data-blknone],[data-blkdone],[data-scale],[data-fs],[data-fb],[data-fr],[data-me],[data-pick],[data-cfv],[data-addop],[data-delop],[data-lgo],[data-lgdel],[data-lgrev],[data-lgok],[data-lgx],[data-sbr]");
  if(el){const a=el.dataset;
   if(a.tab)return go(a.tab);
   if(a.pu)return progEdit(+a.pu);
@@ -2946,8 +3026,14 @@ document.addEventListener("click",e=>{if(!e.target.closest(".more"))$("#menu").h
   if(a.issdel){need(()=>{LOG({act:"issue",uid:+a.issdel,name:(S.issues[a.issdel].gone||{}).name||"",field:"вопрос",to:"убран из списка"});delete S.issues[a.issdel];S.order=S.order.filter(x=>x!==+a.issdel);save();rerender()});return}
   if(a.eds){const u=+a.eds;EDS.has(u)?EDS.delete(u):EDS.add(u);return rerender()}
   if(a.tw){e.stopPropagation();S.open[a.tw]=!S.open[a.tw];return renderGnt(true)}
-  if(a.blkt){const k=a.blkt,b=UI.blocks;UI.blocks=b.includes(k)?(b.length>1?b.filter(x=>x!==k):b):[...b,k];
-   UI.blocks.sort((x,y)=>BLOCKS.findIndex(z=>z.key===x)-BLOCKS.findIndex(z=>z.key===y));saveUI();return renderGnt()}
+  if(a.blkt){const k=a.blkt,b=UI.blocks,on=b.includes(k);return blkSet(on?b.filter(x=>x!==k):[...b,k],{to:on?null:k})}   // галочка: добавить / убрать, панель остаётся (пустой выбор можно)
+  if(a.blk1)return blkSet([a.blk1],{close:true,to:a.blk1});                                    // название: только этот блок
+  if(a.blkg!==undefined||a.blkg1!==undefined){const g=blkGroups()[+(a.blkg??a.blkg1)],ks=g.bs.map(b=>b.key);
+   if(a.blkg1!==undefined)return blkSet(ks,{close:true,to:ks[0]});
+   const all=ks.every(k=>UI.blocks.includes(k));return blkSet(all?UI.blocks.filter(k=>!ks.includes(k)):[...UI.blocks,...ks],{to:all?null:ks[0]})}
+  if(a.blkall!==undefined){const vis=[...$$("#blkL .pi:not(.pg):not([hidden]) [data-blkt]")].map(x=>x.dataset.blkt);return blkSet(UI.bq?[...new Set([...UI.blocks,...vis])]:BLOCKS.map(b=>b.key))}
+  if(a.blknone!==undefined)return blkSet([]);
+  if(a.blkdone!==undefined){closePop();return renderGnt()}
   if(a.scale){UI.scale=a.scale;saveUI();return renderGnt()}
   if(a.fs){const s=UI.flt.st;UI.flt.st=s.includes(a.fs)?s.filter(x=>x!==a.fs):[...s,a.fs];saveUI();return renderTab(true)}
   if(a.fb){UI.flt[a.fb]=!UI.flt[a.fb];saveUI();return renderTab(true)}
@@ -3198,7 +3284,7 @@ function siteApply(L,remote){
  buildModel();
  if(remote){HIST=makeHistory(snapNow);UNDO_D.length=0;REDO_D.length=0;UNDO_L.length=0;REDO_L.length=0;toast.hot=false}   // чужая правка: отмена не должна её затереть
  else HIST.rebase();
- UI.blocks=UI.blocks.filter(k=>BK[k]);if(!UI.blocks.length){const b=BLOCKS.find(y=>y.def&&y.kind!=="misc")||BLOCKS[0];if(b)UI.blocks=[b.key]}
+ UI.blocks=UI.blocks.filter(k=>BK[k]);if(!UI.blocks.length&&!UI.none){const b=BLOCKS.find(y=>y.def&&y.kind!=="misc")||BLOCKS[0];if(b)UI.blocks=[b.key]}
  if(UI.sel&&!byId[UI.sel])closeDrawer();
  $("#asof").innerHTML=asofHTML();rerender();return true}
 function siteError(e,kind){
