@@ -3172,14 +3172,23 @@ document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&(e.code==="Ke
   const[us,k]=e.target.dataset.ed.split(":"),ids=ORDER,nx=ids[ids.indexOf(+us)+1];e.target.blur();
   if(nx)requestAnimationFrame(()=>{const i=$(`.row [data-ed="${nx}:${k}"]`);if(i){i.focus();i.select&&i.select()}})}});
 const tip=$("#tip");
-document.addEventListener("mousemove",e=>{const tc=e.target.closest(".row .tc"),r=tc&&tc.parentElement;
- if(!r||(!r.dataset.id&&!r.dataset.tipPlan)||e.target.closest("input")){tip.style.display="none";return}
+/* подсказка у полосы (09.11, «Паша»: при прокрутке колёсиком висела посреди Ганта со старой операцией): прокрутка её прячет;
+   снова — когда мышь постоит на полосе ~0,4 с */
+let tipQ=0,tipT=null;
+const tipHide=()=>{tip.style.display="none"};
+document.addEventListener("scroll",()=>{tipHide();tipQ=Date.now();clearTimeout(tipT)},true);
+document.addEventListener("wheel",()=>{tipHide();tipQ=Date.now();clearTimeout(tipT)},{capture:true,passive:true});
+document.addEventListener("mousemove",e=>{clearTimeout(tipT);
+ if(Date.now()-tipQ<400){tipHide();const x=e.clientX,y=e.clientY;tipT=setTimeout(()=>{tipQ=0;const el=document.elementFromPoint(x,y);if(el)tipAt(el,x,y)},400);return}
+ tipAt(e.target,e.clientX,e.clientY)});
+function tipAt(el,cx,cy){const tc=el.closest(".row .tc"),r=tc&&tc.parentElement;
+ if(!r||(!r.dataset.id&&!r.dataset.tipPlan)||el.closest("input")){tipHide();return}
  let h="";
  if(r.dataset.tipPlan){const u=+r.dataset.tipPlan,f=FC[u];h=`<b>${esc(byId[u].name)}</b><br><span class="m">По плану: ${fD(f.S)}–${fD(f.F)}. В факте эта операция не выполнялась.</span>`}
  else if(r.classList.contains("stp"))h=`<b>${esc(r.querySelector(".t").textContent)}</b><br><span class="m">Этап решения: ${esc(byId[+r.dataset.id].name)}</span>`;
  else{const u=+r.dataset.id,t=byId[u],f=FC[u],iss=openIss(u);
   h=`<b>${esc(t.name)}</b><br>${fDH(f.S)} — ${fDH(f.F)}, ${fN(dd(f.S,f.F))} сут, ${Math.round(pct(u))}%`+(+f.F>+f.F0+36e5?`<br><span class="m">По графику окончание ${fDH(f.F0)}</span>`:"")+(t.resp?`<br>Ответственный: ${esc(t.resp)}`:"")+(t.note?`<br><span class="m">${esc(t.note)}</span>`:"")+(iss?`<br><b style="color:#ffb3aa">Проблема: ${esc(iss.problem||"не описана")}</b>`:"")+`<br><span class="m">${updText(u)}</span>`}
- tip.innerHTML=h;tip.style.display="block";tip.style.left=Math.min(e.clientX+16,innerWidth-380)+"px";tip.style.top=Math.min(e.clientY+16,innerHeight-tip.offsetHeight-10)+"px"});
+ tip.innerHTML=h;tip.style.display="block";tip.style.left=Math.min(cx+16,innerWidth-380)+"px";tip.style.top=Math.min(cy+16,innerHeight-tip.offsetHeight-10)+"px"}
 /* перетаскивание файлов */
 let dragN=0;
 addEventListener("dragenter",e=>{if(![...e.dataTransfer.types].includes("Files"))return;dragN++;$("#drop").classList.add("on")});
