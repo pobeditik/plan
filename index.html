@@ -875,26 +875,26 @@ body.hist main{margin-right:min(420px,94vw)}
 .pblk .pi .pst{flex:none;margin-left:auto;padding-left:8px}
 .pblk .pl,.pblk .pgr{display:grid;grid-template-columns:minmax(0,1fr)}
 
-/* ---------- «Особо важный» — маленький флажок у названия (13.11; было «Нужно решение ГД») ---------- */
-.vip{flex:none;display:inline-grid;place-items:center;width:24px;height:24px;margin:-3px 4px -3px -4px;border:0;border-radius:6px;background:none;color:var(--ink3);opacity:.55;vertical-align:-6px;transition:opacity .15s,background-color .15s,color .15s}
-.vip svg{width:14px;height:14px}
-.vip:hover{opacity:1;background:var(--sunk);color:var(--red)}
-.vip.on{opacity:1;color:var(--red)}
-.vip.ro{cursor:default}
-.irow:not(:hover) .vip:not(.on){opacity:0}
+/* ---------- «Особо важный» (13.11 вечер): кнопка с подписью и «!» у статуса; в строке — красный «!» ---------- */
+.vipm{display:inline-grid;place-items:center;width:16px;height:16px;margin-right:6px;color:var(--red);vertical-align:-2px;flex:none}
+.vipm svg{width:16px;height:16px}
+.vipc{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 11px 0 9px;border:1px dashed var(--rule2);border-radius:9px;background:none;font-size:13px;font-weight:600;color:var(--ink2);white-space:nowrap}
+.vipc svg{width:15px;height:15px;flex:none;color:var(--ink3)}
+.vipc:hover{border-style:solid;border-color:var(--red);color:var(--red)}.vipc:hover svg{color:var(--red)}
+.vipc.on{border:1px solid var(--red);background:color-mix(in srgb,var(--red) 9%,var(--raised));color:var(--red)}.vipc.on svg{color:var(--red)}
+.vipc.ro{cursor:default}
 .irow.gd .itx b{color:var(--red)}
 .irow.gd:before{content:"";position:absolute;left:-1px;top:8px;bottom:8px;width:3px;border-radius:2px;background:var(--red)}
 .card.gd h3,.pli.gd .op{color:var(--red)}
-.h-vip{display:flex;align-items:center;gap:6px}.h-vip .vip{margin:0}
-.vip-t{font-size:11.5px;font-weight:700;color:#fff;background:var(--red);border-radius:6px;padding:1px 7px}
-@media (pointer:coarse){.irow .vip:not(.on){opacity:.55}.vip{width:36px;height:36px;margin:-9px 0 -9px -8px}}
+.h-vip{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+body.ph .vipc{height:44px;font-size:15px}
 
 /* ---------- Чаты (мессенджер, 13.11; эскиз docs/messenger) ---------- */
 .mx-i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
 nav.tabs .cnt.mx-u{background:var(--ink);color:var(--paper)}
 nav.tabs .cnt.mx-u.z{background:var(--sunk);color:var(--ink3)}
-#tab-cht{max-width:1480px}
-.mx-app{height:calc(100dvh - var(--th,130px) - 46px);min-height:420px;display:grid;grid-template-columns:340px minmax(0,1fr);background:var(--surface);border:1px solid var(--rule);border-radius:16px;overflow:hidden}
+body.cht main{padding:0}
+.mx-app{height:calc(100dvh - var(--th,130px));min-height:420px;display:grid;grid-template-columns:360px minmax(0,1fr);background:var(--surface);overflow:hidden}
 .mx-list{display:flex;flex-direction:column;min-height:0;border-right:1px solid var(--rule)}
 .mx-find{padding:14px 14px 10px}
 .mx-find label{display:flex;align-items:center;gap:8px;height:36px;padding:0 11px;border-radius:9px;background:var(--sunk);color:var(--ink3);font-size:14px}
@@ -904,6 +904,18 @@ nav.tabs .cnt.mx-u.z{background:var(--sunk);color:var(--ink3)}
 .mx-ci:hover{background:color-mix(in srgb,var(--sunk) 55%,transparent)}
 .mx-ci.on{background:var(--raised);box-shadow:0 0 0 1px var(--rule2)}
 .mx-ci.imp{background:color-mix(in srgb,var(--red) 5%,transparent)}
+.mx-ci .vipi{flex:none;display:inline-flex;color:var(--red)}.mx-ci .vipi .mx-i{width:14px;height:14px}
+.mx-iact{position:absolute;right:8px;top:6px;display:none;gap:2px;padding:2px;border-radius:8px;background:var(--raised);box-shadow:0 0 0 1px var(--rule2)}
+.mx-ci:hover .mx-iact,.mx-ci:focus-within .mx-iact{display:flex}
+.mx-iact button{width:28px;height:28px;border:0;border-radius:6px;background:none;color:var(--ink3);display:grid;place-items:center}
+.mx-iact button:hover{background:var(--sunk);color:var(--ink)}.mx-iact button.v:hover,.mx-iact button.v.on{color:var(--red)}.mx-iact button.on{color:var(--ink)}
+.mx-filt{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:0 14px 10px}
+.mx-filt .chip{height:28px;padding:0 10px;font-size:12.5px}
+.mx-filt .chip span{color:var(--ink3);font-weight:600;margin-left:2px}.mx-filt .chip.on span{color:inherit}
+.mx-filt select{height:28px;border:1px solid var(--rule2);border-radius:999px;background:var(--raised);padding:0 8px;font-size:12.5px;color:var(--ink2);max-width:150px}
+.mx-vipb{flex:none;display:inline-flex;align-items:center;gap:6px;border:1px dashed var(--rule2);background:none;border-radius:8px;padding:5px 10px;font-size:13px;font-weight:600;color:var(--ink2)}
+.mx-vipb:hover{border-style:solid;border-color:var(--red);color:var(--red)}
+.mx-vipb.on{border:1px solid var(--red);color:var(--red);background:color-mix(in srgb,var(--red) 8%,transparent)}
 .mx-ci.imp.on{background:color-mix(in srgb,var(--red) 7%,var(--raised));box-shadow:0 0 0 1px color-mix(in srgb,var(--red) 40%,var(--rule2))}
 .mx-ci .t{font-size:14.5px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;display:flex;align-items:center;gap:6px;min-width:0}
 .mx-ci .t span{overflow:hidden;text-overflow:ellipsis}
@@ -933,7 +945,8 @@ nav.tabs .cnt.mx-u.z{background:var(--sunk);color:var(--ink3)}
 .mx-imp{font-size:11px;font-weight:700;color:#fff;background:var(--red);border-radius:5px;padding:0 6px;line-height:16px}
 .mx-pinb{flex:none;display:inline-flex;align-items:center;gap:6px;border:1px solid transparent;background:none;border-radius:8px;padding:5px 9px;font-size:13px;font-weight:600;color:var(--ink3)}
 .mx-pinb:hover{background:var(--sunk);color:var(--ink)}
-.mx-pinb.on{color:var(--ink);border-color:var(--rule2)}
+.mx-pinb{border-color:var(--rule2);color:var(--ink2)}
+.mx-pinb.on{color:var(--ink);border-color:var(--ink3);background:var(--sunk)}
 .mx-sum{display:flex;align-items:flex-end;flex-wrap:wrap;gap:8px 28px;padding:2px 18px 12px 22px}
 .mx-sum .f{display:grid;gap:2px;min-width:0}
 .mx-sum .k{font-size:12px;color:var(--ink3)}
@@ -1007,27 +1020,41 @@ nav.tabs .cnt.mx-u.z{background:var(--sunk);color:var(--ink3)}
 .mx-pop .mx-nm{font-size:14px;font-weight:600}
 .mx-pop .ft{font-size:11.5px;color:var(--ink3);padding:5px 9px 3px;border-top:1px solid var(--rule);margin-top:4px}
 .mx-pop .ft kbd{font:inherit;font-weight:600;color:var(--ink2)}
-/* «Обсуждение» у вопроса и в панели операции — вместо «Комментариев» */
+/* Переписка в карточке вопроса и в панели операции (13.11 вечер: «как раньше», + ссылка в «Чаты») */
 .mx-disc{display:grid;border:1px solid var(--rule);border-radius:12px;background:var(--surface);overflow:hidden}
-.mx-dh{display:flex;align-items:center;gap:8px;padding:10px 8px 8px 14px;border:0;background:none;text-align:left;width:100%}
+.mx-dh{display:flex;align-items:center;gap:8px;padding:10px 8px 8px 14px}
 .mx-dh h4{margin:0;font-size:13px;font-weight:600;color:var(--ink2)}
-.mx-dh .c{font-size:12.5px;color:var(--ink3)}
-.mx-dh .nw{font-size:12px;font-weight:700;color:var(--paper);background:var(--ink);border-radius:9px;padding:0 7px;line-height:18px}
-.mx-dh .go{margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:600;color:var(--ink);padding:5px 8px;border-radius:8px}
-.mx-dh:hover .go{background:var(--sunk)}
-.mx-dm{display:grid;grid-template-columns:26px minmax(0,1fr);gap:0 9px;padding:4px 14px 6px}
-.mx-dm .mx-av{width:26px;height:26px;font-size:11px;margin-top:1px}
-.mx-dm .w{font-size:12px;color:var(--ink3)}.mx-dm .w b{font-size:13px;font-weight:600;color:var(--ink);margin-right:6px}
-.mx-dm p{margin:0;font-size:14px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
-.mx-dm .mx-i{width:13px;height:13px;vertical-align:-2px;color:var(--ink3)}
-.mx-dbox{display:flex;align-items:flex-end;gap:2px;margin:6px 10px 10px;padding:3px 3px 3px 10px;border:1px solid var(--rule2);border-radius:10px;background:var(--raised)}
-.mx-dbox:focus-within{border-color:var(--ink3)}
-.mx-dbox textarea{flex:1;min-height:32px;border:0;background:none;resize:none;outline:none;padding:6px 0;font-size:14px;line-height:1.4}
-.mx-dbox .ib2{width:32px;height:32px;border-radius:8px}
-.mx-disc.mx-empty{background:transparent;border-style:dashed;border-color:var(--rule2)}
-.mx-dnote{margin:0 0 10px;padding:0 14px;font-size:12.5px;color:var(--ink3)}
+.mx-dh .c{font-size:12px;font-weight:600;color:var(--ink3)}
+.mx-golink{display:inline-flex;align-items:center;gap:3px;border:0;background:none;font-size:13px;font-weight:600;color:var(--ink);padding:5px 8px;border-radius:8px;text-decoration:underline;text-decoration-color:var(--rule2);text-underline-offset:3px}
+.mx-golink:hover{background:var(--sunk)}
+.mx-bfeed{max-height:340px;overflow:auto;padding:2px 14px 8px;display:grid;gap:10px;align-content:start;border-top:1px solid var(--rule)}
+.mx-bm{position:relative;padding-top:8px}
+.mx-bm .w{font-size:12px;color:var(--ink3)}.mx-bm .w b{font-size:13px;font-weight:600;color:var(--ink);margin-right:6px}
+.mx-bm .mx-t{font-size:14px;line-height:1.45}
+.mx-bm.me-at{box-shadow:inset 3px 0 0 var(--ink);padding-left:8px;margin-left:-8px}
+.mx-bm .del{position:absolute;right:0;top:6px;border:0;background:none;color:var(--ink3);width:24px;height:24px;border-radius:6px;opacity:0}
+.mx-bm:hover .del{opacity:1}.mx-bm .del:hover{background:var(--sunk);color:var(--red)}
+.mx-bm .mx-file{width:260px}.mx-bm .mx-photo{width:200px}
+.mx-bcmp{border-top:1px solid var(--rule);padding:10px 12px 12px;display:grid;gap:8px;background:var(--raised)}
+.mx-bcmp textarea{width:100%;min-height:58px;border:1px solid var(--rule2);border-radius:10px;background:var(--raised);padding:8px 10px;resize:none;outline:none;font-size:14px;line-height:1.4}
+.mx-bcmp textarea:focus{border-color:var(--ink3)}
+.mx-bact{display:flex;align-items:center;gap:8px}.mx-bact .btn svg,.mx-bact .mx-i{width:15px;height:15px}
+.mx-bcmp .mx-pend{padding:0}
+.mx-dnote{margin:8px 0 4px;font-size:13px;color:var(--ink3);text-wrap:pretty}
+/* колокольчик: упоминания (13.11 вечер) */
+.bellw{position:relative}
+.bell{position:relative}
+.bdot{position:absolute;top:1px;right:1px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--red);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;line-height:1}
+.bdot[hidden]{display:none}
+.bellp{position:absolute;right:0;top:calc(100% + 8px);width:min(420px,92vw);max-height:min(70dvh,560px);overflow:auto;background:var(--raised);border:1px solid var(--rule2);border-radius:14px;box-shadow:0 24px 60px -24px rgba(58,54,51,.55);z-index:90}
+.bell-h{position:sticky;top:0;display:flex;align-items:center;gap:8px;padding:12px 12px 8px 16px;background:var(--raised);border-bottom:1px solid var(--rule)}
+.bell-h b{font-size:15px}
+.bell-l{display:grid;gap:2px;padding:6px}
+.bell-z{margin:0;padding:18px 16px;font-size:13.5px;color:var(--ink3);text-wrap:pretty}
 @media (max-width:760px){
- .mx-app{display:block;height:calc(100dvh - var(--th,120px) - 28px);border-radius:14px}
+ .mx-app{display:block;height:calc(100dvh - var(--th,120px))}
+ .mx-iact{display:none!important}
+ .mx-vipb span,.mx-pinb span{display:none}.mx-vipb{width:40px;height:40px;justify-content:center;padding:0}
  .mx-app .mx-list{height:100%;border-right:0}
  .mx-app .mx-chat{display:none;height:100%}
  .mx-app.ph-chat .mx-list{display:none}.mx-app.ph-chat .mx-chat{display:flex}
@@ -1051,11 +1078,6 @@ nav.tabs .cnt.mx-u.z{background:var(--sunk);color:var(--ink3)}
  .mx-pop{left:8px;right:8px;width:auto}
 }
 /* упоминания (13.11): «@N» на вкладке, раздел «@ Упоминания», окно при входе */
-nav.tabs .cnt.mx-atc{background:var(--ink);color:var(--paper);margin-left:4px}
-nav.tabs .cnt[hidden]{display:none}
-.mx-ci.at .t{gap:8px}
-.mx-atic{flex:none;width:18px;height:18px;border-radius:5px;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-size:12px;font-weight:700;line-height:1}
-.mx-ci.at{margin-bottom:2px}
 .mx-mlist{display:grid;gap:2px;padding:4px 10px 6px;max-height:min(60dvh,520px);overflow:auto}
 .mx-mi{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:0 10px;align-items:start;width:100%;padding:9px 10px;border:0;border-radius:10px;background:none;text-align:left;cursor:pointer}
 .mx-mi:hover{background:var(--sunk)}
@@ -1068,7 +1090,6 @@ nav.tabs .cnt[hidden]{display:none}
 .mx-mt .tx{font-size:14px;line-height:1.4;color:var(--ink);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
 .mx-mi .go{color:var(--ink3);align-self:center}
 .mx-mmore{margin:2px 20px 0;font-size:12.5px;color:var(--ink3)}
-.mx-ments{padding:8px 12px}
 .mx-m.jmp{box-shadow:inset 3px 0 0 var(--ochre);transition:box-shadow .3s}
 @media print{#tab-cht,#tabCht{display:none!important}}
 
@@ -1082,10 +1103,12 @@ nav.tabs .cnt[hidden]{display:none}
    <button data-tab="sum">Сводка</button>
    <button data-tab="iss">Вопросы<span class="cnt" id="cntI"></span></button>
    <button data-tab="gnt">График</button>
-   <button data-tab="cht" id="tabCht" hidden>Чаты<span class="cnt z mx-u" id="cntC"></span><span class="cnt mx-atc" id="cntM" hidden title="Вас упомянули"></span></button>
+   <button data-tab="cht" id="tabCht" hidden>Чаты<span class="cnt z mx-u" id="cntC"></span></button>
   </nav>
   <div class="sp"></div>
   <div class="hbtns">
+   <div class="bellw"><button class="btn ghost ico bell" id="bellBtn" data-cxbell hidden title="Уведомления: где вас упомянули" aria-label="Уведомления"><svg viewBox="0 0 16 16"><path d="M4 11.5V7.2a4 4 0 0 1 8 0v4.3l1.2 1.2H2.8zM6.6 13.8a1.5 1.5 0 0 0 2.8 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/></svg><span class="bdot" id="bellN" hidden></span></button>
+    <div class="bellp" id="bellPop" hidden></div></div>
    <button class="btn ghost ico" data-act="log" title="История изменений"><svg viewBox="0 0 16 16"><path d="M8 4.5V8l2.5 1.5M2.5 8a5.5 5.5 0 1 0 1.7-4M2.5 2.5v3h3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
    <div class="more"><span class="me" id="me"></span>
     <div class="menu" id="menu" hidden><div class="mrole" id="mrole" hidden></div><div class="msb" id="sbBox" hidden></div><button data-act="log" class="m-ph">История изменений</button><button data-act="copy" id="copyBtn" hidden title="Файл со снимком данных — открывается без интернета и без входа">Скачать копию</button><button data-act="print" id="printBtn" title="Лист программы работ на A3">Печать A3</button><button data-act="impx" title="В Project: Файл → Сохранить как → XML">Обновить план из Project (XML)…</button><button data-act="logout" id="outBtn" hidden>Выйти</button></div></div>
@@ -1615,6 +1638,7 @@ function makeDb(createClient, url = SB_URL, key = SB_KEY, proj = 'gdt', pmId = 1
     async pin(userId, chatId, on, lastId) {
       chk(await sb.from('chat_reads').upsert({ user_id: userId, chat_id: chatId, pinned: on, last_id: lastId || 0 }, { onConflict: 'user_id,chat_id' }));
     },
+    async setVip(chatId, on) { chk(await sb.from('chats').update({ vip: !!on }).eq('id', chatId)); },   // «особо важный» у чата без вопроса
     async unread() { return chk(await sb.rpc('chat_unread')); },
     // Упоминания вошедшего с текстом сообщения (окно при входе и раздел «@» в «Чатах»); onlyNew — только неувиденные.
     async mentionsFeed(onlyNew) {
@@ -2453,10 +2477,16 @@ function stepsHTML(u){const sp=(FC[u]&&FC[u].steps)||stepPlan(u),cur=sp.find(x=>
   <button class="x" data-stepdel="${u}:${x.i}" title="Удалить этап">×</button></div>`).join("")}
  <button class="addstep" data-stepadd="${u}">+ этап</button>
  <div class="src">Следующий этап открывается, когда предыдущий на 100%. Изменение сохраняется, когда уходите из поля (Tab, Enter или щелчок мимо).</div></div>`}
-/* «Особо важный» (13.11, пользователь: «кнопку никто не нажимает»): маленький флажок у названия вместо крупной
-   «Нужно решение ГД»; вопрос наверху и красным у всех, его чат — тоже (chat.js). Поле то же — issues.gd. */
-const vipBtn=u=>{const on=!!S.issues[u].gd;return can("issue_edit")?`<button class="vip ${on?"on":""}" data-gd="${u}" aria-pressed="${on}" title="${on?"Особо важный — снять пометку":"Пометить особо важным: наверху и красным у всех"}">${on?I.flagF:I.flag}</button>`
- :on?`<span class="vip on ro" title="Особо важный">${I.flagF}</span>`:""};
+/* «Особо важный» (13.11, пользователь: «кнопку никто не нажимает», потом «флажок не виден и похож на отметку проблемы»):
+   небольшая кнопка с подписью и значком «!» рядом со статусом вопроса; у важного — красная. В строке списка — красный «!».
+   Вопрос наверху и красным у всех, его чат — тоже (chat.js). Поле то же — issues.gd. */
+const VIP_I='<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 4.8v3.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.1" r=".9" fill="currentColor"/></svg>',
+ VIP_F='<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.6" fill="currentColor"/><path d="M8 4.6v4" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/><circle cx="8" cy="11.2" r="1" fill="#fff"/></svg>';
+const vipMark=u=>S.issues[u].gd?`<span class="vipm" title="Особо важный">${VIP_F}</span>`:"";
+const vipChip=u=>{const on=!!S.issues[u].gd;return can("issue_edit")?`<button class="vipc ${on?"on":""}" data-gd="${u}" aria-pressed="${on}" title="${on?"Снять пометку «особо важный»":"Вопрос встанет наверх и будет гореть красным у всех — в «Вопросах» и в «Чатах»"}">${on?VIP_F:VIP_I}${on?"Особо важный":"Особо важный?"}</button>`
+ :on?`<span class="vipc on ro">${VIP_F}Особо важный</span>`:""};
+function setGd(u,on){const i=S.issues[u];if(!i||!!i.gd===!!on)return;need(()=>{LOG({act:"issue",uid:+u,name:byId[u].name,field:"особо важный",from:i.gd?"да":"нет",to:on?"да":"нет"});
+ i.gd=!!on;touchIss(+u);save();rerender();if(on)toast("Особо важный: вопрос наверху и красным у всех");if(typeof chatSoon==="function")chatSoon()})}
 function commentsHTML(u){if(typeof chatOn==="function"&&chatOn())return chatBoxHTML(u);   // сайт с мессенджером: «Обсуждение» вместо комментариев
  const c=(S.tasks[u]&&S.tasks[u].cm)||[];
  return `<div class="cm"><h4>Комментарии${c.length?" ("+c.length+")":""}</h4>
@@ -2474,10 +2504,10 @@ function issueFields(u){const i=S.issues[u],t=byId[u];
 function cardHTML(u){const i=S.issues[u],t=byId[u],f=FC[u],done=i.status==="решён";
  const late=f.F>f.F0?` <span class="late">прогноз ${fD(f.F)}</span>`:"";
  return `<article class="card ${i.gd&&!done?"gd":""} ${done?"done":""} ${litId===u?"lit":""}" id="card-${u}">
-  <div class="c-head"><div class="c-title"><div class="blk">${esc(BK[BOF[u]].title)}, операция №${t.id}</div><h3>${vipBtn(u)}${esc(t.name)}</h3>
+  <div class="c-head"><div class="c-title"><div class="blk">${esc(BK[BOF[u]].title)}, операция №${t.id}</div><h3>${vipMark(u)}${esc(t.name)}</h3>
     <div class="c-meta"><span>${fD(f.S0)}–${fD(f.F0)}${late}</span><span>Готовность <b>${Math.round(pct(u))}%</b></span>${t.resp?`<span>Отв. по графику <b>${esc(t.resp)}</b></span>`:""}</div></div>
-   <div class="c-acts">${!can("issue_edit")?`<span class="st-ro">${esc(i.status)}</span>`:`
-    <div class="seg">${["открыт","в работе","решён"].map(v=>`<button class="${i.status===v?"on "+(v==="решён"?"g":v==="открыт"?"r":""):""}" data-ist="${u}:${v}">${v[0].toUpperCase()+v.slice(1)}</button>`).join("")}</div>`}
+   <div class="c-acts">${!can("issue_edit")?`${vipChip(u)}<span class="st-ro">${esc(i.status)}</span>`:`
+    <div class="seg">${["открыт","в работе","решён"].map(v=>`<button class="${i.status===v?"on "+(v==="решён"?"g":v==="открыт"?"r":""):""}" data-ist="${u}:${v}">${v[0].toUpperCase()+v.slice(1)}</button>`).join("")}</div>${vipChip(u)}`}
     <button class="btn ghost" data-goto="${u}">Показать в графике</button></div></div>
   <div class="c-body"><div class="c-left">${issueFields(u)}${isP(u)?stepsHTML(u):can("steps_edit")?`<button class="addstep" data-stepadd="${u}">+ добавить этапы решения</button>`:""}
     ${t.note&&t.note.trim()!==(i.problem||"").trim()?`<div class="src">Примечание к операции: <q>${esc(t.note)}</q></div>`:""}
@@ -2513,7 +2543,7 @@ function irowHTML(u,drag){const i=S.issues[u],t=byId[u],op=IOPEN.has(u),ncm=((S.
   <div class="ih" data-itog="${u}">
    ${drag?`<span class="igrip" data-igrip title="Перетащите, чтобы изменить порядок">${I.grip}</span>`:"<span></span>"}
    <span class="idot" style="--c:${ST_C[i.status]||"var(--ink3)"}"></span>
-   <span class="itx">${vipBtn(u)}<b>${esc(t.name)}</b><span class="ipr">${esc(firstSentence(i.problem)||"суть не описана")}</span></span>
+   <span class="itx">${vipMark(u)}<b>${esc(t.name)}</b><span class="ipr">${esc(firstSentence(i.problem)||"суть не описана")}</span></span>
    <span class="iblk">${esc(BK[BOF[u]].title)}</span>
    <span class="iwho">${esc(issWho(u)||"—")}</span>
    <span class="idue ${issLate(u)?"l":""}">${dueOf(u)?fD(D(dueOf(u))):"—"}</span>
@@ -2521,8 +2551,8 @@ function irowHTML(u,drag){const i=S.issues[u],t=byId[u],op=IOPEN.has(u),ncm=((S.
    <span class="ist" style="--c:${ST_C[i.status]||"var(--ink3)"}">${esc(i.status)}</span>
    <span class="icm">${(typeof chatOn==="function"&&chatOn()?chatCount(u):ncm)?I.cm+(typeof chatOn==="function"&&chatOn()?chatCount(u):ncm):""}</span>
   </div>
-  ${op?`<div class="ib2"><div class="c-acts">${!can("issue_edit")?`<span class="st-ro">${esc(i.status)}</span>`:`
-    <div class="seg">${["открыт","в работе","решён"].map(v=>`<button class="${i.status===v?"on "+(v==="решён"?"g":v==="открыт"?"r":""):""}" data-ist="${u}:${v}">${v[0].toUpperCase()+v.slice(1)}</button>`).join("")}</div>`}
+  ${op?`<div class="ib2"><div class="c-acts">${!can("issue_edit")?`${vipChip(u)}<span class="st-ro">${esc(i.status)}</span>`:`
+    <div class="seg">${["открыт","в работе","решён"].map(v=>`<button class="${i.status===v?"on "+(v==="решён"?"g":v==="открыт"?"r":""):""}" data-ist="${u}:${v}">${v[0].toUpperCase()+v.slice(1)}</button>`).join("")}</div>${vipChip(u)}`}
     <span class="sp"></span><span class="imeta">№${t.id} · ${fD(FC[u].S0)}–${fD(FC[u].F0)}${FC[u].F>FC[u].F0?` <b>прогноз ${fD(FC[u].F)}</b>`:""} · готовность ${Math.round(pct(u))}%</span>
     <button class="btn ghost" data-goto="${u}">Показать в графике</button></div>
    <div class="c-body"><div class="c-left">${issueFields(u)}${isP(u)?stepsHTML(u):can("steps_edit")?`<button class="addstep" data-stepadd="${u}">+ добавить этапы решения</button>`:""}
@@ -2874,7 +2904,7 @@ function openDrawer(u){closeHist();if(UI.hot!==u){const o=UI.hot;UI.hot=null;if(
   ${lateHint(u)}
   ${PHONE()?ctxHTML(u):""}
   <div class="dr-sec"><h4>Готовность</h4>${isP(u)?`<div class="pctrl"><span style="flex:1;color:var(--ink3);font-size:13px">Считается по этапам решения</span><output>${p}%</output></div>`:PHONE()||!can("pct_edit")?`<div class="pctrl"><output>${p}%</output></div>`:`<div class="pctrl"><input type="range" min="0" max="100" step="5" value="${p}" data-pctr="${u}"><output id="pout">${p}%</output></div>`}${!isP(u)&&p<100&&can("pct_edit")&&!PLANIDS.has(u)?`<button class="btn ghost" data-done="${u}" title="${can("plan_edit")?"Готовность 100 % и фактическое окончание — сейчас":"Готовность 100 %"}">Выполнено сегодня</button>`:""}<div class="upd">${updText(u)}</div></div>
-  ${iss?`<div class="dr-sec"><h4 class="h-vip">Проблемный вопрос ${vipBtn(u)}${i.gd?'<span class="vip-t">особо важный</span>':""}</h4><div class="pbox">${issueFields(u)}${!can("issue_edit")?"":`<div style="display:flex;gap:8px;flex-wrap:wrap">${PHONE()?`<div class="seg">${["открыт","в работе","решён"].map(v=>`<button class="${i.status===v?"on "+(v==="решён"?"g":v==="открыт"?"r":""):""}" data-ist="${u}:${v}">${v[0].toUpperCase()+v.slice(1)}</button>`).join("")}</div>`:`<button class="btn" data-ist="${u}:решён">Решено</button><button class="btn ghost" data-go-iss="${u}">Открыть в списке</button>`}</div>`}</div></div>`
+  ${iss?`<div class="dr-sec"><h4 class="h-vip">Проблемный вопрос ${vipChip(u)}</h4><div class="pbox">${issueFields(u)}${!can("issue_edit")?"":`<div style="display:flex;gap:8px;flex-wrap:wrap">${PHONE()?`<div class="seg">${["открыт","в работе","решён"].map(v=>`<button class="${i.status===v?"on "+(v==="решён"?"g":v==="открыт"?"r":""):""}" data-ist="${u}:${v}">${v[0].toUpperCase()+v.slice(1)}</button>`).join("")}</div>`:`<button class="btn" data-ist="${u}:решён">Решено</button><button class="btn ghost" data-go-iss="${u}">Открыть в списке</button>`}</div>`}</div></div>`
    :`<div class="dr-sec">${can("issue_edit")?`<button class="btn red" data-flag="${u}" style="justify-self:start">${I.flag} Отметить как проблемный вопрос</button>`:""}${i&&i.status==="решён"?`<div class="src">Был проблемный вопрос, решён: <q>${esc(i.problem)}</q></div>`:""}</div>`}
   ${isP(u)?`<div class="dr-sec">${stepsHTML(u)}</div>`:""}
   <div class="dr-sec">${commentsHTML(u)}</div></div>`;
@@ -3262,7 +3292,7 @@ function goto(u){const k=BOF[u];if(k&&!UI.blocks.includes(k)){UI.blocks=[k];UI.n
  requestAnimationFrame(()=>{const r=$("#r-"+u),gw=$("#gw");if(PHONE()&&!LAND()&&r){r.scrollIntoView({block:"center"});openDrawer(u);return}if(!r||!gw)return;gw.scrollTop=Math.max(0,r.offsetTop-gw.clientHeight/2);
   if(geoCache)gw.scrollLeft=Math.max(0,geoCache.x(FC[u].S)-(gw.clientWidth-geoCache.lw)*.3);
   openDrawer(u)})}
-function go(tab,push=true){UI.tab=tab;saveUI();if(tab!=="gnt"&&$("#drawer").classList.contains("on"))closeDrawer();   // панель операции — только в «Графике» (03.11, «Паша»)
+function go(tab,push=true){UI.tab=tab;saveUI();document.body.classList.toggle("cht",tab==="cht");   // «Чаты» — на весь экран (13.11 вечер)if(tab!=="gnt"&&$("#drawer").classList.contains("on"))closeDrawer();   // панель операции — только в «Графике» (03.11, «Паша»)
  $$("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.tab===tab));
  $$("section.tab").forEach(s=>s.classList.toggle("on",s.id==="tab-"+tab));if(push)history.replaceState(null,"","#"+tab);renderTab()}
 function renderTab(keep){renderMe();paintDirty();const n=issList(true).length;$("#cntI").textContent=n;$("#cntI").classList.toggle("z",!n);
@@ -3300,8 +3330,7 @@ document.addEventListener("click",e=>{if(!e.target.closest(".more"))$("#menu").h
   if(a.goto)return goto(+a.goto);
   if(a.done)return doneToday(+a.done);
   if(a.goIss){closeDrawer();IOPEN.add(+a.goIss);go("iss");return requestAnimationFrame(()=>{const c=$("#card-"+a.goIss);if(c){c.scrollIntoView({behavior:"smooth",block:"center"});c.classList.add("lit")}})}
-  if(a.gd){e.stopPropagation();return need(()=>{const i=S.issues[a.gd];LOG({act:"issue",uid:+a.gd,name:byId[a.gd].name,field:"особо важный",from:i.gd?"да":"нет",to:i.gd?"нет":"да"});i.gd=!i.gd;touchIss(+a.gd);save();rerender();
-   if(i.gd)toast("Особо важный: вопрос наверху и красным у всех");if(typeof chatSoon==="function")chatSoon()})}
+  if(a.gd){e.stopPropagation();return setGd(+a.gd,!S.issues[a.gd].gd)}
   if(a.ist){const[u,v]=a.ist.split(":");if(v==="решён"&&isP(+u)&&pct(+u)<100&&S.issues[u].status!=="решён"){const nm=esc(trunc(byId[u].name,70)),left=ST(+u).filter(x=>(+x.pct||0)<100).map(x=>"«"+esc(trunc(x.n,40))+"»");   // 06.11, «Паша»: закрыл вопрос при незаконченных этапах молча
     return pAsk({h:`«${nm}» — этапы решения не закончены (${Math.round(pct(+u))} %)`,p:`Не готовы: ${left.slice(0,4).join(", ")}${left.length>4?` и ещё ${left.length-4}`:""}. Закрыть вопрос всё равно? Этапы останутся у операции.`,
      opts:[{l:"Отмена",fn:()=>{}},{l:"Закрыть вопрос",pri:true,fn:()=>issStatus(u,v)}]})}}
@@ -3641,8 +3670,11 @@ if(SITE)(async()=>{let s=null;try{s=await DB.session()}catch(e){}
    База — supabase/messenger.sql, обращения — через обёртку src/db.js. Пока SQL не запущен, chatList() отвечает ошибкой —
    вкладки «Чаты» нет, у вопросов остаются прежние «Комментарии».
    Пишут все с логином (право chat), песочница — только читает. Закрепить — каждый себе; «особо важный» — флажок вопроса
-   (issues.gd), горит красным и наверху у всех. DECISIONS «Мессенджер». */
-const MX={on:false,list:[],unread:{},people:[],cur:null,msgs:[],more:false,reply:null,edit:null,pend:[],q:"",urls:{},draft:{},busy:false,ph:false,off:null,t:null};
+   (issues.gd) или самого чата (chats.vip, если вопроса нет), горит красным и наверху у всех. DECISIONS «Мессенджер».
+   13.11 вечер (пользователь): «Чаты» — на весь экран, без общего чата, с фильтрами; упоминания — в колокольчике в шапке;
+   у вопроса и операции — вся переписка прямо в карточке (как комментарии раньше) и ссылка «Открыть в «Чатах»». */
+const MX={on:false,list:[],unread:{},people:[],cur:null,msgs:[],more:false,reply:null,edit:null,pend:[],q:"",urls:{},draft:{},busy:false,ph:false,off:null,t:null,
+ f:"all",fp:"",box:{},bpend:{},bell:null};
 const CX_I={
  clip:'<svg class="mx-i" viewBox="0 0 16 16"><path d="M13.5 7.4 8.2 12.7a3.4 3.4 0 0 1-4.8-4.8l5.5-5.5a2.2 2.2 0 0 1 3.2 3.1L6.6 11a1 1 0 0 1-1.5-1.4l5-5"/></svg>',
  send:'<svg class="mx-i" viewBox="0 0 16 16"><path d="M8 13V3.5M3.8 7.5 8 3.3l4.2 4.2"/></svg>',
@@ -3655,7 +3687,9 @@ const CX_I={
  open:'<svg class="mx-i" viewBox="0 0 16 16"><path d="M6 3.5 10.5 8 6 12.5"/></svg>',
  gone:'<svg class="mx-i" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><path d="m4.2 11.8 7.6-7.6"/></svg>',
  pin:'<svg class="mx-i" viewBox="0 0 16 16"><path d="M9.5 2.5 13.5 6.5 11 7.5 8.5 10l.5 3-2-2-3.5 3.5M7 11 5 9m0 0-2-2 3-.5L8.5 4z"/></svg>',
- pinF:'<svg class="mx-i" viewBox="0 0 16 16"><path d="M9.5 2.5 13.5 6.5 11 7.5 8.5 10l.5 3-6.5-6.5 3-.5L8.5 4z" fill="currentColor"/><path d="M5.5 10.5 2.5 13.5"/></svg>'};
+ pinF:'<svg class="mx-i" viewBox="0 0 16 16"><path d="M9.5 2.5 13.5 6.5 11 7.5 8.5 10l.5 3-6.5-6.5 3-.5L8.5 4z" fill="currentColor"/><path d="M5.5 10.5 2.5 13.5"/></svg>',
+ vip:'<svg class="mx-i" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 4.8v3.8"/><circle cx="8" cy="11.1" r=".4" fill="currentColor"/></svg>',
+ vipF:'<svg class="mx-i" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5" fill="currentColor" stroke="none"/><path d="M8 4.6v4" stroke="#fff" stroke-width="1.7"/><circle cx="8" cy="11.2" r="1" fill="#fff" stroke="none"/></svg>'};
 const chatOn=()=>MX.on;
 const cxWrite=()=>SITE&&!!ME_&&ME_.role!=="sandbox"&&!!(ME_.can&&ME_.can.chat!==false);
 const cxProj=k=>{const p=PROJS.find(x=>x.k===k);return p?p.org+(p.pad?" · "+p.pad:""):""};
@@ -3679,12 +3713,11 @@ function cxText(t){let h=esc(t).replace(/(https?:\/\/[^\s<]+[^\s<.,;:!?)»"'])/g
   h=h.replace(re,`<span class="mx-at-t${ME_&&p.user_id===ME_.uid?" me":""}">@${nm}</span>`)}
  return h.replace(/\n/g,"<br>")}
 const cxMentions=t=>cxPeople().filter(p=>new RegExp("@"+p.name.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"(?![\\wА-Яа-яЁё])").test(t)).map(p=>p.user_id).slice(0,20);
-
 /* ---- загрузка ---- */
 async function chatInit(){
  try{const[ppl,list]=await Promise.all([DB.people(),DB.chatList()]);MX.people=ppl;MX.list=list;MX.on=true}
  catch(e){MX.on=false;return}
- $("#tabCht").hidden=false;$("#tab-cht").hidden=false;
+ $("#tabCht").hidden=false;$("#bellBtn").hidden=false;
  await cxUnread();
  if(MX.off)MX.off();
  MX.off=DB.subscribeChat(()=>{clearTimeout(MX.t);MX.t=setTimeout(()=>chatRefresh(true),450)},st=>{if(st==="CHANNEL_ERROR"||st==="TIMED_OUT")setTimeout(()=>{if(MX.on)chatInit()},20000)});
@@ -3692,68 +3725,71 @@ async function chatInit(){
  const want=new URLSearchParams(location.search).get("c");if(want&&(location.hash||"")==="#cht"){const c=MX.list.find(x=>x.id===+want);if(c)MX.cur=c}
  if(UI.tab==="cht"||(location.hash||"")==="#cht")go("cht",false);else rerender()}
 async function cxUnread(){try{const u=await DB.unread();MX.unread=Object.fromEntries(u.map(x=>[x.chat_id,x]))}catch(e){}cxBadge()}
-/* На вкладке: число новых сообщений и отдельно «@N» — сколько раз вас упомянули (13.11, пользователь) */
-function cxBadge(){const n=Object.values(MX.unread).reduce((s,x)=>s+x.unread,0),b=$("#cntC"),m=$("#cntM");MX.mentN=cxMentN();if(!b)return;b.textContent=n>99?"99+":n;b.classList.toggle("z",!n);b.hidden=!n&&!!MX.mentN;
- if(m){m.hidden=!MX.mentN;m.textContent="@"+MX.mentN}}
+/* На вкладке «Чаты» — новые сообщения; упоминания — числом на колокольчике (13.11 вечер) */
+function cxBadge(){const n=Object.values(MX.unread).reduce((s,x)=>s+x.unread,0),b=$("#cntC"),bn=$("#bellN");MX.mentN=cxMentN();
+ if(b){b.textContent=n>99?"99+":n;b.classList.toggle("z",!n)}
+ if(bn){bn.hidden=!MX.mentN;bn.textContent=MX.mentN>9?"9+":MX.mentN}}
 const cxMentN=()=>Object.values(MX.unread).reduce((s,x)=>s+x.mentions,0);
-/* ---- упоминания: окно при входе (обновлении страницы) и раздел «@ Упоминания» в «Чатах» ---- */
+/* ---- упоминания: окно при входе и колокольчик в шапке ---- */
 const cxChatOf=id=>MX.list.find(c=>c.id===id);
 const cxWhere=c=>c?(c.kind==="general"?"общем чате":`чате «${esc(trunc(c.name||"операция",60))}» · ${esc(cxProj(c.proj))}`):"чате";
-function cxMentItem(x,pop){const c=cxChatOf(x.chat_id);
+function cxMentItem(x){const c=cxChatOf(x.chat_id);
  return `<button class="mx-mi ${x.seen_at?"":"new"}" data-cxjump="${x.chat_id}:${x.message_id}"><span class="mx-av">${esc(cxIni(x.msg.who))}</span>
-  <span class="mx-mt"><span class="w"><b>${esc(x.msg.who)}</b> в ${cxWhere(c)}<span class="tm">${cxWhen(x.msg.at)}</span></span><span class="tx">${cxText(trunc(x.msg.t||"",pop?220:400))}</span></span>${pop?"":`<span class="go">${CX_I.open}</span>`}</button>`}
+  <span class="mx-mt"><span class="w"><b>${esc(x.msg.who)}</b> упомянул(а) вас в ${cxWhere(c)}<span class="tm">${cxWhen(x.msg.at)}</span></span><span class="tx">${cxText(trunc(x.msg.t||"",220))}</span></span></button>`}
 async function cxMentPopup(){let L;try{L=await DB.mentionsFeed(true)}catch(e){return}
  if(!L.length||$("#scrim").classList.contains("on"))return;
  openModal(`<button class="dr-x mx" data-act="mclose" aria-label="Закрыть">×</button><h3>Вас упомянули${L.length>1?" — "+L.length:""}</h3>
-  <div class="mx-mlist">${L.slice(0,6).map(x=>cxMentItem(x,true)).join("")}</div>${L.length>6?`<p class="mx-mmore">и ещё ${L.length-6} — в «Чаты» → «@ Упоминания»</p>`:""}
-  <div class="mfoot"><button class="btn ghost" data-cxseen>Отметить прочитанными</button><button class="btn pri" data-cxmall>Открыть упоминания</button></div>`)}
-async function cxSeen(){try{await DB.seeMentions();await cxUnread();if(MX.cur&&MX.cur.kind==="ment")MX.ment=await DB.mentionsFeed(false);if(UI.tab==="cht")renderChat()}catch(e){toast("Не получилось: "+dbErr(e),false)}}
-function cxMentHTML(){const L=MX.ment||[];
- return `<div class="mx-hd"><div class="mx-hbtn">${MX.ph?`<button class="mx-back" data-cxback>${CX_I.back}Чаты</button>`:""}<div class="mx-ht"><div class="blk">Где вас отметили через @</div><h3>Упоминания</h3></div><span class="sp"></span>
-  ${MX.mentN?`<button class="mx-pinb" data-cxseen>Отметить прочитанными</button>`:""}</div></div>
-  <div class="mx-feed mx-ments" id="mxFeed">${L.length?L.map(x=>cxMentItem(x,false)).join(""):`<div class="mx-zero">Вас пока никто не упоминал. Упомянуть человека — написать в чате @ и начало фамилии.</div>`}</div>`}
-/* Список, непрочитанные и открытый чат — заново (realtime, возврат на вкладку, раз в минуту). */
+  <div class="mx-mlist">${L.slice(0,6).map(cxMentItem).join("")}</div>${L.length>6?`<p class="mx-mmore">и ещё ${L.length-6} — в колокольчике вверху справа</p>`:""}
+  <div class="mfoot"><button class="btn ghost" data-cxseen>Отметить прочитанными</button><button class="btn pri" data-act="mclose">Понятно</button></div>`)}
+async function cxSeen(){try{await DB.seeMentions();await cxUnread();if(MX.bell)await cxBellLoad()}catch(e){toast("Не получилось: "+dbErr(e),false)}}
+function cxBellHTML(){const L=MX.bell||[];
+ return `<div class="bell-h"><b>Уведомления</b><span class="sp"></span>${MX.mentN?`<button class="btn ghost" data-cxseen>Отметить прочитанными</button>`:""}</div>
+  <div class="bell-l">${L.length?L.map(cxMentItem).join(""):`<p class="bell-z">Здесь появится, когда вас упомянут в чате или в обсуждении операции: пишут <b>@</b> и фамилию.</p>`}</div>`}
+async function cxBellLoad(){try{MX.bell=await DB.mentionsFeed(false)}catch(e){MX.bell=[]}const p=$("#bellPop");if(p&&!p.hidden)p.innerHTML=cxBellHTML()}
+async function cxBell(){const p=$("#bellPop");if(!p.hidden){p.hidden=true;return}p.innerHTML=`<p class="bell-z">Загрузка…</p>`;p.hidden=false;await cxBellLoad()}
+/* Список, непрочитанные, открытый чат и переписка в карточках — заново (realtime, возврат на вкладку, раз в минуту). */
 async function chatRefresh(feed){if(!MX.on)return;
  try{MX.list=await DB.chatList()}catch(e){return}
  await cxUnread();
  if(MX.cur&&MX.cur.id==null){const c=cxByUid(MX.cur.uid);if(c&&c.id!=null)MX.cur=c}
  else if(MX.cur){const c=MX.list.find(x=>x.id===MX.cur.id);if(c)MX.cur=c}
  if(feed&&MX.cur&&MX.cur.id!=null)await cxLoad(false);
- if(feed&&MX.cur&&MX.cur.kind==="ment")try{MX.ment=await DB.mentionsFeed(false)}catch(e){}
+ if(feed){for(const k of Object.keys(MX.box))MX.box[k].stale=true;if(MX.bell&&!$("#bellPop").hidden)cxBellLoad()}
  cxPaint()}
-function cxPaint(){if(UI.tab==="cht")renderChat();else if(UI.tab==="iss"||$("#drawer").classList.contains("on"))cxPaintBoxes()}
+function cxPaint(){if(UI.tab==="cht")renderChat();else cxPaintBoxes()}
 async function cxLoad(scroll=true){const c=MX.cur;if(!c||c.id==null){MX.msgs=[];MX.more=false;return}
  const ms=await DB.messages(c.id);if(MX.cur!==c&&(!MX.cur||MX.cur.id!==c.id))return;
  MX.msgs=ms;MX.more=ms.length>=50;cxRead();if(scroll)MX.scroll=true}
 let cxReadT=0;
 function cxRead(){const c=MX.cur;if(!c||c.id==null||!MX.msgs.length||document.hidden||UI.tab!=="cht"||sandbox())return;   // песочница в базу не пишет
- const last=MX.msgs[MX.msgs.length-1].id,u=MX.unread[c.id];if(!u&&c._read>=last)return;c._read=last;
- clearTimeout(cxReadT);cxReadT=setTimeout(async()=>{try{await DB.markRead(ME_.uid,c.id,last);delete MX.unread[c.id];cxBadge();if(UI.tab==="cht")cxPaintList()}catch(e){}},300)}
+ const last=MX.msgs[MX.msgs.length-1].id;cxMark(c.id,last)}
+function cxMark(id,last){if(sandbox()||!id||!last)return;const u=MX.unread[id],c=MX.list.find(x=>x.id===id)||{};if(!u&&c._read>=last)return;c._read=last;
+ clearTimeout(cxReadT);cxReadT=setTimeout(async()=>{try{await DB.markRead(ME_.uid,id,last);delete MX.unread[id];cxBadge();if(UI.tab==="cht")cxPaintList()}catch(e){}},300)}
 
-/* ---- список чатов ---- */
-function cxSorted(){const q=MX.q.trim().toLowerCase(),L=MX.list.filter(c=>!q||(c.name||"Общий чат").toLowerCase().includes(q)||(c.last_t||"").toLowerCase().includes(q)||cxProj(c.proj).toLowerCase().includes(q));
- const by=(a,b)=>(b.last_at||"").localeCompare(a.last_at||"");
- return{gen:L.filter(c=>c.kind==="general"),pin:L.filter(c=>c.kind!=="general"&&c.pinned).sort(by),
-  imp:L.filter(c=>c.kind!=="general"&&!c.pinned&&c.important).sort(by),rest:L.filter(c=>c.kind!=="general"&&!c.pinned&&!c.important).sort(by)}}
-function cxItem(c){const on=MX.cur&&(c.id!=null?MX.cur.id===c.id:MX.cur.uid===c.uid),n=cxUnr(c),gen=c.kind==="general",t=byId[c.uid]&&c.proj===PROJ.k?byId[c.uid]:null;
- const last=c.last_id==null?`<span class="mx-none">${c.important?"Особо важный вопрос — обсуждения ещё нет":"Сообщений нет"}</span>`
+/* ---- список чатов: поиск, фильтры, проект ---- */
+const CX_F=[["all","Все"],["new","Непрочитанные"],["pin","Закреплённые"],["imp","Особо важные"]];
+const cxTasks=()=>MX.list.filter(c=>c.kind!=="general");   // общего чата в списке нет (13.11 вечер: «бесполезен»)
+function cxPass(c,f){const q=MX.q.trim().toLowerCase();f=f||MX.f;
+ return(!q||(c.name||"").toLowerCase().includes(q)||(c.last_t||"").toLowerCase().includes(q)||cxProj(c.proj).toLowerCase().includes(q))
+  &&(!MX.fp||c.proj===MX.fp)&&(f==="new"?cxUnr(c)>0:f==="pin"?c.pinned:f==="imp"?c.important:true)}
+function cxItem(c){const on=MX.cur&&(c.id!=null?MX.cur.id===c.id:MX.cur.uid===c.uid),n=cxUnr(c),t=byId[c.uid]&&c.proj===PROJ.k?byId[c.uid]:null,key=c.id!=null?c.id:"u"+c.uid;
+ const last=c.last_id==null?`<span class="mx-none">${c.important?"Особо важный — обсуждения ещё нет":"Сообщений нет"}</span>`
   :c.last_del?`<b>${esc(c.last_who||"")}:</b> сообщение удалено`
   :`<b>${esc(ME_&&c.last_who===ME_.name?"Вы":c.last_who||"")}:</b> ${c.last_files&&!c.last_t?CX_I.clip+"Файл":esc(c.last_t||"")}`;
- return `<div class="mx-ci ${on?"on":""} ${n?"new":""} ${gen?"gen":""} ${c.important?"imp":""}" data-cxo="${c.id!=null?c.id:"u"+c.uid}" role="button" tabindex="0">
-  <div class="t">${c.important?'<i class="rd" title="Особо важный вопрос"></i>':""}${c.pinned?`<span class="pn" title="Закреплён у вас">${CX_I.pinF}</span>`:""}${t?`<span class="n">№${t.id}</span>`:""}<span>${esc(gen?"Общий чат":c.name||"Операция удалена")}</span>${gen?"":`<em class="pj">${esc(cxProj(c.proj))}</em>`}</div>
-  <div class="tm">${cxWhen(c.last_at)}</div><div class="l">${last}</div>${n?`<span class="mx-badge ${cxAt(c)?"at":""}">${cxAt(c)?"@":n}</span>`:""}</div>`}
-function cxListHTML(){const s=cxSorted(),sec=(h,l)=>l.length?(h?`<div class="mx-sep">${h}</div>`:"")+l.map(cxItem).join(""):"";
- const any=s.gen.length+s.pin.length+s.imp.length+s.rest.length;
- const mo=MX.cur&&MX.cur.kind==="ment",mn=MX.mentN||0;
- return `<div class="mx-ci at ${mo?"on":""} ${mn?"new":""}" data-cxo="@" role="button" tabindex="0"><div class="t"><span class="mx-atic">@</span><span>Упоминания</span></div><div class="tm"></div><div class="l">${mn?`Новых: ${mn}`:"Где вас отметили через @"}</div>${mn?`<span class="mx-badge at">@${mn>1?mn:""}</span>`:""}</div>`
-  +sec("",s.gen)+sec("Закреплённые",s.pin)+sec("Особо важные",s.imp)+sec(s.pin.length+s.imp.length?"Остальные":"Операции",s.rest)
-  +(any?"":`<div class="mx-empty-l">${MX.q?"Ничего не нашлось":"Чатов пока нет"}</div>`)
-  +`<p class="mx-tip">Чат операции открывается из вопроса или панели операции в «Графике» — «Обсуждение».</p>`}
-function cxPaintList(){const el=$("#mxChats");if(el)el.innerHTML=cxListHTML()}
+ return `<div class="mx-ci ${on?"on":""} ${n?"new":""} ${c.important?"imp":""}" data-cxo="${key}" role="button" tabindex="0">
+  <div class="t">${c.important?`<span class="vipi" title="Особо важный">${CX_I.vipF}</span>`:""}${c.pinned?`<span class="pn" title="Закреплён у вас">${CX_I.pinF}</span>`:""}${t?`<span class="n">№${t.id}</span>`:""}<span>${esc(c.name||"Операция удалена")}</span><em class="pj">${esc(cxProj(c.proj))}</em></div>
+  <div class="tm">${cxWhen(c.last_at)}</div><div class="l">${last}</div>${n?`<span class="mx-badge ${cxAt(c)?"at":""}">${cxAt(c)?"@":n}</span>`:""}
+  ${sandbox()?"":`<span class="mx-iact"><button class="${c.pinned?"on":""}" data-cxpinid="${key}" title="${c.pinned?"Открепить":"Закрепить у себя — наверху списка"}">${c.pinned?CX_I.pinF:CX_I.pin}</button>${can("issue_edit")?`<button class="v ${c.important?"on":""}" data-cxvipid="${key}" title="${c.important?"Снять «особо важный»":"Особо важный — наверху и красным у всех"}">${c.important?CX_I.vipF:CX_I.vip}</button>`:""}</span>`}</div>`}
+function cxFiltHTML(){const T=cxTasks(),cnt=f=>T.filter(c=>cxPass(c,f)).length,P=[...new Set(T.map(c=>c.proj))];
+ return `<div class="mx-filt">${CX_F.map(([k,l])=>{const n=k==="all"?0:cnt(k);return `<button class="chip ${MX.f===k?"on":""}" data-cxfl="${k}">${l}${n?` <span>${n}</span>`:""}</button>`}).join("")}
+  ${P.length>1?`<select id="mxP" title="Проект"><option value="">Все проекты</option>${PROJS.filter(p=>P.includes(p.k)).map(p=>`<option value="${p.k}" ${MX.fp===p.k?"selected":""}>${esc(cxProj(p.k))}</option>`).join("")}</select>`:""}</div>`}
+function cxListHTML(){const by=(a,b)=>(b.last_at||"").localeCompare(a.last_at||""),L=cxTasks().filter(c=>cxPass(c)).sort(by),sec=(h,l)=>l.length?(h?`<div class="mx-sep">${h}</div>`:"")+l.map(cxItem).join(""):"";
+ const body=MX.f!=="all"?sec("",L):sec("Закреплённые",L.filter(c=>c.pinned))+sec("Особо важные",L.filter(c=>!c.pinned&&c.important))+sec(L.some(c=>c.pinned||c.important)?"Остальные":"",L.filter(c=>!c.pinned&&!c.important));
+ return body+(L.length?"":`<div class="mx-empty-l">${MX.q||MX.f!=="all"||MX.fp?"Под фильтр ничего не попало":"Чатов пока нет. Чат операции появляется, когда в её карточке пишут первое сообщение."}</div>`)}
+function cxPaintList(){const el=$("#mxChats");if(el)el.innerHTML=cxListHTML();const fl=$("#mxFilt");if(fl)fl.innerHTML=cxFiltHTML()}
 
 /* ---- открытый чат ---- */
-function cxHeadHTML(c){if(c.kind==="general")return `<div class="mx-hd"><div class="mx-hbtn"><div><div class="blk">Все проекты</div><h3>Общий чат</h3></div><span class="sp"></span></div></div>`;
- const here=c.proj===PROJ.k&&byId[c.uid],t=here?byId[c.uid]:null,iss=here&&S.issues[c.uid];
+function cxHeadHTML(c){const here=c.proj===PROJ.k&&byId[c.uid],t=here?byId[c.uid]:null,iss=here&&S.issues[c.uid];
  let meta="";
  if(t){const f=FC[c.uid]||{};const late=f.F&&f.F0&&f.F>f.F0;
   meta=`<div class="mx-sum"><div class="f"><span class="k">Ответственный</span><span class="v">${esc(t.resp||"—")}</span></div>
@@ -3761,11 +3797,13 @@ function cxHeadHTML(c){if(c.kind==="general")return `<div class="mx-hd"><div cla
    <div class="f"><span class="k">Готовность</span><span class="v">${Math.round(pct(c.uid))}%</span></div>
    ${iss?`<div class="f"><span class="k">Вопрос</span><span class="v"><span class="${iss.status==="решён"?"":"r"}">${esc(iss.status)}</span></span></div>`:""}
    <span class="sp"></span>${iss?`<button class="btn ghost" data-go-iss="${c.uid}">Вопрос</button>`:""}<button class="btn ghost" data-goto="${c.uid}">Показать в графике</button></div>`}
- else meta=`<div class="mx-sum"><span class="mx-other">${byId[c.uid]||c.proj===PROJ.k?"":`Операция проекта ${esc(cxProj(c.proj))}.`}${c.proj!==PROJ.k?` <a href="?p=${esc(c.proj)}${c.id!=null?"&c="+c.id:""}#cht">Перейти в ${esc(cxProj(c.proj))}</a>`:" Операции больше нет в плане."}</span></div>`;
+ else meta=`<div class="mx-sum"><span class="mx-other">${c.proj!==PROJ.k?`Операция проекта ${esc(cxProj(c.proj))}. <a href="?p=${esc(c.proj)}${c.id!=null?"&c="+c.id:""}#cht">Перейти в ${esc(cxProj(c.proj))}</a>`:"Операции больше нет в плане."}</span></div>`;
+ const vipB=can("issue_edit")&&!sandbox()?`<button class="mx-vipb ${c.important?"on":""}" data-cxvip title="${c.important?"Снять пометку":"Наверху и красным у всех — в списке чатов и в «Вопросах»"}">${c.important?CX_I.vipF:CX_I.vip}<span>${c.important?"Особо важный":"Сделать особо важным"}</span></button>`
+  :c.important?`<span class="mx-imp">особо важный</span>`:"";
  return `<div class="mx-hd"><div class="mx-hbtn">${MX.ph?`<button class="mx-back" data-cxback>${CX_I.back}Чаты</button>`:""}
-  <div class="mx-ht"><div class="blk">${c.important?'<span class="mx-imp">особо важный</span>':""}<span class="pj">${esc(cxProj(c.proj))}</span>${t&&BK[BOF[c.uid]]?" · "+esc(BK[BOF[c.uid]].title):""}</div>
+  <div class="mx-ht"><div class="blk"><span class="pj">${esc(cxProj(c.proj))}</span>${t&&BK[BOF[c.uid]]?" · "+esc(BK[BOF[c.uid]].title):""}</div>
   <h3>${t?`<span class="n">№${t.id}</span>`:""}${esc(c.name||"Операция удалена")}</h3></div><span class="sp"></span>
-  ${sandbox()?"":`<button class="mx-pinb ${c.pinned?"on":""}" data-cxpin title="${c.pinned?"Открепить":"Закрепить у себя — чат будет наверху списка"}">${c.pinned?CX_I.pinF:CX_I.pin}<span>${c.pinned?"Закреплён":"Закрепить"}</span></button>`}</div>${meta}</div>`}
+  ${vipB}${sandbox()?"":`<button class="mx-pinb ${c.pinned?"on":""}" data-cxpin title="${c.pinned?"Открепить":"Закрепить у себя — чат будет наверху вашего списка"}">${c.pinned?CX_I.pinF:CX_I.pin}<span>${c.pinned?"Закреплён у вас":"Закрепить у себя"}</span></button>`}</div>${meta}</div>`}
 function cxFileHTML(f){const img=/^image\/(jpeg|png|webp|gif)$/.test(f.mime);
  return img?`<button class="mx-photo" data-cxf="${f.id}" title="${esc(f.name)} — открыть"><img alt="${esc(f.name)}" data-cximg="${f.id}"><span>${esc(trunc(f.name,28))} · ${cxSize(f.size)}</span></button>`
   :`<button class="mx-file" data-cxf="${f.id}" title="Скачать"><span class="mx-ext">${esc(cxExt(f.name))}</span><span class="mx-fn"><b>${esc(f.name)}</b><span>${cxSize(f.size)}</span></span><span class="mx-dl">${CX_I.dl}</span></button>`}
@@ -3781,38 +3819,42 @@ function cxMsgHTML(m,prev){const mine=ME_&&m.user_id===ME_.uid,cont=prev&&prev.u
   ${(m.files||[]).length?`<div class="mx-files">${m.files.map(cxFileHTML).join("")}</div>`:""}</div>
   ${cxWrite()?`<div class="mx-tools"><button data-cxrep="${m.id}" title="Ответить">${CX_I.reply}</button>${mine?`<button data-cxed="${m.id}" title="Изменить">${CX_I.edit}</button><button class="x" data-cxdel="${m.id}" title="Удалить">${CX_I.del}</button>`:""}</div>`:""}</div>`}
 function cxFeedHTML(){const c=MX.cur;if(!c)return"";
- if(c.id==null||!MX.msgs.length)return `<div class="mx-zero">${c.kind==="general"?"Здесь — всё, что касается всех проектов.":"Обсуждения ещё нет."}${cxWrite()?" Первое сообщение откроет чат"+(c.kind==="general"?"":" операции")+" для всех.":""}</div>`;
+ if(c.id==null||!MX.msgs.length)return `<div class="mx-zero">Обсуждения ещё нет.${cxWrite()?" Первое сообщение откроет чат операции для всех.":""}</div>`;
  return (MX.more?`<button class="mx-moreb" data-cxmore>Показать раньше</button>`:"")+MX.msgs.map((m,k)=>cxMsgHTML(m,MX.msgs[k-1])).join("")}
+function cxPendHTML(L,attr){return L.length?`<div class="mx-pend">${L.map((f,k)=>`<span class="mx-pc">${CX_I.clip}${esc(trunc(f.name,26))} · ${cxSize(f.size)}<button ${attr}="${k}" title="Убрать">×</button></span>`).join("")}</div>`:""}
 function cxCmpHTML(){if(!cxWrite())return `<div class="mx-cmp ro">${ME_&&ME_.role==="sandbox"?"Песочница: чаты только для чтения":"Писать в чаты вам недоступно"}</div>`;
  const r=MX.reply&&MX.msgs.find(x=>x.id===MX.reply),e=MX.edit&&MX.msgs.find(x=>x.id===MX.edit);
  return `<div class="mx-cmp">${r?`<div class="mx-reply">${CX_I.reply}<p>Ответ <b>${esc(r.who)}</b>: ${esc(trunc(r.t||"файл",90))}</p><button data-cxnor title="Не отвечать">×</button></div>`:""}
   ${e?`<div class="mx-reply">${CX_I.edit}<p><b>Изменение сообщения</b> — Enter сохранит, Esc отменит</p><button data-cxnoe title="Отменить">×</button></div>`:""}
-  ${MX.pend.length?`<div class="mx-pend">${MX.pend.map((f,k)=>`<span class="mx-pc">${esc(trunc(f.name,26))} · ${cxSize(f.size)}<button data-cxrm="${k}" title="Убрать">×</button></span>`).join("")}</div>`:""}
-  <div class="mx-box"><button class="ib2" data-cxclip title="Приложить файл или фото">${CX_I.clip}</button>
-   <textarea class="mx-in" id="mxIn" rows="1" placeholder="${MX.cur&&MX.cur.kind==="general"?"Написать в общий чат…":"Написать… @ — упомянуть"}" ${MX.busy?"disabled":""}></textarea>
+  ${cxPendHTML(MX.pend,"data-cxrm")}
+  <div class="mx-box"><button class="ib2" data-cxclip title="Прикрепить файл или фото (до 30 МБ)">${CX_I.clip}</button>
+   <textarea class="mx-in" id="mxIn" rows="1" placeholder="Написать… @ — упомянуть, 📎 — файл или фото" ${MX.busy?"disabled":""}></textarea>
    <button class="mx-send" data-cxsend title="Отправить (Enter)" ${MX.busy?"disabled":""}>${CX_I.send}</button></div>
   <div class="mx-pop" id="mxPop" hidden></div></div>`}
 function renderChat(){const el=$("#tab-cht");if(!el)return;MX.ph=PHONE();el.style.setProperty("--th",$(".top").offsetHeight+"px");
  if(!MX.on){el.innerHTML=`<div class="empty">Чаты недоступны.</div>`;return}
- if(!MX.cur&&!MX.ph){const g=MX.list.find(c=>c.kind==="general");if(g){MX.cur=g;cxLoad().then(renderChat);}}
- const keep=$("#mxIn"),txt=keep?keep.value:null,foc=keep&&document.activeElement===keep,fe=$("#mxFeed"),atBot=!fe||fe.scrollHeight-fe.scrollTop-fe.clientHeight<60,top=fe?fe.scrollTop:0;
+ if(MX.cur&&MX.cur.kind==="general")MX.cur=null;
+ const keep=$("#mxIn"),txt=keep?keep.value:null,foc=keep&&document.activeElement===keep,fe=$("#mxFeed"),atBot=!fe||fe.scrollHeight-fe.scrollTop-fe.clientHeight<60,top=fe?fe.scrollTop:0,
+  ql=$("#mxChats"),lt=ql?ql.scrollTop:0,qf=document.activeElement&&document.activeElement.id==="mxQ";
  el.innerHTML=`<div class="mx-app ${MX.ph&&MX.cur?"ph-chat":""}">
-  <aside class="mx-list"><div class="mx-find"><label>${CX_I.find}<input id="mxQ" placeholder="Поиск по чатам" value="${esc(MX.q)}" autocomplete="off"></label></div><div class="mx-chats" id="mxChats">${cxListHTML()}</div></aside>
-  <section class="mx-chat">${MX.cur&&MX.cur.kind==="ment"?cxMentHTML():MX.cur?cxHeadHTML(MX.cur)+`<div class="mx-feed" id="mxFeed">${cxFeedHTML()}</div>`+cxCmpHTML():`<div class="mx-zero">Выберите чат слева</div>`}</section></div>`;
+  <aside class="mx-list"><div class="mx-find"><label>${CX_I.find}<input id="mxQ" placeholder="Поиск по чатам и сообщениям" value="${esc(MX.q)}" autocomplete="off"></label></div>
+   <div id="mxFilt">${cxFiltHTML()}</div><div class="mx-chats" id="mxChats">${cxListHTML()}</div></aside>
+  <section class="mx-chat">${MX.cur?cxHeadHTML(MX.cur)+`<div class="mx-feed" id="mxFeed">${cxFeedHTML()}</div>`+cxCmpHTML()
+   :`<div class="mx-zero"><b>Выберите чат слева</b><br>Чат операции открывается и из её карточки — «Открыть в «Чатах»». Закрепить чат у себя и сделать его особо важным — кнопки в заголовке чата или значки справа в строке списка.</div>`}</section></div>`;
+ const l2=$("#mxChats");if(l2)l2.scrollTop=lt;if(qf){const q=$("#mxQ");q.focus();q.selectionStart=q.selectionEnd=q.value.length}
  const inp=$("#mxIn");if(inp){inp.value=txt!=null?txt:(MX.draft[cxKey()]||"");cxGrow(inp);if(foc||MX.focus){inp.focus();MX.focus=false}}
- const f2=$("#mxFeed");if(f2&&MX.cur&&MX.cur.kind!=="ment"){if(MX.scroll||atBot)f2.scrollTop=f2.scrollHeight;else f2.scrollTop=top;MX.scroll=false}
+ const f2=$("#mxFeed");if(f2){if(MX.scroll||atBot)f2.scrollTop=f2.scrollHeight;else f2.scrollTop=top;MX.scroll=false}
  if(MX.jump){const j=$("#mx-"+MX.jump);if(j){j.scrollIntoView({block:"center"});j.classList.add("hov","jmp");setTimeout(()=>j.classList.remove("hov","jmp"),2200);MX.jump=null}}
  cxImgs();cxRead()}
-const cxKey=()=>MX.cur&&MX.cur.kind!=="ment"?(MX.cur.id!=null?"c"+MX.cur.id:"u"+MX.cur.uid):"";
+const cxKey=()=>MX.cur?(MX.cur.id!=null?"c"+MX.cur.id:"u"+MX.cur.uid):"";
 function cxGrow(t){t.style.height="auto";t.style.height=Math.min(t.scrollHeight,180)+"px"}
 /* картинки: подписанная ссылка на 2 минуты, своя на каждый показ (не хранится дольше) */
-async function cxImgs(){for(const img of $$("img[data-cximg]")){const f=cxFile(img.dataset.cximg);if(!f)continue;
+async function cxImgs(){for(const img of $$("img[data-cximg]")){if(img.src)continue;const f=cxFile(img.dataset.cximg);if(!f)continue;
  const c=MX.urls[f.id];if(c&&Date.now()-c.at<100000){img.src=c.u;continue}
  try{const u=await DB.fileUrl(f,false);MX.urls[f.id]={u,at:Date.now()};img.src=u}catch(e){}}}
-const cxFile=id=>{for(const m of MX.msgs)for(const f of m.files||[])if(f.id===id)return f;return null};
-async function chatOpen(key){
- if(key==="@"){MX.cur={kind:"ment"};MX.msgs=[];if(UI.tab!=="cht")go("cht");else renderChat();try{MX.ment=await DB.mentionsFeed(false)}catch(e){MX.ment=[]}return renderChat()}
- const c=String(key)[0]==="u"?cxByUid(String(key).slice(1))||{id:null,kind:"task",uid:+String(key).slice(1),proj:PROJ.k,name:(byId[String(key).slice(1)]||{}).name||""}:MX.list.find(x=>x.id===+key);
+const cxFile=id=>{for(const L of[MX.msgs,...Object.values(MX.box).map(b=>b.msgs||[])])for(const m of L)for(const f of m.files||[])if(f.id===id)return f;return null};
+const cxKeyChat=k=>String(k)[0]==="u"?cxByUid(String(k).slice(1))||{id:null,kind:"task",uid:+String(k).slice(1),proj:PROJ.k,name:(byId[String(k).slice(1)]||{}).name||""}:MX.list.find(x=>x.id===+k);
+async function chatOpen(key){const c=cxKeyChat(key);
  if(!c)return;const k=cxKey(),inp=$("#mxIn");if(inp&&k)MX.draft[k]=inp.value;
  MX.cur=c;MX.reply=null;MX.edit=null;MX.pend=[];MX.msgs=[];MX.more=false;
  if(UI.tab!=="cht")go("cht");else renderChat();
@@ -3820,6 +3862,14 @@ async function chatOpen(key){
  if(UI.tab==="cht"){MX.focus=!MX.ph;renderChat()}}
 /* открыть чат операции (из вопроса, панели операции) */
 function chatOpenUid(u){const c=cxByUid(u);return chatOpen(c&&c.id!=null?c.id:"u"+u)}
+/* закрепить у себя / «особо важный» — из заголовка чата или значком в строке списка */
+async function cxPin(c){try{const x=await cxEnsureChat(c);await DB.pin(ME_.uid,x.id,!c.pinned,c.last_id||0);if(MX.cur&&MX.cur.uid===c.uid)MX.cur={...x,pinned:!c.pinned};await chatRefresh(false);
+ toast(c.pinned?"Чат откреплён":"Чат закреплён у вас — он наверху списка",false)}catch(err){toast("Не получилось: "+dbErr(err),false)}}
+/* «Особо важный»: у вопроса текущего проекта — его флажок (как в «Вопросах», с историей и отменой); иначе — пометка чата. */
+async function cxVip(c){if(!can("issue_edit"))return;const on=!c.important,here=c.proj===PROJ.k&&S.issues[c.uid]&&!S.issues[c.uid].gone&&S.issues[c.uid].status!=="решён";
+ try{if(on){if(here)setGd(c.uid,true);else{const x=await cxEnsureChat(c);await DB.setVip(x.id,true);toast("Особо важный: чат наверху и красным у всех",false)}}
+  else{if(c.gd&&here)setGd(c.uid,false);else if(c.gd)toast("Пометку вопроса снимают в «Вопросах» проекта "+cxProj(c.proj),false);if(c.vip&&c.id!=null)await DB.setVip(c.id,false)}
+  setTimeout(()=>chatRefresh(false),here?900:0)}catch(err){toast("Не получилось: "+dbErr(err),false)}}
 
 /* ---- отправка ---- */
 async function cxEnsureChat(c){if(c.id!=null)return c;const x=await DB.chatFor(c.uid);const n={...c,...x};return n}
@@ -3847,17 +3897,34 @@ async function cxSubmit(){const inp=$("#mxIn");if(!inp||MX.busy)return;const t=i
  catch(e){toast("Не отправлено: "+dbErr(e),false)}
  MX.busy=false;MX.focus=true;renderChat()}
 
-/* ---- «Обсуждение» у вопроса и в панели операции ---- */
-function chatBoxHTML(u){const c=cxByUid(u),n=c?c.n:0,nw=cxUnr(c);
- const last=c&&c.last_id!=null?`<div class="mx-dm"><span class="mx-av">${esc(cxIni(c.last_who))}</span><div><div class="w"><b>${esc(c.last_who||"")}</b>${cxWhen(c.last_at)}</div><p>${c.last_del?"сообщение удалено":c.last_files&&!c.last_t?CX_I.clip+" файл":esc(c.last_t||"")}</p></div></div>`:"";
- return `<div class="mx-disc ${n?"":"mx-empty"}" data-cxbox="${u}"><button class="mx-dh" data-cxou="${u}"><h4>Обсуждение</h4>${n?`<span class="c">${n} ${plural(n,"сообщение","сообщения","сообщений")}</span>`:""}${nw?`<span class="nw">${nw} ${plural(nw,"новое","новых","новых")}</span>`:""}<span class="go">Открыть чат${CX_I.open}</span></button>
-  ${last}${cxWrite()?`<div class="mx-dbox"><textarea rows="1" placeholder="${n?"Написать в чат операции…":"Начать обсуждение…"}" data-cxqin="${u}"></textarea><button class="ib2" data-cxqclip="${u}" title="Приложить файл или фото">${CX_I.clip}</button><button class="ib2" data-cxqs="${u}" title="Отправить">${CX_I.send}</button></div>`:""}
-  ${n?"":`<p class="mx-dnote">${cxWrite()?"Первое сообщение откроет чат операции — его увидят все.":"Сообщений пока нет."}</p>`}</div>`}
-function cxPaintBoxes(){for(const b of $$("[data-cxbox]")){const ta=b.querySelector("textarea");if(ta&&(ta.value||document.activeElement===ta))continue;b.outerHTML=chatBoxHTML(+b.dataset.cxbox)}}
-async function cxQuick(u,files){const ta=$(`[data-cxqin="${u}"]`),t=ta?ta.value.trim():"";if(!t&&!(files&&files.length))return ta&&ta.focus();
+/* ---- переписка в карточке вопроса и в панели операции (13.11 вечер: «оставь тот же функционал, что был») ----
+   Вся лента чата операции прямо в карточке, поле и «Прикрепить файл или фото»; сверху — «Открыть в «Чатах»». */
+function chatBoxHTML(u){const c=cxByUid(u),b=MX.box[u],n=c?c.n:0;
+ if(!b||b.stale)setTimeout(()=>cxBoxLoad(u),0);
+ return `<div class="mx-disc" data-cxbox="${u}"><div class="mx-dh"><h4>Комментарии и файлы</h4>${n?`<span class="c">${n}</span>`:""}<span class="sp"></span>
+   <button class="mx-golink" data-cxou="${u}" title="Та же переписка во вкладке «Чаты»: ответы, упоминания, закрепление">Открыть в «Чатах»${CX_I.open}</button></div>
+  <div class="mx-bfeed" data-cxbf="${u}">${cxBoxFeed(u)}</div>
+  ${cxWrite()?`<div class="mx-bcmp"><div data-cxbp="${u}">${cxPendHTML(MX.bpend[u]||[],"data-cxbrm")}</div>
+   <textarea rows="2" placeholder="Комментарий… @ и фамилия — упомянуть" data-cxqin="${u}"></textarea>
+   <div class="mx-bact"><button class="btn ghost" data-cxqclip="${u}">${CX_I.clip}Прикрепить файл или фото</button><span class="sp"></span><button class="btn pri" data-cxqs="${u}">Отправить</button></div></div>`:""}</div>`}
+function cxBoxFeed(u){const b=MX.box[u];
+ if(!b)return `<p class="mx-dnote">Загрузка…</p>`;
+ if(!b.msgs.length)return `<p class="mx-dnote">${cxWrite()?"Комментариев пока нет. Напишите первым — его увидят все, а в «Чатах» появится чат этой операции.":"Комментариев пока нет."}</p>`;
+ return b.msgs.map(m=>{const mine=ME_&&m.user_id===ME_.uid,tm=new Date(m.at);
+  return `<div class="mx-bm ${ME_&&(m.mentions||[]).includes(ME_.uid)?"me-at":""}" id="mxb-${m.id}"><div class="w"><b>${esc(m.who||"—")}</b>${fD(tm)} ${p2(tm.getHours())}:${p2(tm.getMinutes())}${m.edited_at?" · изменено":""}
+   ${mine&&!m.deleted_at&&cxWrite()?`<button class="del" data-cxbdel="${u}:${m.id}" title="Удалить своё">×</button>`:""}</div>
+   ${m.deleted_at?`<p class="mx-del">Сообщение удалено</p>`:`${m.t?`<div class="mx-t">${cxText(m.t)}</div>`:""}${(m.files||[]).length?`<div class="mx-files">${m.files.map(cxFileHTML).join("")}</div>`:""}`}</div>`}).join("")}
+async function cxBoxLoad(u){const c=cxByUid(u);if(MX.box[u]&&MX.box[u].busy)return;MX.box[u]={...(MX.box[u]||{msgs:[]}),busy:true};
+ try{MX.box[u]={msgs:c&&c.id!=null?await DB.messages(c.id):[],at:Date.now()}}catch(e){MX.box[u]={msgs:[],at:Date.now()}}
+ const el=$(`[data-cxbf="${u}"]`);if(el){el.innerHTML=cxBoxFeed(u);el.scrollTop=el.scrollHeight;cxImgs()}
+ if(c&&c.id!=null&&MX.box[u].msgs.length&&el)cxMark(c.id,MX.box[u].msgs[MX.box[u].msgs.length-1].id)}
+function cxPaintBoxes(){for(const el of $$("[data-cxbf]")){const u=+el.dataset.cxbf;if(!MX.box[u]||MX.box[u].stale)cxBoxLoad(u)}}
+async function cxQuick(u){const ta=$(`[data-cxqin="${u}"]`),t=ta?ta.value.trim():"",fs=MX.bpend[u]||[];if(!t&&!fs.length)return ta&&ta.focus();
  const c0=cxByUid(u)||{id:null,kind:"task",uid:+u,proj:PROJ.k,name:(byId[u]||{}).name||""};
- try{if(ta)ta.disabled=true;await cxSend(t,files||[],c0,null);if(ta)ta.value="";toast("Отправлено в чат операции",false);await chatRefresh(false);cxPaintBoxes()}
- catch(e){toast("Не отправлено: "+dbErr(e),false)}finally{if(ta)ta.disabled=false}}
+ const btn=$(`[data-cxqs="${u}"]`);
+ try{if(ta)ta.disabled=true;if(btn)btn.disabled=true;await cxSend(t,fs,c0,null);if(ta)ta.value="";MX.bpend[u]=[];cxBoxPend(u);await chatRefresh(false);await cxBoxLoad(u)}
+ catch(e){toast("Не отправлено: "+dbErr(e),false)}finally{if(ta){ta.disabled=false;ta.focus()}if(btn)btn.disabled=false}}
+function cxBoxPend(u){const el=$(`[data-cxbp="${u}"]`);if(el)el.innerHTML=cxPendHTML(MX.bpend[u]||[],"data-cxbrm")}
 const chatCount=u=>{const c=cxByUid(u);return c?c.n:0};
 /* вопрос стал (или перестал быть) «особо важным» — у себя или у другого: список чатов заново */
 function chatSoon(){if(!MX.on)return;clearTimeout(MX.t3);MX.t3=setTimeout(()=>chatRefresh(false),900)}
@@ -3878,19 +3945,29 @@ let cxPickFor=null;
 function cxPick(target){cxPickFor=target;let f=$("#cxFile");if(!f){f=document.createElement("input");f.type="file";f.id="cxFile";f.multiple=true;f.hidden=true;document.body.appendChild(f);
  f.onchange=()=>{const L=[...f.files];f.value="";if(!L.length)return;const big=L.filter(x=>x.size>CHAT_MAX);if(big.length)toast("Больше 30 МБ — не приложить: "+big.map(x=>x.name).join(", "),false);
   const ok=L.filter(x=>x.size<=CHAT_MAX);if(!ok.length)return;
-  if(cxPickFor==="cmp"){MX.pend=[...MX.pend,...ok].slice(0,10);renderChat()}else cxQuick(cxPickFor,ok)}}
+  if(cxPickFor==="cmp"){MX.pend=[...MX.pend,...ok].slice(0,10);renderChat()}else{const u=cxPickFor;MX.bpend[u]=[...(MX.bpend[u]||[]),...ok].slice(0,10);cxBoxPend(u);const ta=$(`[data-cxqin="${u}"]`);if(ta)ta.focus()}}}
  f.click()}
-document.addEventListener("click",async e=>{const el=e.target.closest("[data-cxjump],[data-cxseen],[data-cxmall],[data-cxo],[data-cxou],[data-cxback],[data-cxpin],[data-cxsend],[data-cxclip],[data-cxrm],[data-cxrep],[data-cxed],[data-cxdel],[data-cxnor],[data-cxnoe],[data-cxf],[data-cxq],[data-cxmore],[data-cxat],[data-cxqs],[data-cxqclip]");
+document.addEventListener("click",async e=>{
+ const bp=$("#bellPop");if(bp&&!bp.hidden&&!e.target.closest("#bellPop,#bellBtn"))bp.hidden=true;
+ const el=e.target.closest("[data-cxbell],[data-cxjump],[data-cxseen],[data-cxpinid],[data-cxvipid],[data-cxfl],[data-cxvip],[data-cxo],[data-cxou],[data-cxback],[data-cxpin],[data-cxsend],[data-cxclip],[data-cxrm],[data-cxbrm],[data-cxbdel],[data-cxrep],[data-cxed],[data-cxdel],[data-cxnor],[data-cxnoe],[data-cxf],[data-cxq],[data-cxmore],[data-cxat],[data-cxqs],[data-cxqclip]");
  if(!el||!MX.on)return;const a=el.dataset;
+ if(a.cxbell!==undefined)return cxBell();
+ if(a.cxpinid){e.stopPropagation();const c=cxKeyChat(a.cxpinid);return c&&cxPin(c)}
+ if(a.cxvipid){e.stopPropagation();const c=cxKeyChat(a.cxvipid);return c&&cxVip(c)}
+ if(a.cxfl){MX.f=a.cxfl;return cxPaintList()}
+ if(a.cxvip!==undefined)return MX.cur&&cxVip(MX.cur);
  if(a.cxo)return chatOpen(a.cxo);
  if(a.cxou){e.stopPropagation();closeDrawer();return chatOpenUid(+a.cxou)}
  if(a.cxback!==undefined){MX.cur=null;return renderChat()}
- if(a.cxpin!==undefined){const c=MX.cur;if(!c)return;try{const x=await cxEnsureChat(c);await DB.pin(ME_.uid,x.id,!c.pinned,c.last_id||0);MX.cur={...x,pinned:!c.pinned};await chatRefresh(false);toast(c.pinned?"Чат откреплён":"Чат закреплён у вас — он наверху списка",false)}catch(err){toast("Не получилось: "+dbErr(err),false)}return}
+ if(a.cxpin!==undefined)return MX.cur&&cxPin(MX.cur);
  if(a.cxsend!==undefined)return cxSubmit();
  if(a.cxclip!==undefined)return cxPick("cmp");
  if(a.cxqclip)return cxPick(+a.cxqclip);
  if(a.cxqs)return cxQuick(+a.cxqs);
  if(a.cxrm!==undefined){MX.pend.splice(+a.cxrm,1);return renderChat()}
+ if(a.cxbrm!==undefined){const u=+el.closest("[data-cxbp]").dataset.cxbp;(MX.bpend[u]||[]).splice(+a.cxbrm,1);return cxBoxPend(u)}
+ if(a.cxbdel){const[u,id]=a.cxbdel.split(":").map(Number),m=(MX.box[u]&&MX.box[u].msgs||[]).find(x=>x.id===id);if(!m||!confirm("Удалить комментарий? Вместо него будет «Сообщение удалено», файлы пропадут."))return;
+  try{await DB.unsend(m);await cxBoxLoad(u);chatRefresh(false)}catch(err){toast("Не удалено: "+dbErr(err),false)}return}
  if(a.cxrep){MX.reply=+a.cxrep;MX.edit=null;MX.focus=true;return renderChat()}
  if(a.cxed){const m=MX.msgs.find(x=>x.id===+a.cxed);if(!m)return;MX.edit=m.id;MX.reply=null;MX.focus=true;renderChat();const i=$("#mxIn");if(i){i.value=m.t;cxGrow(i)}return}
  if(a.cxnor!==undefined){MX.reply=null;return renderChat()}
@@ -3902,25 +3979,29 @@ document.addEventListener("click",async e=>{const el=e.target.closest("[data-cxj
  if(a.cxq){const t=$("#mx-"+a.cxq);if(t){t.scrollIntoView({behavior:"smooth",block:"center"});t.classList.add("hov");setTimeout(()=>t.classList.remove("hov"),1400)}return}
  if(a.cxmore!==undefined){const fe=$("#mxFeed"),h=fe.scrollHeight;try{const old=await DB.messages(MX.cur.id,MX.msgs[0].id);MX.more=old.length>=50;MX.msgs=[...old,...MX.msgs];renderChat();const f2=$("#mxFeed");f2.scrollTop=f2.scrollHeight-h}catch(err){}return}
  if(a.cxat)return cxPutAt(a.cxat);
- if(a.cxjump){const[c,m]=a.cxjump.split(":").map(Number);closeModal();MX.jump=m;await chatOpen(c);if(MX.jump&&!MX.msgs.some(x=>x.id===m))toast("Сообщение старое — нажмите «Показать раньше»",false);return}
- if(a.cxseen!==undefined){closeModal();return cxSeen()}
- if(a.cxmall!==undefined){closeModal();return chatOpen("@")}});
+ if(a.cxjump){const[c,m]=a.cxjump.split(":").map(Number);closeModal();if(bp)bp.hidden=true;MX.jump=m;await chatOpen(c);if(MX.jump&&!MX.msgs.some(x=>x.id===m))toast("Сообщение старое — нажмите «Показать раньше»",false);return}
+ if(a.cxseen!==undefined){closeModal();return cxSeen()}});
+document.addEventListener("change",e=>{if(e.target.id==="mxP"){MX.fp=e.target.value;cxPaintList()}});
 document.addEventListener("keydown",e=>{const t=e.target;if(!MX.on)return;
+ if(e.key==="Escape"){const bp=$("#bellPop");if(bp&&!bp.hidden){bp.hidden=true;return}}
  if(t.id==="mxIn"){const pop=$("#mxPop");
   if(pop&&!pop.hidden){const o=$$("#mxPop .o");if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();cxPopI=(cxPopI+(e.key==="ArrowDown"?1:o.length-1))%o.length;return cxPop()}
    if(e.key==="Enter"||e.key==="Tab"){e.preventDefault();return cxPutAt(o[cxPopI].dataset.cxat)}if(e.key==="Escape"){e.preventDefault();pop.hidden=true;return}}
   if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing&&!PHONE()){e.preventDefault();return cxSubmit()}
   if(e.key==="Escape"&&(MX.edit||MX.reply)){MX.edit=null;MX.reply=null;t.value="";renderChat()}}
  else if(t.dataset&&t.dataset.cxqin&&e.key==="Enter"&&!e.shiftKey&&!e.isComposing&&!PHONE()){e.preventDefault();cxQuick(+t.dataset.cxqin)}
- else if(t.closest&&t.closest(".mx-ci")&&(e.key==="Enter"||e.key===" ")){e.preventDefault();chatOpen(t.closest(".mx-ci").dataset.cxo)}});
+ else if(t.closest&&t.closest(".mx-ci")&&!t.closest(".mx-iact")&&(e.key==="Enter"||e.key===" ")){e.preventDefault();chatOpen(t.closest(".mx-ci").dataset.cxo)}});
 document.addEventListener("input",e=>{const t=e.target;if(t.id==="mxIn"){cxGrow(t);cxPopI=0;cxPop();MX.draft[cxKey()]=t.value}
  else if(t.id==="mxQ"){MX.q=t.value;cxPaintList()}
- else if(t.dataset&&t.dataset.cxqin){t.style.height="auto";t.style.height=Math.min(t.scrollHeight,140)+"px"}});
-/* вставка картинки из буфера (снимок экрана) — в поле ввода чата */
-document.addEventListener("paste",e=>{if(!MX.on||e.target.id!=="mxIn"||!cxWrite())return;const fs=[...(e.clipboardData&&e.clipboardData.files||[])];if(!fs.length)return;
- e.preventDefault();MX.pend=[...MX.pend,...fs.filter(f=>f.size<=CHAT_MAX).map((f,k)=>f.name&&f.name!=="image.png"?f:new File([f],`Снимок ${fDT(new Date()).replace(/[.:]/g,"-")}${k?"-"+k:""}.png`,{type:f.type}))].slice(0,10);renderChat()});
-document.addEventListener("visibilitychange",()=>{if(!document.hidden&&MX.on)chatRefresh(UI.tab==="cht")});
-setInterval(()=>{if(MX.on&&!document.hidden)chatRefresh(UI.tab==="cht")},60000);
+ else if(t.dataset&&t.dataset.cxqin){t.style.height="auto";t.style.height=Math.min(t.scrollHeight,160)+"px"}});
+/* вставка картинки из буфера (снимок экрана) — в поле чата или карточки */
+document.addEventListener("paste",e=>{if(!MX.on||!cxWrite())return;const t=e.target,box=t.dataset&&t.dataset.cxqin;if(t.id!=="mxIn"&&!box)return;
+ const fs=[...(e.clipboardData&&e.clipboardData.files||[])];if(!fs.length)return;e.preventDefault();
+ const add=fs.filter(f=>f.size<=CHAT_MAX).map((f,k)=>f.name&&f.name!=="image.png"?f:new File([f],`Снимок ${fDT(new Date()).replace(/[.:]/g,"-")}${k?"-"+k:""}.png`,{type:f.type}));
+ if(box){const u=+box;MX.bpend[u]=[...(MX.bpend[u]||[]),...add].slice(0,10);return cxBoxPend(u)}
+ MX.pend=[...MX.pend,...add].slice(0,10);renderChat()});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&MX.on)chatRefresh(true)});
+setInterval(()=>{if(MX.on&&!document.hidden)chatRefresh(true)},60000);
 
 </script>
 </body>
