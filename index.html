@@ -1050,6 +1050,26 @@ nav.tabs .cnt.mx-u.z{background:var(--sunk);color:var(--ink3)}
  .mx-dbox textarea{font-size:16px}
  .mx-pop{left:8px;right:8px;width:auto}
 }
+/* упоминания (13.11): «@N» на вкладке, раздел «@ Упоминания», окно при входе */
+nav.tabs .cnt.mx-atc{background:var(--ink);color:var(--paper);margin-left:4px}
+nav.tabs .cnt[hidden]{display:none}
+.mx-ci.at .t{gap:8px}
+.mx-atic{flex:none;width:18px;height:18px;border-radius:5px;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-size:12px;font-weight:700;line-height:1}
+.mx-ci.at{margin-bottom:2px}
+.mx-mlist{display:grid;gap:2px;padding:4px 10px 6px;max-height:min(60dvh,520px);overflow:auto}
+.mx-mi{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:0 10px;align-items:start;width:100%;padding:9px 10px;border:0;border-radius:10px;background:none;text-align:left;cursor:pointer}
+.mx-mi:hover{background:var(--sunk)}
+.mx-mi.new{background:color-mix(in srgb,var(--ink) 5%,transparent);box-shadow:inset 3px 0 0 var(--ink)}
+.mx-mi .mx-av{width:30px;height:30px;font-size:12px;margin:0}
+.mx-mt{display:grid;gap:2px;min-width:0}
+.mx-mt .w{font-size:12.5px;color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mx-mt .w b{color:var(--ink);font-weight:600;font-size:13.5px}
+.mx-mt .tm{margin-left:8px}
+.mx-mt .tx{font-size:14px;line-height:1.4;color:var(--ink);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.mx-mi .go{color:var(--ink3);align-self:center}
+.mx-mmore{margin:2px 20px 0;font-size:12.5px;color:var(--ink3)}
+.mx-ments{padding:8px 12px}
+.mx-m.jmp{box-shadow:inset 3px 0 0 var(--ochre);transition:box-shadow .3s}
 @media print{#tab-cht,#tabCht{display:none!important}}
 
 </style>
@@ -1062,7 +1082,7 @@ nav.tabs .cnt.mx-u.z{background:var(--sunk);color:var(--ink3)}
    <button data-tab="sum">Сводка</button>
    <button data-tab="iss">Вопросы<span class="cnt" id="cntI"></span></button>
    <button data-tab="gnt">График</button>
-   <button data-tab="cht" id="tabCht" hidden>Чаты<span class="cnt z mx-u" id="cntC"></span></button>
+   <button data-tab="cht" id="tabCht" hidden>Чаты<span class="cnt z mx-u" id="cntC"></span><span class="cnt mx-atc" id="cntM" hidden title="Вас упомянули"></span></button>
   </nav>
   <div class="sp"></div>
   <div class="hbtns">
@@ -1596,6 +1616,16 @@ function makeDb(createClient, url = SB_URL, key = SB_KEY, proj = 'gdt', pmId = 1
       chk(await sb.from('chat_reads').upsert({ user_id: userId, chat_id: chatId, pinned: on, last_id: lastId || 0 }, { onConflict: 'user_id,chat_id' }));
     },
     async unread() { return chk(await sb.rpc('chat_unread')); },
+    // Упоминания вошедшего с текстом сообщения (окно при входе и раздел «@» в «Чатах»); onlyNew — только неувиденные.
+    async mentionsFeed(onlyNew) {
+      let q = sb.from('mentions').select('message_id,chat_id,at,seen_at').order('at', { ascending: false }).limit(50);
+      if (onlyNew) q = q.is('seen_at', null);
+      const ms = chk(await q);
+      if (!ms.length) return [];
+      const rows = chk(await sb.from('messages').select('id,chat_id,who,t,at,deleted_at').in('id', ms.map(m => m.message_id)));
+      return ms.map(m => ({ ...m, msg: rows.find(r => r.id === m.message_id) })).filter(m => m.msg && !m.msg.deleted_at);
+    },
+    async seeMentions() { chk(await sb.from('mentions').update({ seen_at: new Date().toISOString() }).is('seen_at', null)); },
     async myMentions() {
       return chk(await sb.from('mentions').select('message_id,chat_id,at').is('seen_at', null).order('at', { ascending: false }));
     },
@@ -3658,12 +3688,30 @@ async function chatInit(){
  await cxUnread();
  if(MX.off)MX.off();
  MX.off=DB.subscribeChat(()=>{clearTimeout(MX.t);MX.t=setTimeout(()=>chatRefresh(true),450)},st=>{if(st==="CHANNEL_ERROR"||st==="TIMED_OUT")setTimeout(()=>{if(MX.on)chatInit()},20000)});
- try{const m=await DB.myMentions();if(m.length){const c=MX.list.find(x=>x.id===m[0].chat_id);
-  toast(`Вас упомянули в чатах: ${m.length} — откройте «Чаты»`+(c?` («${trunc(c.name||"Общий чат",40)}»)`:""),false)}}catch(e){}
+ cxMentPopup();
  const want=new URLSearchParams(location.search).get("c");if(want&&(location.hash||"")==="#cht"){const c=MX.list.find(x=>x.id===+want);if(c)MX.cur=c}
  if(UI.tab==="cht"||(location.hash||"")==="#cht")go("cht",false);else rerender()}
 async function cxUnread(){try{const u=await DB.unread();MX.unread=Object.fromEntries(u.map(x=>[x.chat_id,x]))}catch(e){}cxBadge()}
-function cxBadge(){const n=Object.values(MX.unread).reduce((s,x)=>s+x.unread+x.mentions,0),b=$("#cntC");if(!b)return;b.textContent=n>99?"99+":n;b.classList.toggle("z",!n)}
+/* На вкладке: число новых сообщений и отдельно «@N» — сколько раз вас упомянули (13.11, пользователь) */
+function cxBadge(){const n=Object.values(MX.unread).reduce((s,x)=>s+x.unread,0),b=$("#cntC"),m=$("#cntM");MX.mentN=cxMentN();if(!b)return;b.textContent=n>99?"99+":n;b.classList.toggle("z",!n);b.hidden=!n&&!!MX.mentN;
+ if(m){m.hidden=!MX.mentN;m.textContent="@"+MX.mentN}}
+const cxMentN=()=>Object.values(MX.unread).reduce((s,x)=>s+x.mentions,0);
+/* ---- упоминания: окно при входе (обновлении страницы) и раздел «@ Упоминания» в «Чатах» ---- */
+const cxChatOf=id=>MX.list.find(c=>c.id===id);
+const cxWhere=c=>c?(c.kind==="general"?"общем чате":`чате «${esc(trunc(c.name||"операция",60))}» · ${esc(cxProj(c.proj))}`):"чате";
+function cxMentItem(x,pop){const c=cxChatOf(x.chat_id);
+ return `<button class="mx-mi ${x.seen_at?"":"new"}" data-cxjump="${x.chat_id}:${x.message_id}"><span class="mx-av">${esc(cxIni(x.msg.who))}</span>
+  <span class="mx-mt"><span class="w"><b>${esc(x.msg.who)}</b> в ${cxWhere(c)}<span class="tm">${cxWhen(x.msg.at)}</span></span><span class="tx">${cxText(trunc(x.msg.t||"",pop?220:400))}</span></span>${pop?"":`<span class="go">${CX_I.open}</span>`}</button>`}
+async function cxMentPopup(){let L;try{L=await DB.mentionsFeed(true)}catch(e){return}
+ if(!L.length||$("#scrim").classList.contains("on"))return;
+ openModal(`<button class="dr-x mx" data-act="mclose" aria-label="Закрыть">×</button><h3>Вас упомянули${L.length>1?" — "+L.length:""}</h3>
+  <div class="mx-mlist">${L.slice(0,6).map(x=>cxMentItem(x,true)).join("")}</div>${L.length>6?`<p class="mx-mmore">и ещё ${L.length-6} — в «Чаты» → «@ Упоминания»</p>`:""}
+  <div class="mfoot"><button class="btn ghost" data-cxseen>Отметить прочитанными</button><button class="btn pri" data-cxmall>Открыть упоминания</button></div>`)}
+async function cxSeen(){try{await DB.seeMentions();await cxUnread();if(MX.cur&&MX.cur.kind==="ment")MX.ment=await DB.mentionsFeed(false);if(UI.tab==="cht")renderChat()}catch(e){toast("Не получилось: "+dbErr(e),false)}}
+function cxMentHTML(){const L=MX.ment||[];
+ return `<div class="mx-hd"><div class="mx-hbtn">${MX.ph?`<button class="mx-back" data-cxback>${CX_I.back}Чаты</button>`:""}<div class="mx-ht"><div class="blk">Где вас отметили через @</div><h3>Упоминания</h3></div><span class="sp"></span>
+  ${MX.mentN?`<button class="mx-pinb" data-cxseen>Отметить прочитанными</button>`:""}</div></div>
+  <div class="mx-feed mx-ments" id="mxFeed">${L.length?L.map(x=>cxMentItem(x,false)).join(""):`<div class="mx-zero">Вас пока никто не упоминал. Упомянуть человека — написать в чате @ и начало фамилии.</div>`}</div>`}
 /* Список, непрочитанные и открытый чат — заново (realtime, возврат на вкладку, раз в минуту). */
 async function chatRefresh(feed){if(!MX.on)return;
  try{MX.list=await DB.chatList()}catch(e){return}
@@ -3671,6 +3719,7 @@ async function chatRefresh(feed){if(!MX.on)return;
  if(MX.cur&&MX.cur.id==null){const c=cxByUid(MX.cur.uid);if(c&&c.id!=null)MX.cur=c}
  else if(MX.cur){const c=MX.list.find(x=>x.id===MX.cur.id);if(c)MX.cur=c}
  if(feed&&MX.cur&&MX.cur.id!=null)await cxLoad(false);
+ if(feed&&MX.cur&&MX.cur.kind==="ment")try{MX.ment=await DB.mentionsFeed(false)}catch(e){}
  cxPaint()}
 function cxPaint(){if(UI.tab==="cht")renderChat();else if(UI.tab==="iss"||$("#drawer").classList.contains("on"))cxPaintBoxes()}
 async function cxLoad(scroll=true){const c=MX.cur;if(!c||c.id==null){MX.msgs=[];MX.more=false;return}
@@ -3695,7 +3744,9 @@ function cxItem(c){const on=MX.cur&&(c.id!=null?MX.cur.id===c.id:MX.cur.uid===c.
   <div class="tm">${cxWhen(c.last_at)}</div><div class="l">${last}</div>${n?`<span class="mx-badge ${cxAt(c)?"at":""}">${cxAt(c)?"@":n}</span>`:""}</div>`}
 function cxListHTML(){const s=cxSorted(),sec=(h,l)=>l.length?(h?`<div class="mx-sep">${h}</div>`:"")+l.map(cxItem).join(""):"";
  const any=s.gen.length+s.pin.length+s.imp.length+s.rest.length;
- return sec("",s.gen)+sec("Закреплённые",s.pin)+sec("Особо важные",s.imp)+sec(s.pin.length+s.imp.length?"Остальные":"Операции",s.rest)
+ const mo=MX.cur&&MX.cur.kind==="ment",mn=MX.mentN||0;
+ return `<div class="mx-ci at ${mo?"on":""} ${mn?"new":""}" data-cxo="@" role="button" tabindex="0"><div class="t"><span class="mx-atic">@</span><span>Упоминания</span></div><div class="tm"></div><div class="l">${mn?`Новых: ${mn}`:"Где вас отметили через @"}</div>${mn?`<span class="mx-badge at">@${mn>1?mn:""}</span>`:""}</div>`
+  +sec("",s.gen)+sec("Закреплённые",s.pin)+sec("Особо важные",s.imp)+sec(s.pin.length+s.imp.length?"Остальные":"Операции",s.rest)
   +(any?"":`<div class="mx-empty-l">${MX.q?"Ничего не нашлось":"Чатов пока нет"}</div>`)
   +`<p class="mx-tip">Чат операции открывается из вопроса или панели операции в «Графике» — «Обсуждение».</p>`}
 function cxPaintList(){const el=$("#mxChats");if(el)el.innerHTML=cxListHTML()}
@@ -3747,18 +3798,21 @@ function renderChat(){const el=$("#tab-cht");if(!el)return;MX.ph=PHONE();el.styl
  const keep=$("#mxIn"),txt=keep?keep.value:null,foc=keep&&document.activeElement===keep,fe=$("#mxFeed"),atBot=!fe||fe.scrollHeight-fe.scrollTop-fe.clientHeight<60,top=fe?fe.scrollTop:0;
  el.innerHTML=`<div class="mx-app ${MX.ph&&MX.cur?"ph-chat":""}">
   <aside class="mx-list"><div class="mx-find"><label>${CX_I.find}<input id="mxQ" placeholder="Поиск по чатам" value="${esc(MX.q)}" autocomplete="off"></label></div><div class="mx-chats" id="mxChats">${cxListHTML()}</div></aside>
-  <section class="mx-chat">${MX.cur?cxHeadHTML(MX.cur)+`<div class="mx-feed" id="mxFeed">${cxFeedHTML()}</div>`+cxCmpHTML():`<div class="mx-zero">Выберите чат слева</div>`}</section></div>`;
+  <section class="mx-chat">${MX.cur&&MX.cur.kind==="ment"?cxMentHTML():MX.cur?cxHeadHTML(MX.cur)+`<div class="mx-feed" id="mxFeed">${cxFeedHTML()}</div>`+cxCmpHTML():`<div class="mx-zero">Выберите чат слева</div>`}</section></div>`;
  const inp=$("#mxIn");if(inp){inp.value=txt!=null?txt:(MX.draft[cxKey()]||"");cxGrow(inp);if(foc||MX.focus){inp.focus();MX.focus=false}}
- const f2=$("#mxFeed");if(f2){if(MX.scroll||atBot)f2.scrollTop=f2.scrollHeight;else f2.scrollTop=top;MX.scroll=false}
+ const f2=$("#mxFeed");if(f2&&MX.cur&&MX.cur.kind!=="ment"){if(MX.scroll||atBot)f2.scrollTop=f2.scrollHeight;else f2.scrollTop=top;MX.scroll=false}
+ if(MX.jump){const j=$("#mx-"+MX.jump);if(j){j.scrollIntoView({block:"center"});j.classList.add("hov","jmp");setTimeout(()=>j.classList.remove("hov","jmp"),2200);MX.jump=null}}
  cxImgs();cxRead()}
-const cxKey=()=>MX.cur?(MX.cur.id!=null?"c"+MX.cur.id:"u"+MX.cur.uid):"";
+const cxKey=()=>MX.cur&&MX.cur.kind!=="ment"?(MX.cur.id!=null?"c"+MX.cur.id:"u"+MX.cur.uid):"";
 function cxGrow(t){t.style.height="auto";t.style.height=Math.min(t.scrollHeight,180)+"px"}
 /* картинки: подписанная ссылка на 2 минуты, своя на каждый показ (не хранится дольше) */
 async function cxImgs(){for(const img of $$("img[data-cximg]")){const f=cxFile(img.dataset.cximg);if(!f)continue;
  const c=MX.urls[f.id];if(c&&Date.now()-c.at<100000){img.src=c.u;continue}
  try{const u=await DB.fileUrl(f,false);MX.urls[f.id]={u,at:Date.now()};img.src=u}catch(e){}}}
 const cxFile=id=>{for(const m of MX.msgs)for(const f of m.files||[])if(f.id===id)return f;return null};
-async function chatOpen(key){const c=String(key)[0]==="u"?cxByUid(String(key).slice(1))||{id:null,kind:"task",uid:+String(key).slice(1),proj:PROJ.k,name:(byId[String(key).slice(1)]||{}).name||""}:MX.list.find(x=>x.id===+key);
+async function chatOpen(key){
+ if(key==="@"){MX.cur={kind:"ment"};MX.msgs=[];if(UI.tab!=="cht")go("cht");else renderChat();try{MX.ment=await DB.mentionsFeed(false)}catch(e){MX.ment=[]}return renderChat()}
+ const c=String(key)[0]==="u"?cxByUid(String(key).slice(1))||{id:null,kind:"task",uid:+String(key).slice(1),proj:PROJ.k,name:(byId[String(key).slice(1)]||{}).name||""}:MX.list.find(x=>x.id===+key);
  if(!c)return;const k=cxKey(),inp=$("#mxIn");if(inp&&k)MX.draft[k]=inp.value;
  MX.cur=c;MX.reply=null;MX.edit=null;MX.pend=[];MX.msgs=[];MX.more=false;
  if(UI.tab!=="cht")go("cht");else renderChat();
@@ -3826,7 +3880,7 @@ function cxPick(target){cxPickFor=target;let f=$("#cxFile");if(!f){f=document.cr
   const ok=L.filter(x=>x.size<=CHAT_MAX);if(!ok.length)return;
   if(cxPickFor==="cmp"){MX.pend=[...MX.pend,...ok].slice(0,10);renderChat()}else cxQuick(cxPickFor,ok)}}
  f.click()}
-document.addEventListener("click",async e=>{const el=e.target.closest("[data-cxo],[data-cxou],[data-cxback],[data-cxpin],[data-cxsend],[data-cxclip],[data-cxrm],[data-cxrep],[data-cxed],[data-cxdel],[data-cxnor],[data-cxnoe],[data-cxf],[data-cxq],[data-cxmore],[data-cxat],[data-cxqs],[data-cxqclip]");
+document.addEventListener("click",async e=>{const el=e.target.closest("[data-cxjump],[data-cxseen],[data-cxmall],[data-cxo],[data-cxou],[data-cxback],[data-cxpin],[data-cxsend],[data-cxclip],[data-cxrm],[data-cxrep],[data-cxed],[data-cxdel],[data-cxnor],[data-cxnoe],[data-cxf],[data-cxq],[data-cxmore],[data-cxat],[data-cxqs],[data-cxqclip]");
  if(!el||!MX.on)return;const a=el.dataset;
  if(a.cxo)return chatOpen(a.cxo);
  if(a.cxou){e.stopPropagation();closeDrawer();return chatOpenUid(+a.cxou)}
@@ -3847,7 +3901,10 @@ document.addEventListener("click",async e=>{const el=e.target.closest("[data-cxo
   if(/^image\//.test(f.mime))window.open(u,"_blank","noopener");else location.href=u}catch(err){toast("Файл не открылся: "+dbErr(err),false)}return}
  if(a.cxq){const t=$("#mx-"+a.cxq);if(t){t.scrollIntoView({behavior:"smooth",block:"center"});t.classList.add("hov");setTimeout(()=>t.classList.remove("hov"),1400)}return}
  if(a.cxmore!==undefined){const fe=$("#mxFeed"),h=fe.scrollHeight;try{const old=await DB.messages(MX.cur.id,MX.msgs[0].id);MX.more=old.length>=50;MX.msgs=[...old,...MX.msgs];renderChat();const f2=$("#mxFeed");f2.scrollTop=f2.scrollHeight-h}catch(err){}return}
- if(a.cxat)return cxPutAt(a.cxat)});
+ if(a.cxat)return cxPutAt(a.cxat);
+ if(a.cxjump){const[c,m]=a.cxjump.split(":").map(Number);closeModal();MX.jump=m;await chatOpen(c);if(MX.jump&&!MX.msgs.some(x=>x.id===m))toast("Сообщение старое — нажмите «Показать раньше»",false);return}
+ if(a.cxseen!==undefined){closeModal();return cxSeen()}
+ if(a.cxmall!==undefined){closeModal();return chatOpen("@")}});
 document.addEventListener("keydown",e=>{const t=e.target;if(!MX.on)return;
  if(t.id==="mxIn"){const pop=$("#mxPop");
   if(pop&&!pop.hidden){const o=$$("#mxPop .o");if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();cxPopI=(cxPopI+(e.key==="ArrowDown"?1:o.length-1))%o.length;return cxPop()}
