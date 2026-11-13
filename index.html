@@ -875,6 +875,183 @@ body.hist main{margin-right:min(420px,94vw)}
 .pblk .pi .pst{flex:none;margin-left:auto;padding-left:8px}
 .pblk .pl,.pblk .pgr{display:grid;grid-template-columns:minmax(0,1fr)}
 
+/* ---------- «Особо важный» — маленький флажок у названия (13.11; было «Нужно решение ГД») ---------- */
+.vip{flex:none;display:inline-grid;place-items:center;width:24px;height:24px;margin:-3px 4px -3px -4px;border:0;border-radius:6px;background:none;color:var(--ink3);opacity:.55;vertical-align:-6px;transition:opacity .15s,background-color .15s,color .15s}
+.vip svg{width:14px;height:14px}
+.vip:hover{opacity:1;background:var(--sunk);color:var(--red)}
+.vip.on{opacity:1;color:var(--red)}
+.vip.ro{cursor:default}
+.irow:not(:hover) .vip:not(.on){opacity:0}
+.irow.gd .itx b{color:var(--red)}
+.irow.gd:before{content:"";position:absolute;left:-1px;top:8px;bottom:8px;width:3px;border-radius:2px;background:var(--red)}
+.card.gd h3,.pli.gd .op{color:var(--red)}
+.h-vip{display:flex;align-items:center;gap:6px}.h-vip .vip{margin:0}
+.vip-t{font-size:11.5px;font-weight:700;color:#fff;background:var(--red);border-radius:6px;padding:1px 7px}
+@media (pointer:coarse){.irow .vip:not(.on){opacity:.55}.vip{width:36px;height:36px;margin:-9px 0 -9px -8px}}
+
+/* ---------- Чаты (мессенджер, 13.11; эскиз docs/messenger) ---------- */
+.mx-i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+nav.tabs .cnt.mx-u{background:var(--ink);color:var(--paper)}
+nav.tabs .cnt.mx-u.z{background:var(--sunk);color:var(--ink3)}
+#tab-cht{max-width:1480px}
+.mx-app{height:calc(100dvh - var(--th,130px) - 46px);min-height:420px;display:grid;grid-template-columns:340px minmax(0,1fr);background:var(--surface);border:1px solid var(--rule);border-radius:16px;overflow:hidden}
+.mx-list{display:flex;flex-direction:column;min-height:0;border-right:1px solid var(--rule)}
+.mx-find{padding:14px 14px 10px}
+.mx-find label{display:flex;align-items:center;gap:8px;height:36px;padding:0 11px;border-radius:9px;background:var(--sunk);color:var(--ink3);font-size:14px}
+.mx-find input{flex:1;border:0;background:none;outline:none;min-width:0}
+.mx-chats{flex:1;overflow:auto;padding:0 8px 12px;display:grid;gap:2px;align-content:start}
+.mx-ci{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;padding:9px 10px 10px 12px;border-radius:10px;cursor:pointer;transition:background-color .15s}
+.mx-ci:hover{background:color-mix(in srgb,var(--sunk) 55%,transparent)}
+.mx-ci.on{background:var(--raised);box-shadow:0 0 0 1px var(--rule2)}
+.mx-ci.imp{background:color-mix(in srgb,var(--red) 5%,transparent)}
+.mx-ci.imp.on{background:color-mix(in srgb,var(--red) 7%,var(--raised));box-shadow:0 0 0 1px color-mix(in srgb,var(--red) 40%,var(--rule2))}
+.mx-ci .t{font-size:14.5px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;display:flex;align-items:center;gap:6px;min-width:0}
+.mx-ci .t span{overflow:hidden;text-overflow:ellipsis}
+.mx-ci.imp .t>span:not(.n):not(.pn){color:var(--red)}
+.mx-ci .t .n{color:var(--ink3);font-weight:500;flex:none}
+.mx-ci .t .pn{flex:none;color:var(--ink2);display:inline-flex}.mx-ci .t .pn .mx-i{width:13px;height:13px}
+.mx-ci .pj,.mx-hd .pj{flex:none;font-style:normal;font-size:11px;font-weight:600;color:var(--ink3);border:1px solid var(--rule2);border-radius:5px;padding:0 5px;line-height:16px}
+.mx-ci .rd{flex:none;width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 0 3px color-mix(in srgb,var(--red) 18%,transparent)}
+.mx-ci .tm{font-size:12px;color:var(--ink3);align-self:center}
+.mx-ci .l{font-size:13px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.mx-ci .l b{font-weight:600}
+.mx-ci .l .mx-i{width:13px;height:13px;color:var(--ink3);vertical-align:-2px;margin-right:3px}
+.mx-ci .mx-none{color:var(--ink3)}
+.mx-ci.new .t,.mx-ci.new .l{color:var(--ink)}
+.mx-badge{justify-self:end;align-self:center;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--ink);color:var(--paper);font-size:12px;font-weight:700;display:grid;place-items:center}
+.mx-ci.gen .t:before{content:"";flex:none;width:18px;height:18px;border-radius:5px;background:var(--ink) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 5h10M3 8h10M3 11h6' stroke='%23ECE8E1' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") center/12px no-repeat}
+.mx-sep{font-size:12px;font-weight:600;color:var(--ink3);padding:12px 12px 4px}
+.mx-empty-l{padding:14px 12px;font-size:13.5px;color:var(--ink3)}
+.mx-tip{margin:14px 12px 0;font-size:12px;color:var(--ink3);text-wrap:pretty}
+.mx-chat{display:flex;flex-direction:column;min-height:0;background:var(--raised)}
+.mx-hd{border-bottom:1px solid var(--rule);background:var(--surface)}
+.mx-hbtn{display:flex;align-items:center;gap:12px;padding:12px 18px 8px 22px}
+.mx-ht{min-width:0}
+.mx-hbtn .blk{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink3)}
+.mx-hbtn h3{margin:2px 0 0;font-size:18px;font-weight:700;letter-spacing:-.01em;line-height:1.25}
+.mx-hbtn h3 .n{color:var(--ink3);font-weight:600;margin-right:6px}
+.mx-imp{font-size:11px;font-weight:700;color:#fff;background:var(--red);border-radius:5px;padding:0 6px;line-height:16px}
+.mx-pinb{flex:none;display:inline-flex;align-items:center;gap:6px;border:1px solid transparent;background:none;border-radius:8px;padding:5px 9px;font-size:13px;font-weight:600;color:var(--ink3)}
+.mx-pinb:hover{background:var(--sunk);color:var(--ink)}
+.mx-pinb.on{color:var(--ink);border-color:var(--rule2)}
+.mx-sum{display:flex;align-items:flex-end;flex-wrap:wrap;gap:8px 28px;padding:2px 18px 12px 22px}
+.mx-sum .f{display:grid;gap:2px;min-width:0}
+.mx-sum .k{font-size:12px;color:var(--ink3)}
+.mx-sum .v{font-size:14px;font-weight:600;white-space:nowrap}
+.mx-sum .v .l{color:var(--ochre)}.mx-sum .v .r{color:var(--red)}
+.mx-sum .btn{flex:none}
+.mx-other{font-size:13.5px;color:var(--ink2)}.mx-other a{color:var(--ink);font-weight:600}
+.mx-feed{flex:1;min-height:0;overflow:auto;padding:6px 0 14px;display:flex;flex-direction:column}
+.mx-zero{margin:auto;padding:24px;max-width:420px;text-align:center;color:var(--ink3);font-size:14px;text-wrap:pretty}
+.mx-moreb{align-self:center;margin:8px 0;border:1px solid var(--rule2);background:var(--surface);border-radius:999px;padding:4px 14px;font-size:13px;color:var(--ink2)}
+.mx-day{display:flex;align-items:center;gap:12px;margin:14px 22px 6px;font-size:12.5px;font-weight:600;color:var(--ink3)}
+.mx-day:before,.mx-day:after{content:"";flex:1;height:1px;background:var(--rule)}
+.mx-m{position:relative;display:grid;grid-template-columns:34px minmax(0,1fr);gap:0 12px;padding:6px 22px}
+.mx-m:hover,.mx-m.hov{background:color-mix(in srgb,var(--surface) 70%,transparent)}
+.mx-m.cont{padding-top:1px}
+.mx-m.cont .mx-av{visibility:hidden;height:0}
+.mx-m.me-at{background:color-mix(in srgb,var(--ink) 4.5%,var(--raised));box-shadow:inset 3px 0 0 var(--ink)}
+.mx-av{width:34px;height:34px;border-radius:50%;background:var(--sunk);color:var(--ink2);display:grid;place-items:center;font-size:13px;font-weight:700;letter-spacing:-.02em;margin-top:2px}
+.mx-b{min-width:0;max-width:760px}
+.mx-w{display:flex;align-items:baseline;gap:8px;font-size:12.5px;color:var(--ink3)}
+.mx-w b{font-size:14px;font-weight:600;color:var(--ink)}
+.mx-t{margin:1px 0 0;font-size:15px;line-height:1.47;color:var(--ink);overflow-wrap:anywhere;text-wrap:pretty}
+.mx-t a{color:var(--ink);text-decoration-color:var(--rule2)}
+.mx-ed{font-size:12px;color:var(--ink3)}
+.mx-at-t{font-weight:600;color:var(--ink);background:var(--sunk);border-radius:4px;padding:0 3px;margin:0 -1px;white-space:nowrap}
+.mx-at-t.me{background:var(--ink);color:var(--paper)}
+.mx-q{display:block;margin:4px 0;padding:4px 0 4px 10px;border-left:2px solid var(--rule2);font-size:13px;color:var(--ink2);cursor:pointer;max-width:520px}
+.mx-q b{display:block;font-weight:600;font-size:12.5px}
+.mx-q span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mx-del{margin:2px 0 0;font-size:14px;color:var(--ink3)}
+.mx-del .mx-i{width:14px;height:14px;vertical-align:-2px;margin-right:6px}
+.mx-files{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.mx-file{display:flex;align-items:center;gap:11px;width:300px;max-width:100%;padding:8px 8px 8px 9px;border:1px solid var(--rule);border-radius:12px;background:var(--surface);text-align:left;transition:border-color .15s}
+.mx-file:hover{border-color:var(--ink3)}
+.mx-ext{flex:none;width:36px;height:42px;border-radius:6px;background:var(--raised);border:1px solid var(--rule2);display:grid;place-items:end center;padding-bottom:6px;font-size:10px;font-weight:700;color:var(--ink2)}
+.mx-fn{flex:1;min-width:0}
+.mx-fn b{display:block;font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mx-fn span{font-size:12px;color:var(--ink3)}
+.mx-dl{flex:none;width:32px;height:32px;border-radius:8px;display:grid;place-items:center;color:var(--ink2)}
+.mx-file:hover .mx-dl{background:var(--sunk);color:var(--ink)}
+.mx-photo{display:block;position:relative;padding:0;border:0;width:240px;max-width:100%;aspect-ratio:3/2;border-radius:12px;overflow:hidden;background:var(--sunk);outline:1px solid rgba(0,0,0,.1);outline-offset:-1px}
+.mx-photo img{display:block;width:100%;height:100%;object-fit:cover}
+.mx-photo span{position:absolute;left:8px;bottom:8px;font-size:12px;color:#fff;background:rgba(0,0,0,.45);border-radius:6px;padding:2px 7px;max-width:calc(100% - 16px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mx-tools{position:absolute;right:22px;top:-12px;display:none;gap:2px;padding:3px;background:var(--raised);border:1px solid var(--rule2);border-radius:10px;box-shadow:0 6px 18px -8px rgba(58,54,51,.35);z-index:2}
+.mx-m:hover .mx-tools,.mx-m:focus-within .mx-tools{display:flex}
+.mx-tools button{border:0;background:none;width:30px;height:30px;border-radius:7px;display:grid;place-items:center;color:var(--ink2)}
+.mx-tools button:hover{background:var(--sunk);color:var(--ink)}
+.mx-tools button.x:hover{color:var(--red)}
+.mx-cmp{position:relative;padding:10px 22px 16px;border-top:1px solid var(--rule);background:var(--surface)}
+.mx-cmp.ro{font-size:13.5px;color:var(--ink3)}
+.mx-reply{display:flex;align-items:center;gap:10px;padding:0 0 8px 2px;font-size:13px;color:var(--ink2)}
+.mx-reply p{margin:0;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mx-reply b{font-weight:600;color:var(--ink)}
+.mx-reply button,.mx-pc button{border:0;background:none;color:var(--ink3);width:26px;height:26px;border-radius:50%;font-size:15px}
+.mx-reply button:hover,.mx-pc button:hover{background:var(--sunk);color:var(--ink)}
+.mx-pend{display:flex;flex-wrap:wrap;gap:6px;padding:0 0 8px}
+.mx-pc{display:inline-flex;align-items:center;gap:2px;padding:2px 2px 2px 10px;border:1px solid var(--rule2);border-radius:999px;background:var(--raised);font-size:12.5px;color:var(--ink2)}
+.mx-box{display:flex;align-items:flex-end;gap:6px;padding:5px;border:1px solid var(--rule2);border-radius:13px;background:var(--raised);transition:border-color .15s}
+.mx-box:focus-within{border-color:var(--ink3);box-shadow:0 0 0 3px color-mix(in srgb,var(--ink) 7%,transparent)}
+.mx-box .ib2,.mx-dbox .ib2{flex:none;width:36px;height:36px;border:0;border-radius:9px;background:none;color:var(--ink2);display:grid;place-items:center}
+.mx-box .ib2:hover,.mx-dbox .ib2:hover{background:var(--sunk);color:var(--ink)}
+.mx-box .ib2 .mx-i{width:18px;height:18px}
+.mx-in{flex:1;min-height:36px;max-height:180px;padding:7px 4px;border:0;background:none;resize:none;outline:none;font-size:15px;line-height:1.45}
+.mx-send{flex:none;width:36px;height:36px;border-radius:9px;border:0;background:var(--ink);color:var(--paper);display:grid;place-items:center;transition:transform .14s var(--spring)}
+.mx-send:active{transform:scale(.94)}
+.mx-send:disabled{background:var(--sunk);color:var(--ink3)}
+.mx-pop{position:absolute;left:60px;bottom:calc(100% - 6px);width:300px;padding:5px;background:var(--raised);border:1px solid var(--rule2);border-radius:12px;box-shadow:0 18px 40px -18px rgba(58,54,51,.5);z-index:5}
+.mx-pop .o{display:flex;align-items:center;gap:10px;padding:7px 9px;border-radius:8px;cursor:pointer}
+.mx-pop .o.on,.mx-pop .o:hover{background:var(--sunk)}
+.mx-pop .mx-av{width:26px;height:26px;font-size:11.5px;margin:0}
+.mx-pop .mx-nm{font-size:14px;font-weight:600}
+.mx-pop .ft{font-size:11.5px;color:var(--ink3);padding:5px 9px 3px;border-top:1px solid var(--rule);margin-top:4px}
+.mx-pop .ft kbd{font:inherit;font-weight:600;color:var(--ink2)}
+/* «Обсуждение» у вопроса и в панели операции — вместо «Комментариев» */
+.mx-disc{display:grid;border:1px solid var(--rule);border-radius:12px;background:var(--surface);overflow:hidden}
+.mx-dh{display:flex;align-items:center;gap:8px;padding:10px 8px 8px 14px;border:0;background:none;text-align:left;width:100%}
+.mx-dh h4{margin:0;font-size:13px;font-weight:600;color:var(--ink2)}
+.mx-dh .c{font-size:12.5px;color:var(--ink3)}
+.mx-dh .nw{font-size:12px;font-weight:700;color:var(--paper);background:var(--ink);border-radius:9px;padding:0 7px;line-height:18px}
+.mx-dh .go{margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:600;color:var(--ink);padding:5px 8px;border-radius:8px}
+.mx-dh:hover .go{background:var(--sunk)}
+.mx-dm{display:grid;grid-template-columns:26px minmax(0,1fr);gap:0 9px;padding:4px 14px 6px}
+.mx-dm .mx-av{width:26px;height:26px;font-size:11px;margin-top:1px}
+.mx-dm .w{font-size:12px;color:var(--ink3)}.mx-dm .w b{font-size:13px;font-weight:600;color:var(--ink);margin-right:6px}
+.mx-dm p{margin:0;font-size:14px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.mx-dm .mx-i{width:13px;height:13px;vertical-align:-2px;color:var(--ink3)}
+.mx-dbox{display:flex;align-items:flex-end;gap:2px;margin:6px 10px 10px;padding:3px 3px 3px 10px;border:1px solid var(--rule2);border-radius:10px;background:var(--raised)}
+.mx-dbox:focus-within{border-color:var(--ink3)}
+.mx-dbox textarea{flex:1;min-height:32px;border:0;background:none;resize:none;outline:none;padding:6px 0;font-size:14px;line-height:1.4}
+.mx-dbox .ib2{width:32px;height:32px;border-radius:8px}
+.mx-disc.mx-empty{background:transparent;border-style:dashed;border-color:var(--rule2)}
+.mx-dnote{margin:0 0 10px;padding:0 14px;font-size:12.5px;color:var(--ink3)}
+@media (max-width:760px){
+ .mx-app{display:block;height:calc(100dvh - var(--th,120px) - 28px);border-radius:14px}
+ .mx-app .mx-list{height:100%;border-right:0}
+ .mx-app .mx-chat{display:none;height:100%}
+ .mx-app.ph-chat .mx-list{display:none}.mx-app.ph-chat .mx-chat{display:flex}
+ .mx-find label{height:40px;font-size:16px}
+ .mx-ci{padding:11px 12px 12px;min-height:60px}.mx-ci .t{font-size:16px}.mx-ci .l{font-size:14.5px}
+ .mx-hbtn{padding:6px 10px 6px 4px;gap:6px}
+ .mx-back{flex:none;display:flex;align-items:center;height:44px;padding:0 6px 0 2px;border:0;background:none;color:var(--ink);font-size:16px;font-weight:500}
+ .mx-back .mx-i{width:22px;height:22px;stroke-width:2}
+ .mx-hbtn h3{font-size:16px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+ .mx-pinb span{display:none}.mx-pinb{width:40px;height:40px;justify-content:center;padding:0}
+ .mx-sum{padding:0 12px 10px 14px;gap:6px 18px}.mx-sum .btn{min-height:40px}
+ .mx-m{grid-template-columns:30px minmax(0,1fr);gap:0 10px;padding:6px 14px}
+ .mx-av{width:30px;height:30px;font-size:12px}
+ .mx-t{font-size:16px}
+ .mx-file,.mx-photo{width:100%}
+ .mx-tools{right:12px}
+ .mx-cmp{padding:8px 10px 12px}
+ .mx-box{border-radius:22px;padding:4px}.mx-box .ib2,.mx-send{width:40px;height:40px;border-radius:50%}
+ .mx-in{font-size:16px;padding:9px 4px}
+ .mx-dbox textarea{font-size:16px}
+ .mx-pop{left:8px;right:8px;width:auto}
+}
+@media print{#tab-cht,#tabCht{display:none!important}}
+
 </style>
 </head>
 <body>
@@ -885,6 +1062,7 @@ body.hist main{margin-right:min(420px,94vw)}
    <button data-tab="sum">Сводка</button>
    <button data-tab="iss">Вопросы<span class="cnt" id="cntI"></span></button>
    <button data-tab="gnt">График</button>
+   <button data-tab="cht" id="tabCht" hidden>Чаты<span class="cnt z mx-u" id="cntC"></span></button>
   </nav>
   <div class="sp"></div>
   <div class="hbtns">
@@ -900,6 +1078,7 @@ body.hist main{margin-right:min(420px,94vw)}
  <section class="tab" id="tab-sum"></section>
  <section class="tab" id="tab-iss"></section>
  <section class="tab" id="tab-gnt"></section>
+ <section class="tab" id="tab-cht"></section>
 </main>
 <div class="dback" id="dback"></div>
 <aside class="drawer" id="drawer" aria-hidden="true"></aside>
@@ -1139,7 +1318,7 @@ function logPush(log,e,noMerge){const out=(log||[]).slice(),last=out[out.length-
 /* отмена правки из истории (16.10, DECISIONS «Удаление истории»): отменить можно только последнюю правку поля — после
    её отмены (запись уходит) последней становится предыдущая. Значение «было» должно быть полным (не обрезанным «…»). */
 const REV_EDIT=["название","ответственный","примечание","готовность","начало","окончание","программа: название"],
- REV_ISS=["проблема","решение","ответственный","срок","влияние, сут","статус","решение ГД"],
+ REV_ISS=["проблема","решение","ответственный","срок","влияние, сут","статус","решение ГД","особо важный"],
  REV_STEP=/^этап \d+: (название|ответственный|срок, сут|готовность)$/;
 const logFieldKey=e=>e&&(e.act==="edit"||e.act==="issue")&&e.uid!=null&&e.field?e.act+"|"+e.uid+"|"+e.field:null;
 const REV_SNAP=/^программа: (сроки|откуда даты|идёт после|готовность|не раньше|бригада)$/;   // правки листа программы — со снимком строки в t (20.10)
@@ -1320,6 +1499,8 @@ if (typeof module !== 'undefined') module.exports = { toRows, fromRows, tsLocal,
 const SB_URL = 'https://kzzyttgdlbhhusklpflk.supabase.co';
 const SB_KEY = 'sb_publishable_wFI2_ijY2I2G6CvPifB4ag_Peg9Eg41'; // публичный ключ, его можно видеть всем
 const DB_TABLES = ['plan_meta', 'tasks', 'task_state', 'issues', 'steps', 'comments', 'log'];
+// Мессенджер (supabase/messenger.sql, 13.11) — один на все проекты; к sync.js/diffRows отношения не имеет.
+const CHAT_BUCKET = 'chat-files', CHAT_PAGE = 50, CHAT_MAX = 30 * 1024 * 1024;
 
 // createClient — supabase.createClient (браузер) или мок (тесты).
 /* proj — проект (куст), с которым работает страница (06.11, core.js PROJS): читаются только его строки, в каждую
@@ -1364,6 +1545,74 @@ function makeDb(createClient, url = SB_URL, key = SB_KEY, proj = 'gdt', pmId = 1
         else if (o.op === 'delete') chk(await q.delete().eq('proj', proj).in(o.key, o.vals));
       }
     },
+    /* ---- мессенджер ---- */
+    async people() { return chk(await sb.from('profiles').select('user_id,name,role')); },
+    async chatList() { return chk(await sb.rpc('chat_list')); },
+    async chatFor(uid) {                       // чат операции: найти или создать (два человека сразу → 23505 → перечитать)
+      const get = async () => chk(await sb.from('chats').select('id,kind,uid,proj,name').eq('uid', uid));
+      let r = await get();
+      if (r.length) return r[0];
+      const { error } = await sb.from('chats').insert({ kind: 'task', uid });
+      if (error && error.code !== '23505') throw new Error(error.message);
+      return (await get())[0];
+    },
+    async messages(chatId, beforeId) {         // лента: последние 50, дальше — «показать раньше»; файлы — отдельным запросом
+      let q = sb.from('messages').select('*').eq('chat_id', chatId).order('id', { ascending: false }).limit(CHAT_PAGE);
+      if (beforeId) q = q.lt('id', beforeId);
+      const ms = chk(await q).reverse();
+      const fs = ms.length ? chk(await sb.from('message_files').select('id,message_id,name,mime,size,path,removed_at')
+        .in('message_id', ms.map(m => m.id))) : [];
+      for (const m of ms) m.files = fs.filter(f => f.message_id === m.id && !f.removed_at);
+      return ms;
+    },
+    async send({ chatId, t, replyTo, mentions, ck }) {
+      return chk(await sb.from('messages').insert({ chat_id: chatId, t, reply_to: replyTo || null, mentions: mentions || [], ck })
+        .select('id,at,who'))[0];
+    },
+    async attach(messageId, file) {            // сначала строка (путь ставит база), потом сам файл
+      if (file.size > CHAT_MAX) throw new Error('файл больше 30 МБ');
+      const row = chk(await sb.from('message_files').insert({ id: newUuid(), message_id: messageId, name: (file.name || 'файл').slice(0, 255),
+        mime: file.type || 'application/octet-stream', size: file.size }).select('id,message_id,name,mime,size,path'))[0];
+      chk(await sb.storage.from(CHAT_BUCKET).upload(row.path, file, { contentType: file.type || undefined, upsert: false }));
+      return row;
+    },
+    async dropFile(f) {
+      chk(await sb.from('message_files').update({ removed_at: new Date().toISOString() }).eq('id', f.id));
+      await sb.storage.from(CHAT_BUCKET).remove([f.path]);
+    },
+    async fileUrl(f, download = true) {        // ссылка живёт 2 минуты, создаётся по щелчку, нигде не хранится
+      return chk(await sb.storage.from(CHAT_BUCKET).createSignedUrl(f.path, 120, download ? { download: f.name } : undefined)).signedUrl;
+    },
+    async edit(id, t, mentions) { chk(await sb.from('messages').update({ t, mentions }).eq('id', id)); },
+    async unsend(m) {                          // мягкое удаление + освободить место в Storage
+      chk(await sb.from('messages').update({ deleted_at: new Date().toISOString() }).eq('id', m.id));
+      const paths = (m.files || []).map(f => f.path);
+      if (paths.length) await sb.storage.from(CHAT_BUCKET).remove(paths);
+    },
+    async markRead(userId, chatId, lastId) {
+      chk(await sb.from('chat_reads').upsert({ user_id: userId, chat_id: chatId, last_id: lastId }, { onConflict: 'user_id,chat_id' }));
+    },
+    async pin(userId, chatId, on, lastId) {
+      chk(await sb.from('chat_reads').upsert({ user_id: userId, chat_id: chatId, pinned: on, last_id: lastId || 0 }, { onConflict: 'user_id,chat_id' }));
+    },
+    async unread() { return chk(await sb.rpc('chat_unread')); },
+    async myMentions() {
+      return chk(await sb.from('mentions').select('message_id,chat_id,at').is('seen_at', null).order('at', { ascending: false }));
+    },
+    // Realtime мессенджера — свой канал; onChange(table) — что-то пришло (перечитать список и открытый чат).
+    subscribeChat(onChange, onStatus) {
+      let ch = null, off = false;
+      (async () => {
+        const s = (await sb.auth.getSession()).data.session;
+        if (s) await sb.realtime.setAuth(s.access_token);
+        if (off) return;
+        ch = sb.channel('chat-' + (++chanSeq));
+        for (const t of ['chats', 'messages', 'message_files', 'mentions'])
+          ch = ch.on('postgres_changes', { event: '*', schema: 'public', table: t }, p => onChange(t, p && p.new));
+        ch.subscribe(st => onStatus && onStatus(st));
+      })().catch(e => onStatus && onStatus('CHANNEL_ERROR', e));
+      return () => { off = true; if (ch) sb.removeChannel(ch); };
+    },
     /* onChange() — что-то изменилось в любой таблице (у кого угодно); onStatus(s) — 'SUBSCRIBED' | 'CHANNEL_ERROR' | …
        Перед подпиской каналу передаётся ключ вошедшего (иначе при восстановленном входе канал — гость, проба 06.10);
        имя канала — новое на каждую подписку. */
@@ -1382,6 +1631,9 @@ function makeDb(createClient, url = SB_URL, key = SB_KEY, proj = 'gdt', pmId = 1
   };
 }
 
+const newUuid = () => (globalThis.crypto && crypto.randomUUID ? crypto.randomUUID()
+  : '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, c => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)));
+
 // Ошибка базы → понятный человеку текст.
 function dbErr(e) {
   const m = (e && e.message) || String(e);
@@ -1389,11 +1641,14 @@ function dbErr(e) {
   if (/Invalid login credentials/i.test(m)) return 'неверная почта или пароль';
   if (/Email not confirmed/i.test(m)) return 'почта не подтверждена — администратору: включить Auto Confirm у пользователя';
   if (/нет прав:/.test(m)) return m.slice(m.indexOf('нет прав:'));
+  if (/место для файлов|10 файлов|файл больше 30/.test(m)) return m;
+  if (/exceeded the maximum allowed size|Payload too large|413/i.test(m)) return 'файл больше 30 МБ';
+  if (/relation "public\.(chats|messages)" does not exist|Could not find the function public\.chat_/i.test(m)) return 'мессенджер ещё не включён в базе — администратору: supabase/messenger.sql';
   if (/permission denied|row-level security/i.test(m)) return 'нет прав на это действие';
   return m;
 }
 
-if (typeof module !== 'undefined') module.exports = { makeDb, dbErr, SB_URL, SB_KEY, DB_TABLES };
+if (typeof module !== 'undefined') module.exports = { makeDb, dbErr, SB_URL, SB_KEY, DB_TABLES, CHAT_MAX };
 
 /* ================== синхронизация с базой ==================
    Без DOM. Действие в интерфейсе меняет DATA/S как раньше и зовёт save() → sync.run(): отличия от того, что уже
@@ -1843,7 +2098,7 @@ function renderSumOld(){compute();
  const shown=BLOCKS.filter(b=>b.kind!=="misc"&&b.def&&b.main!=null&&FC[b.main]);
  const iss=issList(true);
  $("#tab-sum").innerHTML=`<div class="sum"><div class="panels">${shown.map(panel).join("")}</div>
-  <div class="sec-h"><h2>Проблемные вопросы</h2><span class="sub">${iss.length?iss.length+" открыто"+(iss.filter(i=>S.issues[i].gd).length?", из них нужно решение ГД — "+iss.filter(i=>S.issues[i].gd).length:""):"открытых нет"}</span></div>
+  <div class="sec-h"><h2>Проблемные вопросы</h2><span class="sub">${iss.length?iss.length+" открыто"+(iss.filter(i=>S.issues[i].gd).length?", из них особо важных — "+iss.filter(i=>S.issues[i].gd).length:""):"открытых нет"}</span></div>
   <div class="plist">${iss.length?iss.map(pliHTML).join(""):`<div class="empty">Открытых проблемных вопросов нет</div>`}</div>
   <div class="rules"><span style="--c:var(--red)">красный — есть открытый проблемный вопрос</span><span style="--c:var(--ochre)">жёлтый — прогноз позже утверждённого плана или просрочка</span><span style="--c:var(--green)">зелёный — идёт по плану</span><span style="--c:var(--ink)">прогноз: график плюс поправка на просроченные операции — они сдвигают следующие по связям</span></div></div>`}
 /* ================== ПРОГРАММА РАБОТ: Сводка = лист A3 (16.10, src/program.js) ==================
@@ -2140,14 +2395,14 @@ function progPackageApply(){const p=PPKG;PPKG=null;closeModal();if(!p)return;
   renumber(T);syncSums(T);buildModel();save();go("sum")})}
 
 const goneList=()=>Object.keys(S.issues).map(Number).filter(u=>S.issues[u].gone&&!byId[u]);
-/* Открытые — сначала с пометкой «Нужно решение ГД», затем остальные; внутри каждой группы — ручной порядок S.order (EDITOR.md). Решённые следом. */
+/* Открытые — сначала с пометкой «Особо важный» (до 13.11 — «Нужно решение ГД»), затем остальные; внутри каждой группы — ручной порядок S.order (EDITOR.md). Решённые следом. */
 const issExists=u=>byId[u]&&BOF[u]!=null;
 const issList=openOnly=>{const o=orderedIssues(S.order,S.issues,u=>issExists(u)&&!!openIss(u)),open=[...o.filter(u=>S.issues[u].gd),...o.filter(u=>!S.issues[u].gd)];
  if(openOnly)return open;
  return[...open,...Object.keys(S.issues).map(Number).filter(u=>issExists(u)&&!openIss(u)).sort((a,b)=>b-a)]};
 function pliHTML(u){const i=S.issues[u],t=byId[u];
  return `<div class="pli ${i.gd?"gd":""}" data-go-iss="${u}">
-  <div><div class="op">${esc(t.name)}<em>${esc(BK[BOF[u]].title)}</em>${i.gd?'<span class="tag-gd">решение ГД</span>':""}</div><div class="pr">${esc(i.problem||"Суть проблемы не описана")}</div>${PRINT&&i.solution?`<div class="pr" style="color:var(--ink)">Решение: ${esc(i.solution)}</div>`:""}</div>
+  <div><div class="op">${esc(t.name)}<em>${esc(BK[BOF[u]].title)}</em>${i.gd?'<span class="tag-gd">особо важный</span>':""}</div><div class="pr">${esc(i.problem||"Суть проблемы не описана")}</div>${PRINT&&i.solution?`<div class="pr" style="color:var(--ink)">Решение: ${esc(i.solution)}</div>`:""}</div>
   <div><div class="k">Ответственный</div><div class="v2">${esc(i.who||t.resp||"—")}</div></div>
   <div><div class="k">Срок решения</div><div class="v2">${dueOf(u)?fD(D(dueOf(u))):"—"}</div></div>
   <div><div class="k">Влияние</div><div class="v2">${+i.impact?"+"+fN(+i.impact)+" сут":"не оценено"}</div></div></div>`}
@@ -2168,7 +2423,12 @@ function stepsHTML(u){const sp=(FC[u]&&FC[u].steps)||stepPlan(u),cur=sp.find(x=>
   <button class="x" data-stepdel="${u}:${x.i}" title="Удалить этап">×</button></div>`).join("")}
  <button class="addstep" data-stepadd="${u}">+ этап</button>
  <div class="src">Следующий этап открывается, когда предыдущий на 100%. Изменение сохраняется, когда уходите из поля (Tab, Enter или щелчок мимо).</div></div>`}
-function commentsHTML(u){const c=(S.tasks[u]&&S.tasks[u].cm)||[];
+/* «Особо важный» (13.11, пользователь: «кнопку никто не нажимает»): маленький флажок у названия вместо крупной
+   «Нужно решение ГД»; вопрос наверху и красным у всех, его чат — тоже (chat.js). Поле то же — issues.gd. */
+const vipBtn=u=>{const on=!!S.issues[u].gd;return can("issue_edit")?`<button class="vip ${on?"on":""}" data-gd="${u}" aria-pressed="${on}" title="${on?"Особо важный — снять пометку":"Пометить особо важным: наверху и красным у всех"}">${on?I.flagF:I.flag}</button>`
+ :on?`<span class="vip on ro" title="Особо важный">${I.flagF}</span>`:""};
+function commentsHTML(u){if(typeof chatOn==="function"&&chatOn())return chatBoxHTML(u);   // сайт с мессенджером: «Обсуждение» вместо комментариев
+ const c=(S.tasks[u]&&S.tasks[u].cm)||[];
  return `<div class="cm"><h4>Комментарии${c.length?" ("+c.length+")":""}</h4>
   ${c.map((x,k)=>`<div class="cmi"><div class="w"><b>${esc(x.who||"—")}</b>, ${fDT(new Date(x.at))}</div>${esc(x.t).replace(/\n/g,"<br>")}${isAdmin()||(can("comment")&&x.who===S.me)?`<button class="del" data-cmdel="${u}:${k}" title="Удалить">×</button>`:""}</div>`).join("")}
   ${!can("comment")?"":`<div class="cmadd"><textarea placeholder="Написать комментарий…" data-cmin="${u}" rows="1"></textarea><button class="btn" data-cmadd="${u}">Добавить</button></div>`}</div>`}
@@ -2184,10 +2444,9 @@ function issueFields(u){const i=S.issues[u],t=byId[u];
 function cardHTML(u){const i=S.issues[u],t=byId[u],f=FC[u],done=i.status==="решён";
  const late=f.F>f.F0?` <span class="late">прогноз ${fD(f.F)}</span>`:"";
  return `<article class="card ${i.gd&&!done?"gd":""} ${done?"done":""} ${litId===u?"lit":""}" id="card-${u}">
-  <div class="c-head"><div class="c-title"><div class="blk">${esc(BK[BOF[u]].title)}, операция №${t.id}</div><h3>${esc(t.name)}</h3>
+  <div class="c-head"><div class="c-title"><div class="blk">${esc(BK[BOF[u]].title)}, операция №${t.id}</div><h3>${vipBtn(u)}${esc(t.name)}</h3>
     <div class="c-meta"><span>${fD(f.S0)}–${fD(f.F0)}${late}</span><span>Готовность <b>${Math.round(pct(u))}%</b></span>${t.resp?`<span>Отв. по графику <b>${esc(t.resp)}</b></span>`:""}</div></div>
-   <div class="c-acts">${!can("issue_edit")?`${i.gd?'<span class="tag-gd">решение ГД</span>':""}<span class="st-ro">${esc(i.status)}</span>`:`
-    <button class="gdt ${i.gd?"on":""}" data-gd="${u}" title="Пометка «нужно решение ГД» поднимает вопрос наверх и подсвечивает его ярче">${i.gd?I.flagF:I.flag} Нужно решение ГД</button>
+   <div class="c-acts">${!can("issue_edit")?`<span class="st-ro">${esc(i.status)}</span>`:`
     <div class="seg">${["открыт","в работе","решён"].map(v=>`<button class="${i.status===v?"on "+(v==="решён"?"g":v==="открыт"?"r":""):""}" data-ist="${u}:${v}">${v[0].toUpperCase()+v.slice(1)}</button>`).join("")}</div>`}
     <button class="btn ghost" data-goto="${u}">Показать в графике</button></div></div>
   <div class="c-body"><div class="c-left">${issueFields(u)}${isP(u)?stepsHTML(u):can("steps_edit")?`<button class="addstep" data-stepadd="${u}">+ добавить этапы решения</button>`:""}
@@ -2203,7 +2462,7 @@ function goneHTML(u){const i=S.issues[u];
    <div class="upd">${updText(u)}</div></div><div class="c-right">${commentsHTML(u)}</div></div></article>`}
 /* Вопросы списком (прогон 2, REDESIGN.md §5): строка — суть, блок, ответственный, срок, влияние, статус;
    клик раскрывает на месте (поля, этапы, комментарии). Порядок — перетаскиванием за ручку прямо в списке
-   (planner/admin), «Нужно решение ГД» — своя группа сверху. Фильтры — только вопросные. */
+   (planner/admin), «Особо важные» — своя группа сверху. Фильтры — только вопросные. */
 const IOPEN=new Set();UI.ifl={who:"",blk:"",late:false};
 const issWho=u=>S.issues[u].who||byId[u].resp||"";
 /* срок решения: у вопроса с этапами — плановое окончание последнего этапа (06.11, «Паша»: этапы до 16.11, а срок 06.11) */
@@ -2224,16 +2483,15 @@ function irowHTML(u,drag){const i=S.issues[u],t=byId[u],op=IOPEN.has(u),ncm=((S.
   <div class="ih" data-itog="${u}">
    ${drag?`<span class="igrip" data-igrip title="Перетащите, чтобы изменить порядок">${I.grip}</span>`:"<span></span>"}
    <span class="idot" style="--c:${ST_C[i.status]||"var(--ink3)"}"></span>
-   <span class="itx"><b>${esc(t.name)}</b><span class="ipr">${esc(firstSentence(i.problem)||"суть не описана")}</span></span>
+   <span class="itx">${vipBtn(u)}<b>${esc(t.name)}</b><span class="ipr">${esc(firstSentence(i.problem)||"суть не описана")}</span></span>
    <span class="iblk">${esc(BK[BOF[u]].title)}</span>
    <span class="iwho">${esc(issWho(u)||"—")}</span>
    <span class="idue ${issLate(u)?"l":""}">${dueOf(u)?fD(D(dueOf(u))):"—"}</span>
    <span class="iimp ${+i.impact?"":"z"}">${+i.impact?"+"+fN(+i.impact)+" сут":"не оценено"}</span>
    <span class="ist" style="--c:${ST_C[i.status]||"var(--ink3)"}">${esc(i.status)}</span>
-   <span class="icm">${ncm?I.cm+ncm:""}</span>
+   <span class="icm">${(typeof chatOn==="function"&&chatOn()?chatCount(u):ncm)?I.cm+(typeof chatOn==="function"&&chatOn()?chatCount(u):ncm):""}</span>
   </div>
-  ${op?`<div class="ib2"><div class="c-acts">${!can("issue_edit")?`${i.gd?'<span class="tag-gd">решение ГД</span>':""}<span class="st-ro">${esc(i.status)}</span>`:`
-    <button class="gdt ${i.gd?"on":""}" data-gd="${u}" title="Пометка «нужно решение ГД» поднимает вопрос наверх">${i.gd?I.flagF:I.flag} Нужно решение ГД</button>
+  ${op?`<div class="ib2"><div class="c-acts">${!can("issue_edit")?`<span class="st-ro">${esc(i.status)}</span>`:`
     <div class="seg">${["открыт","в работе","решён"].map(v=>`<button class="${i.status===v?"on "+(v==="решён"?"g":v==="открыт"?"r":""):""}" data-ist="${u}:${v}">${v[0].toUpperCase()+v.slice(1)}</button>`).join("")}</div>`}
     <span class="sp"></span><span class="imeta">№${t.id} · ${fD(FC[u].S0)}–${fD(FC[u].F0)}${FC[u].F>FC[u].F0?` <b>прогноз ${fD(FC[u].F)}</b>`:""} · готовность ${Math.round(pct(u))}%</span>
     <button class="btn ghost" data-goto="${u}">Показать в графике</button></div>
@@ -2247,7 +2505,7 @@ function renderIss(){compute();if(litId)IOPEN.add(litId);
  const grp=(h,l,k)=>l.length?`${h?`<div class="igh">${h}<span>${l.length}</span></div>`:""}<div class="ilist" data-grp="${k}">${l.map(u=>irowHTML(u,drag)).join("")}</div>`:"";
  $("#tab-iss").innerHTML=`<div class="iss-top"><h2>Проблемные вопросы</h2><span class="sp"></span>${issFiltersHTML()}${can("issue_edit")?`<button class="btn red" data-act="addiss">+ Проблемный вопрос</button>`:""}</div>
   <div class="ihd"><span></span><span></span><span>Операция и суть</span><span>Блок</span><span>Ответственный</span><span>Срок</span><span>Влияние</span><span>Статус</span><span></span></div>
-  ${op.length?grp(gd.length?"Нужно решение ГД":"",gd,"gd")+grp(gd.length?"Остальные":"",rest,"rest"):`<div class="empty">${iflActive()?"Под фильтр ничего не попало":"Открытых проблемных вопросов нет. Отметьте операцию флажком в графике или кнопкой выше."}</div>`}
+  ${op.length?grp(gd.length?"Особо важные":"",gd,"gd")+grp(gd.length?"Остальные":"",rest,"rest"):`<div class="empty">${iflActive()?"Под фильтр ничего не попало":"Открытых проблемных вопросов нет. Отметьте операцию флажком в графике или кнопкой выше."}</div>`}
   ${(()=>{const g=goneList();return g.length?`<details class="arch" open><summary>Операций нет в текущем плане (${g.length})</summary><div class="cards">${g.map(goneHTML).join("")}</div></details>`:""})()}
   ${ar.length?`<details class="arch" ${ar.some(u=>IOPEN.has(u))?"open":""}><summary>Решённые (${ar.length})</summary><div class="ilist">${ar.map(u=>irowHTML(u,false)).join("")}</div></details>`:""}`;
  litId=null;growAll($("#tab-iss"))}
@@ -2586,7 +2844,7 @@ function openDrawer(u){closeHist();if(UI.hot!==u){const o=UI.hot;UI.hot=null;if(
   ${lateHint(u)}
   ${PHONE()?ctxHTML(u):""}
   <div class="dr-sec"><h4>Готовность</h4>${isP(u)?`<div class="pctrl"><span style="flex:1;color:var(--ink3);font-size:13px">Считается по этапам решения</span><output>${p}%</output></div>`:PHONE()||!can("pct_edit")?`<div class="pctrl"><output>${p}%</output></div>`:`<div class="pctrl"><input type="range" min="0" max="100" step="5" value="${p}" data-pctr="${u}"><output id="pout">${p}%</output></div>`}${!isP(u)&&p<100&&can("pct_edit")&&!PLANIDS.has(u)?`<button class="btn ghost" data-done="${u}" title="${can("plan_edit")?"Готовность 100 % и фактическое окончание — сейчас":"Готовность 100 %"}">Выполнено сегодня</button>`:""}<div class="upd">${updText(u)}</div></div>
-  ${iss?`<div class="dr-sec"><h4>Проблемный вопрос</h4><div class="pbox">${issueFields(u)}${!can("issue_edit")?"":`<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="gdt ${i.gd?"on":""}" data-gd="${u}">${i.gd?I.flagF:I.flag} Нужно решение ГД</button>${PHONE()?`<div class="seg">${["открыт","в работе","решён"].map(v=>`<button class="${i.status===v?"on "+(v==="решён"?"g":v==="открыт"?"r":""):""}" data-ist="${u}:${v}">${v[0].toUpperCase()+v.slice(1)}</button>`).join("")}</div>`:`<button class="btn" data-ist="${u}:решён">Решено</button><button class="btn ghost" data-go-iss="${u}">Открыть в списке</button>`}</div>`}</div></div>`
+  ${iss?`<div class="dr-sec"><h4 class="h-vip">Проблемный вопрос ${vipBtn(u)}${i.gd?'<span class="vip-t">особо важный</span>':""}</h4><div class="pbox">${issueFields(u)}${!can("issue_edit")?"":`<div style="display:flex;gap:8px;flex-wrap:wrap">${PHONE()?`<div class="seg">${["открыт","в работе","решён"].map(v=>`<button class="${i.status===v?"on "+(v==="решён"?"g":v==="открыт"?"r":""):""}" data-ist="${u}:${v}">${v[0].toUpperCase()+v.slice(1)}</button>`).join("")}</div>`:`<button class="btn" data-ist="${u}:решён">Решено</button><button class="btn ghost" data-go-iss="${u}">Открыть в списке</button>`}</div>`}</div></div>`
    :`<div class="dr-sec">${can("issue_edit")?`<button class="btn red" data-flag="${u}" style="justify-self:start">${I.flag} Отметить как проблемный вопрос</button>`:""}${i&&i.status==="решён"?`<div class="src">Был проблемный вопрос, решён: <q>${esc(i.problem)}</q></div>`:""}</div>`}
   ${isP(u)?`<div class="dr-sec">${stepsHTML(u)}</div>`:""}
   <div class="dr-sec">${commentsHTML(u)}</div></div>`;
@@ -2903,7 +3161,7 @@ function revertEntry(e){const u=e.uid,t=byId[u],f=e.field,v=e.from;
   Object.entries(sn.ops||{}).forEach(([x,[a,b]])=>{const o=byId[x];if(o){o.s=a;o.f=b}});
   renumber(DATA.tasks);syncSums(DATA.tasks);return null}
  if(e.act==="issue"){const i=S.issues[u];if(!i)return"вопроса уже нет";
-  if(f==="статус")i.status=v;else if(f==="решение ГД")i.gd=v==="да";
+  if(f==="статус")i.status=v;else if(f==="решение ГД"||f==="особо важный")i.gd=v==="да";
   else{const k=Object.keys(ISSF).find(k=>ISSF[k]===f);if(!k)return"поле неизвестно";i[k]=k==="impact"?(+v||0):v}
   touchIss(u);return null}
  if(!t)return"операции уже нет";
@@ -2978,7 +3236,7 @@ function go(tab,push=true){UI.tab=tab;saveUI();if(tab!=="gnt"&&$("#drawer").clas
  $$("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.tab===tab));
  $$("section.tab").forEach(s=>s.classList.toggle("on",s.id==="tab-"+tab));if(push)history.replaceState(null,"","#"+tab);renderTab()}
 function renderTab(keep){renderMe();paintDirty();const n=issList(true).length;$("#cntI").textContent=n;$("#cntI").classList.toggle("z",!n);
- if(LAND())renderGnt(keep);else if(UI.tab==="sum")renderSum();else if(UI.tab==="iss")renderIss();else renderGnt(keep)}
+ if(LAND())renderGnt(keep);else if(UI.tab==="sum")renderSum();else if(UI.tab==="iss")renderIss();else if(UI.tab==="cht"&&typeof renderChat==="function")renderChat();else renderGnt(keep)}
 const rerender=()=>{renderTab(true);refreshDrawer();refreshHist()};
 const newDay=()=>{if(DATA&&dayTick()){buildModel();$("#asof").innerHTML=asofHTML();rerender()}};
 setInterval(newDay,60000);   // линия «сегодня» сама переходит на новый день
@@ -3012,7 +3270,8 @@ document.addEventListener("click",e=>{if(!e.target.closest(".more"))$("#menu").h
   if(a.goto)return goto(+a.goto);
   if(a.done)return doneToday(+a.done);
   if(a.goIss){closeDrawer();IOPEN.add(+a.goIss);go("iss");return requestAnimationFrame(()=>{const c=$("#card-"+a.goIss);if(c){c.scrollIntoView({behavior:"smooth",block:"center"});c.classList.add("lit")}})}
-  if(a.gd)return need(()=>{const i=S.issues[a.gd];LOG({act:"issue",uid:+a.gd,name:byId[a.gd].name,field:"решение ГД",from:i.gd?"да":"нет",to:i.gd?"нет":"да"});i.gd=!i.gd;touchIss(+a.gd);save();rerender()});
+  if(a.gd){e.stopPropagation();return need(()=>{const i=S.issues[a.gd];LOG({act:"issue",uid:+a.gd,name:byId[a.gd].name,field:"особо важный",from:i.gd?"да":"нет",to:i.gd?"нет":"да"});i.gd=!i.gd;touchIss(+a.gd);save();rerender();
+   if(i.gd)toast("Особо важный: вопрос наверху и красным у всех");if(typeof chatSoon==="function")chatSoon()})}
   if(a.ist){const[u,v]=a.ist.split(":");if(v==="решён"&&isP(+u)&&pct(+u)<100&&S.issues[u].status!=="решён"){const nm=esc(trunc(byId[u].name,70)),left=ST(+u).filter(x=>(+x.pct||0)<100).map(x=>"«"+esc(trunc(x.n,40))+"»");   // 06.11, «Паша»: закрыл вопрос при незаконченных этапах молча
     return pAsk({h:`«${nm}» — этапы решения не закончены (${Math.round(pct(+u))} %)`,p:`Не готовы: ${left.slice(0,4).join(", ")}${left.length>4?` и ещё ${left.length-4}`:""}. Закрыть вопрос всё равно? Этапы останутся у операции.`,
      opts:[{l:"Отмена",fn:()=>{}},{l:"Закрыть вопрос",pri:true,fn:()=>issStatus(u,v)}]})}}
@@ -3240,9 +3499,9 @@ $("#asof").innerHTML=asofHTML();
 if(S.copyAt){const b=$("#stale");b.hidden=false;$("#saveBtn").style.display="none";   // «Скачать копию» с сайта
  b.textContent=`Копия сайта от ${fDT(new Date(S.copyAt))} — для просмотра без интернета. Правки здесь на сайт не попадут.`}
 else if(STALE){const b=$("#stale");b.hidden=false;b.textContent=`Открыта старая версия файла (ревизия ${STALE.rev}, уже видели ${STALE.seen}). Свежая — с последней датой в имени файла.`}
-addEventListener("hashchange",()=>{if(!BLOCKS)return;const t=(location.hash||"").slice(1);if(["sum","iss","gnt"].includes(t)&&t!==UI.tab)go(t,false)});
+addEventListener("hashchange",()=>{if(!BLOCKS)return;const t=(location.hash||"").slice(1);if((["sum","iss","gnt"].includes(t)||t==="cht"&&typeof chatOn==="function"&&chatOn())&&t!==UI.tab)go(t,false)});
 const hsh=(location.hash||"").slice(1);
-go(["sum","iss","gnt"].includes(hsh)?hsh:(UI.tab||"sum"))}
+go(["sum","iss","gnt"].includes(hsh)?hsh:(UI.tab&&UI.tab!=="cht"?UI.tab:"sum"))}   // «Чаты» откроет chat.js, когда загрузится
 if(!SITE)boot();
 /* лист программы подстраивается под ширину, когда она меняется не от окна: открыли/закрыли историю (20.10, пункт 1) */
 let sumW=0;if(window.ResizeObserver)new ResizeObserver(()=>{const w=$("#tab-sum").clientWidth;if(UI.tab!=="sum"||!w||w===sumW||!$("#tab-sum .psheet"))return;sumW=w;clearTimeout(rzT);rzT=setTimeout(()=>{if(UI.tab==="sum"&&!$("#scrim").classList.contains("on"))renderSum()},60)}).observe($("#tab-sum"));
@@ -3263,7 +3522,7 @@ $("#dback").addEventListener("click",closeDrawer);
 const DB=SITE?makeDb(typeof makeMockSupabase==="function"?MOCK_SB.createClient:supabase.createClient,SB_URL,SB_KEY,PROJ.k,PROJ.id):null;   // в «копии» базы нет
 let ME_=null,SYNC=null,BOOTED=false,WAIT=false,rtOff=null,rtT=null;
 const siteCan=a=>!!(ME_&&ME_.can[a]);
-const siteWriter=()=>!!ME_&&Object.entries(ME_.can).some(([k,v])=>v&&k!=="log_clear");
+const siteWriter=()=>!!ME_&&Object.entries(ME_.can).some(([k,v])=>v&&k!=="log_clear"&&k!=="chat");   // chat (13.11) — у всех, «пишущим» не делает
 /* Песочница (роль sandbox, supabase/tools/add_sandbox.sql): план читается из базы один раз при входе, правки остаются
    только на этой странице — сайт их не отправляет, а база от этой роли запись и не примет. F5 или «Сбросить
    песочницу» — снова как в базе. В браузере ничего не хранится (правило 3). «Смотреть как» — права выбранной роли
@@ -3281,7 +3540,7 @@ function sbReset(){if(!confirm("Сбросить песочницу? Ваши п
 function impBtn(){const b=$('[data-act="impx"]');b.hidden=siteRole()!=="admin";b.textContent="Загрузить пакет от Claude…";b.title="Пакет программы работ (.json), который готовит Claude из файла Project"}
 const newKey=()=>crypto.randomUUID?crypto.randomUUID():"10000000-1000-4000-8000-100000000000".replace(/[018]/g,c=>(c^crypto.getRandomValues(new Uint8Array(1))[0]&15>>c/4).toString(16));
 /* Человек печатает или открыто окно — картину базы показываем после (иначе перерисовка съест ввод). */
-const busyUI=()=>$("#scrim").classList.contains("on")||!!document.activeElement&&document.activeElement.matches("main input,main textarea,main select,#drawer input,#drawer textarea,#drawer select");
+const busyUI=()=>$("#scrim").classList.contains("on")||!!document.activeElement&&document.activeElement.matches("main input:not(#mxQ),main textarea:not(.mx-in),main select,#drawer input,#drawer textarea,#drawer select");   // поле чата перерисовка не трогает (chat.js)
 
 let logK=0;
 function siteRows(){for(const l of S.log)if(l.id==null&&!l._k)l._k="k"+(++logK);return toRows(DATA,S)}
@@ -3317,15 +3576,15 @@ async function afterLogin(){
  ME_=await DB.me();
  if(!ME_){await DB.signOut();return showLogin("У вас ещё нет роли — администратору: Table Editor → profiles → role")}
  if(sandbox()){sbView("planner");SYNC=makeSandboxSync(DB,{apply:siteApply});await SYNC.start();hideLogin();
-  return toast("Песочница: правки остаются на этой странице, в базу не уходят")}
+  chatInit();return toast("Песочница: правки остаются на этой странице, в базу не уходят")}
  SYNC=makeSync(DB,{rows:siteRows,apply:siteApply,later:()=>{WAIT=true},error:siteError,noOrd:()=>!siteCan("issue_order")});
- await SYNC.start();hideLogin();live()}
+ await SYNC.start();hideLogin();live();chatInit()}
 async function siteLogout(){if(SYNC&&(SYNC.busy()||SYNC.pending()))return toast("Подождите: правки ещё сохраняются");
- if(rtOff)rtOff();await DB.signOut();location.reload()}
+ if(rtOff)rtOff();if(MX.off)MX.off();await DB.signOut();location.reload()}
 
 /* ---- обновления от других ---- */
 function live(){if(rtOff)rtOff();
- rtOff=DB.subscribe(()=>{clearTimeout(rtT);rtT=setTimeout(()=>SYNC.run(),400)},
+ rtOff=DB.subscribe(t=>{clearTimeout(rtT);rtT=setTimeout(()=>SYNC.run(),400);if(t==="issues")chatSoon()},   // «особо важный» — и в списке чатов
   st=>{if(st==="CHANNEL_ERROR"||st==="TIMED_OUT")setTimeout(live,20000)})}   // realtime может не подключиться — повтор
 document.addEventListener("visibilitychange",()=>{if(SYNC&&!document.hidden)SYNC.run()});
 addEventListener("online",()=>{if(SYNC)SYNC.run()});
@@ -3346,6 +3605,265 @@ if(SITE){$("#saveBtn").style.display="none";$("#copyBtn").hidden=false}
 if(SITE)(async()=>{let s=null;try{s=await DB.session()}catch(e){}
  if(!s)return showLogin();
  try{await afterLogin()}catch(e){showLogin(dbErr(e))}})();
+
+/* ================== ЧАТЫ (мессенджер, 13.11) ==================
+   Только сайт (build.py --site): один мессенджер на все проекты — общий чат и чаты операций ГДТ и ВТК (метка проекта).
+   База — supabase/messenger.sql, обращения — через обёртку src/db.js. Пока SQL не запущен, chatList() отвечает ошибкой —
+   вкладки «Чаты» нет, у вопросов остаются прежние «Комментарии».
+   Пишут все с логином (право chat), песочница — только читает. Закрепить — каждый себе; «особо важный» — флажок вопроса
+   (issues.gd), горит красным и наверху у всех. DECISIONS «Мессенджер». */
+const MX={on:false,list:[],unread:{},people:[],cur:null,msgs:[],more:false,reply:null,edit:null,pend:[],q:"",urls:{},draft:{},busy:false,ph:false,off:null,t:null};
+const CX_I={
+ clip:'<svg class="mx-i" viewBox="0 0 16 16"><path d="M13.5 7.4 8.2 12.7a3.4 3.4 0 0 1-4.8-4.8l5.5-5.5a2.2 2.2 0 0 1 3.2 3.1L6.6 11a1 1 0 0 1-1.5-1.4l5-5"/></svg>',
+ send:'<svg class="mx-i" viewBox="0 0 16 16"><path d="M8 13V3.5M3.8 7.5 8 3.3l4.2 4.2"/></svg>',
+ dl:'<svg class="mx-i" viewBox="0 0 16 16"><path d="M8 2.5v8m0 0 3-3m-3 3-3-3M3 13.5h10"/></svg>',
+ reply:'<svg class="mx-i" viewBox="0 0 16 16"><path d="M6.5 4 3 7.5 6.5 11M3 7.5h6.5a3.5 3.5 0 0 1 3.5 3.5v1"/></svg>',
+ edit:'<svg class="mx-i" viewBox="0 0 16 16"><path d="M10.5 3 13 5.5 6 12.5 3 13l.5-3z"/></svg>',
+ del:'<svg class="mx-i" viewBox="0 0 16 16"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.6 8.5h5.8l.6-8.5"/></svg>',
+ back:'<svg class="mx-i" viewBox="0 0 16 16"><path d="M10 3 5 8l5 5"/></svg>',
+ find:'<svg class="mx-i" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3"/></svg>',
+ open:'<svg class="mx-i" viewBox="0 0 16 16"><path d="M6 3.5 10.5 8 6 12.5"/></svg>',
+ gone:'<svg class="mx-i" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><path d="m4.2 11.8 7.6-7.6"/></svg>',
+ pin:'<svg class="mx-i" viewBox="0 0 16 16"><path d="M9.5 2.5 13.5 6.5 11 7.5 8.5 10l.5 3-2-2-3.5 3.5M7 11 5 9m0 0-2-2 3-.5L8.5 4z"/></svg>',
+ pinF:'<svg class="mx-i" viewBox="0 0 16 16"><path d="M9.5 2.5 13.5 6.5 11 7.5 8.5 10l.5 3-6.5-6.5 3-.5L8.5 4z" fill="currentColor"/><path d="M5.5 10.5 2.5 13.5"/></svg>'};
+const chatOn=()=>MX.on;
+const cxWrite=()=>SITE&&!!ME_&&ME_.role!=="sandbox"&&!!(ME_.can&&ME_.can.chat!==false);
+const cxProj=k=>{const p=PROJS.find(x=>x.k===k);return p?p.org+(p.pad?" · "+p.pad:""):""};
+const cxByUid=u=>MX.list.find(c=>c.uid===+u);
+const cxUnr=c=>{const x=c&&c.id!=null&&MX.unread[c.id];return x?x.unread+x.mentions:0};
+const cxAt=c=>{const x=c&&c.id!=null&&MX.unread[c.id];return!!(x&&x.mentions)};
+const cxIni=n=>{const w=String(n||"?").trim().split(/\s+/);return(w[0]||"?")[0].toUpperCase()+(w[1]?w[1][0].toUpperCase():"")};
+const cxSize=b=>b>=1048576?fN(Math.round(b/104857.6)/10)+" МБ":Math.max(1,Math.round(b/1024))+" КБ";
+const cxExt=n=>{const m=/\.([a-z0-9]{1,5})$/i.exec(n||"");return m?m[1].toUpperCase():"ФАЙЛ"};
+function cxWhen(iso){if(!iso)return"";const d=new Date(iso),t=p2(d.getHours())+":"+p2(d.getMinutes()),n=new Date();
+ if(d.toDateString()===n.toDateString())return t;const y=new Date(n);y.setDate(n.getDate()-1);if(d.toDateString()===y.toDateString())return"вчера";
+ return fD(d)+(d.getFullYear()!==n.getFullYear()?"."+String(d.getFullYear()).slice(2):"")}
+function cxDay(iso){const d=new Date(iso),n=new Date();if(d.toDateString()===n.toDateString())return"Сегодня";
+ const y=new Date(n);y.setDate(n.getDate()-1);if(d.toDateString()===y.toDateString())return"Вчера";
+ return d.toLocaleDateString("ru-RU",{day:"numeric",month:"long",...(d.getFullYear()!==n.getFullYear()?{year:"numeric"}:{})})}
+const cxPeople=()=>MX.people.filter(p=>p.role&&p.role!=="sandbox"&&p.name);
+/* Текст сообщения: экранирование → ссылки → @упоминания (своё — тёмным). */
+function cxText(t){let h=esc(t).replace(/(https?:\/\/[^\s<]+[^\s<.,;:!?)»"'])/g,'<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+ const ps=cxPeople().slice().sort((a,b)=>b.name.length-a.name.length);
+ for(const p of ps){const nm=esc(p.name),re=new RegExp("@"+nm.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"(?![\\wА-Яа-яЁё])","g");
+  h=h.replace(re,`<span class="mx-at-t${ME_&&p.user_id===ME_.uid?" me":""}">@${nm}</span>`)}
+ return h.replace(/\n/g,"<br>")}
+const cxMentions=t=>cxPeople().filter(p=>new RegExp("@"+p.name.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"(?![\\wА-Яа-яЁё])").test(t)).map(p=>p.user_id).slice(0,20);
+
+/* ---- загрузка ---- */
+async function chatInit(){
+ try{const[ppl,list]=await Promise.all([DB.people(),DB.chatList()]);MX.people=ppl;MX.list=list;MX.on=true}
+ catch(e){MX.on=false;return}
+ $("#tabCht").hidden=false;$("#tab-cht").hidden=false;
+ await cxUnread();
+ if(MX.off)MX.off();
+ MX.off=DB.subscribeChat(()=>{clearTimeout(MX.t);MX.t=setTimeout(()=>chatRefresh(true),450)},st=>{if(st==="CHANNEL_ERROR"||st==="TIMED_OUT")setTimeout(()=>{if(MX.on)chatInit()},20000)});
+ try{const m=await DB.myMentions();if(m.length){const c=MX.list.find(x=>x.id===m[0].chat_id);
+  toast(`Вас упомянули в чатах: ${m.length} — откройте «Чаты»`+(c?` («${trunc(c.name||"Общий чат",40)}»)`:""),false)}}catch(e){}
+ const want=new URLSearchParams(location.search).get("c");if(want&&(location.hash||"")==="#cht"){const c=MX.list.find(x=>x.id===+want);if(c)MX.cur=c}
+ if(UI.tab==="cht"||(location.hash||"")==="#cht")go("cht",false);else rerender()}
+async function cxUnread(){try{const u=await DB.unread();MX.unread=Object.fromEntries(u.map(x=>[x.chat_id,x]))}catch(e){}cxBadge()}
+function cxBadge(){const n=Object.values(MX.unread).reduce((s,x)=>s+x.unread+x.mentions,0),b=$("#cntC");if(!b)return;b.textContent=n>99?"99+":n;b.classList.toggle("z",!n)}
+/* Список, непрочитанные и открытый чат — заново (realtime, возврат на вкладку, раз в минуту). */
+async function chatRefresh(feed){if(!MX.on)return;
+ try{MX.list=await DB.chatList()}catch(e){return}
+ await cxUnread();
+ if(MX.cur&&MX.cur.id==null){const c=cxByUid(MX.cur.uid);if(c&&c.id!=null)MX.cur=c}
+ else if(MX.cur){const c=MX.list.find(x=>x.id===MX.cur.id);if(c)MX.cur=c}
+ if(feed&&MX.cur&&MX.cur.id!=null)await cxLoad(false);
+ cxPaint()}
+function cxPaint(){if(UI.tab==="cht")renderChat();else if(UI.tab==="iss"||$("#drawer").classList.contains("on"))cxPaintBoxes()}
+async function cxLoad(scroll=true){const c=MX.cur;if(!c||c.id==null){MX.msgs=[];MX.more=false;return}
+ const ms=await DB.messages(c.id);if(MX.cur!==c&&(!MX.cur||MX.cur.id!==c.id))return;
+ MX.msgs=ms;MX.more=ms.length>=50;cxRead();if(scroll)MX.scroll=true}
+let cxReadT=0;
+function cxRead(){const c=MX.cur;if(!c||c.id==null||!MX.msgs.length||document.hidden||UI.tab!=="cht"||sandbox())return;   // песочница в базу не пишет
+ const last=MX.msgs[MX.msgs.length-1].id,u=MX.unread[c.id];if(!u&&c._read>=last)return;c._read=last;
+ clearTimeout(cxReadT);cxReadT=setTimeout(async()=>{try{await DB.markRead(ME_.uid,c.id,last);delete MX.unread[c.id];cxBadge();if(UI.tab==="cht")cxPaintList()}catch(e){}},300)}
+
+/* ---- список чатов ---- */
+function cxSorted(){const q=MX.q.trim().toLowerCase(),L=MX.list.filter(c=>!q||(c.name||"Общий чат").toLowerCase().includes(q)||(c.last_t||"").toLowerCase().includes(q)||cxProj(c.proj).toLowerCase().includes(q));
+ const by=(a,b)=>(b.last_at||"").localeCompare(a.last_at||"");
+ return{gen:L.filter(c=>c.kind==="general"),pin:L.filter(c=>c.kind!=="general"&&c.pinned).sort(by),
+  imp:L.filter(c=>c.kind!=="general"&&!c.pinned&&c.important).sort(by),rest:L.filter(c=>c.kind!=="general"&&!c.pinned&&!c.important).sort(by)}}
+function cxItem(c){const on=MX.cur&&(c.id!=null?MX.cur.id===c.id:MX.cur.uid===c.uid),n=cxUnr(c),gen=c.kind==="general",t=byId[c.uid]&&c.proj===PROJ.k?byId[c.uid]:null;
+ const last=c.last_id==null?`<span class="mx-none">${c.important?"Особо важный вопрос — обсуждения ещё нет":"Сообщений нет"}</span>`
+  :c.last_del?`<b>${esc(c.last_who||"")}:</b> сообщение удалено`
+  :`<b>${esc(ME_&&c.last_who===ME_.name?"Вы":c.last_who||"")}:</b> ${c.last_files&&!c.last_t?CX_I.clip+"Файл":esc(c.last_t||"")}`;
+ return `<div class="mx-ci ${on?"on":""} ${n?"new":""} ${gen?"gen":""} ${c.important?"imp":""}" data-cxo="${c.id!=null?c.id:"u"+c.uid}" role="button" tabindex="0">
+  <div class="t">${c.important?'<i class="rd" title="Особо важный вопрос"></i>':""}${c.pinned?`<span class="pn" title="Закреплён у вас">${CX_I.pinF}</span>`:""}${t?`<span class="n">№${t.id}</span>`:""}<span>${esc(gen?"Общий чат":c.name||"Операция удалена")}</span>${gen?"":`<em class="pj">${esc(cxProj(c.proj))}</em>`}</div>
+  <div class="tm">${cxWhen(c.last_at)}</div><div class="l">${last}</div>${n?`<span class="mx-badge ${cxAt(c)?"at":""}">${cxAt(c)?"@":n}</span>`:""}</div>`}
+function cxListHTML(){const s=cxSorted(),sec=(h,l)=>l.length?(h?`<div class="mx-sep">${h}</div>`:"")+l.map(cxItem).join(""):"";
+ const any=s.gen.length+s.pin.length+s.imp.length+s.rest.length;
+ return sec("",s.gen)+sec("Закреплённые",s.pin)+sec("Особо важные",s.imp)+sec(s.pin.length+s.imp.length?"Остальные":"Операции",s.rest)
+  +(any?"":`<div class="mx-empty-l">${MX.q?"Ничего не нашлось":"Чатов пока нет"}</div>`)
+  +`<p class="mx-tip">Чат операции открывается из вопроса или панели операции в «Графике» — «Обсуждение».</p>`}
+function cxPaintList(){const el=$("#mxChats");if(el)el.innerHTML=cxListHTML()}
+
+/* ---- открытый чат ---- */
+function cxHeadHTML(c){if(c.kind==="general")return `<div class="mx-hd"><div class="mx-hbtn"><div><div class="blk">Все проекты</div><h3>Общий чат</h3></div><span class="sp"></span></div></div>`;
+ const here=c.proj===PROJ.k&&byId[c.uid],t=here?byId[c.uid]:null,iss=here&&S.issues[c.uid];
+ let meta="";
+ if(t){const f=FC[c.uid]||{};const late=f.F&&f.F0&&f.F>f.F0;
+  meta=`<div class="mx-sum"><div class="f"><span class="k">Ответственный</span><span class="v">${esc(t.resp||"—")}</span></div>
+   ${f.F0?`<div class="f"><span class="k">Окончание${late?": план → прогноз":""}</span><span class="v">${fD(f.F0)}${late?` → <span class="l">${fD(f.F)}</span>`:""}</span></div>`:""}
+   <div class="f"><span class="k">Готовность</span><span class="v">${Math.round(pct(c.uid))}%</span></div>
+   ${iss?`<div class="f"><span class="k">Вопрос</span><span class="v"><span class="${iss.status==="решён"?"":"r"}">${esc(iss.status)}</span></span></div>`:""}
+   <span class="sp"></span>${iss?`<button class="btn ghost" data-go-iss="${c.uid}">Вопрос</button>`:""}<button class="btn ghost" data-goto="${c.uid}">Показать в графике</button></div>`}
+ else meta=`<div class="mx-sum"><span class="mx-other">${byId[c.uid]||c.proj===PROJ.k?"":`Операция проекта ${esc(cxProj(c.proj))}.`}${c.proj!==PROJ.k?` <a href="?p=${esc(c.proj)}${c.id!=null?"&c="+c.id:""}#cht">Перейти в ${esc(cxProj(c.proj))}</a>`:" Операции больше нет в плане."}</span></div>`;
+ return `<div class="mx-hd"><div class="mx-hbtn">${MX.ph?`<button class="mx-back" data-cxback>${CX_I.back}Чаты</button>`:""}
+  <div class="mx-ht"><div class="blk">${c.important?'<span class="mx-imp">особо важный</span>':""}<span class="pj">${esc(cxProj(c.proj))}</span>${t&&BK[BOF[c.uid]]?" · "+esc(BK[BOF[c.uid]].title):""}</div>
+  <h3>${t?`<span class="n">№${t.id}</span>`:""}${esc(c.name||"Операция удалена")}</h3></div><span class="sp"></span>
+  ${sandbox()?"":`<button class="mx-pinb ${c.pinned?"on":""}" data-cxpin title="${c.pinned?"Открепить":"Закрепить у себя — чат будет наверху списка"}">${c.pinned?CX_I.pinF:CX_I.pin}<span>${c.pinned?"Закреплён":"Закрепить"}</span></button>`}</div>${meta}</div>`}
+function cxFileHTML(f){const img=/^image\/(jpeg|png|webp|gif)$/.test(f.mime);
+ return img?`<button class="mx-photo" data-cxf="${f.id}" title="${esc(f.name)} — открыть"><img alt="${esc(f.name)}" data-cximg="${f.id}"><span>${esc(trunc(f.name,28))} · ${cxSize(f.size)}</span></button>`
+  :`<button class="mx-file" data-cxf="${f.id}" title="Скачать"><span class="mx-ext">${esc(cxExt(f.name))}</span><span class="mx-fn"><b>${esc(f.name)}</b><span>${cxSize(f.size)}</span></span><span class="mx-dl">${CX_I.dl}</span></button>`}
+function cxMsgHTML(m,prev){const mine=ME_&&m.user_id===ME_.uid,cont=prev&&prev.user_id===m.user_id&&!m.reply_to&&!prev.deleted_at&&(new Date(m.at)-new Date(prev.at))<5*60000&&cxDay(prev.at)===cxDay(m.at);
+ const atMe=ME_&&(m.mentions||[]).includes(ME_.uid),q=m.reply_to&&MX.msgs.find(x=>x.id===m.reply_to);
+ const day=!prev||cxDay(prev.at)!==cxDay(m.at)?`<div class="mx-day">${cxDay(m.at)}</div>`:"";
+ const tm=new Date(m.at),hm=p2(tm.getHours())+":"+p2(tm.getMinutes());
+ if(m.deleted_at)return day+`<div class="mx-m ${cont?"cont":""}" id="mx-${m.id}"><span class="mx-av">${esc(cxIni(m.who))}</span><div class="mx-b">${cont?"":`<div class="mx-w"><b>${esc(m.who)}</b>${hm}</div>`}<p class="mx-del">${CX_I.gone}Сообщение удалено</p></div></div>`;
+ return day+`<div class="mx-m ${cont?"cont":""} ${atMe?"me-at":""}" id="mx-${m.id}"><span class="mx-av">${esc(cxIni(m.who))}</span><div class="mx-b">
+  ${cont?"":`<div class="mx-w"><b>${esc(m.who||"—")}</b>${hm}${m.edited_at?" · изменено":""}</div>`}
+  ${q?`<span class="mx-q" data-cxq="${q.id}"><b>${esc(q.who)}</b><span>${q.deleted_at?"сообщение удалено":esc(trunc(q.t||"файл",120))}</span></span>`:""}
+  ${m.t?`<div class="mx-t">${cxText(m.t)}</div>`:""}${cont&&m.edited_at?'<div class="mx-ed">изменено</div>':""}
+  ${(m.files||[]).length?`<div class="mx-files">${m.files.map(cxFileHTML).join("")}</div>`:""}</div>
+  ${cxWrite()?`<div class="mx-tools"><button data-cxrep="${m.id}" title="Ответить">${CX_I.reply}</button>${mine?`<button data-cxed="${m.id}" title="Изменить">${CX_I.edit}</button><button class="x" data-cxdel="${m.id}" title="Удалить">${CX_I.del}</button>`:""}</div>`:""}</div>`}
+function cxFeedHTML(){const c=MX.cur;if(!c)return"";
+ if(c.id==null||!MX.msgs.length)return `<div class="mx-zero">${c.kind==="general"?"Здесь — всё, что касается всех проектов.":"Обсуждения ещё нет."}${cxWrite()?" Первое сообщение откроет чат"+(c.kind==="general"?"":" операции")+" для всех.":""}</div>`;
+ return (MX.more?`<button class="mx-moreb" data-cxmore>Показать раньше</button>`:"")+MX.msgs.map((m,k)=>cxMsgHTML(m,MX.msgs[k-1])).join("")}
+function cxCmpHTML(){if(!cxWrite())return `<div class="mx-cmp ro">${ME_&&ME_.role==="sandbox"?"Песочница: чаты только для чтения":"Писать в чаты вам недоступно"}</div>`;
+ const r=MX.reply&&MX.msgs.find(x=>x.id===MX.reply),e=MX.edit&&MX.msgs.find(x=>x.id===MX.edit);
+ return `<div class="mx-cmp">${r?`<div class="mx-reply">${CX_I.reply}<p>Ответ <b>${esc(r.who)}</b>: ${esc(trunc(r.t||"файл",90))}</p><button data-cxnor title="Не отвечать">×</button></div>`:""}
+  ${e?`<div class="mx-reply">${CX_I.edit}<p><b>Изменение сообщения</b> — Enter сохранит, Esc отменит</p><button data-cxnoe title="Отменить">×</button></div>`:""}
+  ${MX.pend.length?`<div class="mx-pend">${MX.pend.map((f,k)=>`<span class="mx-pc">${esc(trunc(f.name,26))} · ${cxSize(f.size)}<button data-cxrm="${k}" title="Убрать">×</button></span>`).join("")}</div>`:""}
+  <div class="mx-box"><button class="ib2" data-cxclip title="Приложить файл или фото">${CX_I.clip}</button>
+   <textarea class="mx-in" id="mxIn" rows="1" placeholder="${MX.cur&&MX.cur.kind==="general"?"Написать в общий чат…":"Написать… @ — упомянуть"}" ${MX.busy?"disabled":""}></textarea>
+   <button class="mx-send" data-cxsend title="Отправить (Enter)" ${MX.busy?"disabled":""}>${CX_I.send}</button></div>
+  <div class="mx-pop" id="mxPop" hidden></div></div>`}
+function renderChat(){const el=$("#tab-cht");if(!el)return;MX.ph=PHONE();el.style.setProperty("--th",$(".top").offsetHeight+"px");
+ if(!MX.on){el.innerHTML=`<div class="empty">Чаты недоступны.</div>`;return}
+ if(!MX.cur&&!MX.ph){const g=MX.list.find(c=>c.kind==="general");if(g){MX.cur=g;cxLoad().then(renderChat);}}
+ const keep=$("#mxIn"),txt=keep?keep.value:null,foc=keep&&document.activeElement===keep,fe=$("#mxFeed"),atBot=!fe||fe.scrollHeight-fe.scrollTop-fe.clientHeight<60,top=fe?fe.scrollTop:0;
+ el.innerHTML=`<div class="mx-app ${MX.ph&&MX.cur?"ph-chat":""}">
+  <aside class="mx-list"><div class="mx-find"><label>${CX_I.find}<input id="mxQ" placeholder="Поиск по чатам" value="${esc(MX.q)}" autocomplete="off"></label></div><div class="mx-chats" id="mxChats">${cxListHTML()}</div></aside>
+  <section class="mx-chat">${MX.cur?cxHeadHTML(MX.cur)+`<div class="mx-feed" id="mxFeed">${cxFeedHTML()}</div>`+cxCmpHTML():`<div class="mx-zero">Выберите чат слева</div>`}</section></div>`;
+ const inp=$("#mxIn");if(inp){inp.value=txt!=null?txt:(MX.draft[cxKey()]||"");cxGrow(inp);if(foc||MX.focus){inp.focus();MX.focus=false}}
+ const f2=$("#mxFeed");if(f2){if(MX.scroll||atBot)f2.scrollTop=f2.scrollHeight;else f2.scrollTop=top;MX.scroll=false}
+ cxImgs();cxRead()}
+const cxKey=()=>MX.cur?(MX.cur.id!=null?"c"+MX.cur.id:"u"+MX.cur.uid):"";
+function cxGrow(t){t.style.height="auto";t.style.height=Math.min(t.scrollHeight,180)+"px"}
+/* картинки: подписанная ссылка на 2 минуты, своя на каждый показ (не хранится дольше) */
+async function cxImgs(){for(const img of $$("img[data-cximg]")){const f=cxFile(img.dataset.cximg);if(!f)continue;
+ const c=MX.urls[f.id];if(c&&Date.now()-c.at<100000){img.src=c.u;continue}
+ try{const u=await DB.fileUrl(f,false);MX.urls[f.id]={u,at:Date.now()};img.src=u}catch(e){}}}
+const cxFile=id=>{for(const m of MX.msgs)for(const f of m.files||[])if(f.id===id)return f;return null};
+async function chatOpen(key){const c=String(key)[0]==="u"?cxByUid(String(key).slice(1))||{id:null,kind:"task",uid:+String(key).slice(1),proj:PROJ.k,name:(byId[String(key).slice(1)]||{}).name||""}:MX.list.find(x=>x.id===+key);
+ if(!c)return;const k=cxKey(),inp=$("#mxIn");if(inp&&k)MX.draft[k]=inp.value;
+ MX.cur=c;MX.reply=null;MX.edit=null;MX.pend=[];MX.msgs=[];MX.more=false;
+ if(UI.tab!=="cht")go("cht");else renderChat();
+ try{await cxLoad()}catch(e){toast("Чат не открылся: "+dbErr(e),false)}
+ if(UI.tab==="cht"){MX.focus=!MX.ph;renderChat()}}
+/* открыть чат операции (из вопроса, панели операции) */
+function chatOpenUid(u){const c=cxByUid(u);return chatOpen(c&&c.id!=null?c.id:"u"+u)}
+
+/* ---- отправка ---- */
+async function cxEnsureChat(c){if(c.id!=null)return c;const x=await DB.chatFor(c.uid);const n={...c,...x};return n}
+/* фото ужимаем до 2000 px по длинной стороне, JPEG 0,85 (5–8 МБ → 0,5–1 МБ: 1 ГБ на всё у бесплатного Supabase) */
+async function cxShrink(f){if(!/^image\/(jpeg|png|webp)$/.test(f.type)||f.size<700000||!window.createImageBitmap)return f;
+ try{const b=await createImageBitmap(f),k=Math.min(1,2000/Math.max(b.width,b.height)),cv=document.createElement("canvas");
+  cv.width=Math.round(b.width*k);cv.height=Math.round(b.height*k);cv.getContext("2d").drawImage(b,0,0,cv.width,cv.height);
+  const out=await new Promise(r=>cv.toBlob(r,"image/jpeg",.85));if(!out||out.size>=f.size)return f;
+  return new File([out],f.name.replace(/\.(png|webp|jpe?g)$/i,"")+".jpg",{type:"image/jpeg"})}catch(e){return f}}
+async function cxSend(text,files,c0,replyTo){
+ if(!text&&!files.length)return null;
+ for(const f of files)if(f.size>CHAT_MAX)throw new Error(`«${f.name}» больше 30 МБ`);
+ const c=await cxEnsureChat(c0);
+ const m=await DB.send({chatId:c.id,t:text,replyTo,mentions:cxMentions(text),ck:newKey()});
+ const bad=[];for(const f of files){try{await DB.attach(m.id,await cxShrink(f))}catch(e){bad.push(f.name+": "+dbErr(e))}}
+ if(bad.length)toast("Не загрузилось: "+bad.join("; "),false);
+ return c}
+async function cxSubmit(){const inp=$("#mxIn");if(!inp||MX.busy)return;const t=inp.value.trim();
+ if(MX.edit){const id=MX.edit;if(!t)return;MX.busy=true;try{await DB.edit(id,t,cxMentions(t));MX.edit=null;inp.value=""}catch(e){toast("Не сохранено: "+dbErr(e),false)}
+  MX.busy=false;await cxLoad(false);return renderChat()}
+ if(!t&&!MX.pend.length)return inp.focus();
+ MX.busy=true;renderChat();
+ try{const c=await cxSend(t,MX.pend,MX.cur,MX.reply);MX.cur=c;MX.pend=[];MX.reply=null;delete MX.draft[cxKey()];const x=$("#mxIn");if(x)x.value="";
+  await chatRefresh(false);await cxLoad();}
+ catch(e){toast("Не отправлено: "+dbErr(e),false)}
+ MX.busy=false;MX.focus=true;renderChat()}
+
+/* ---- «Обсуждение» у вопроса и в панели операции ---- */
+function chatBoxHTML(u){const c=cxByUid(u),n=c?c.n:0,nw=cxUnr(c);
+ const last=c&&c.last_id!=null?`<div class="mx-dm"><span class="mx-av">${esc(cxIni(c.last_who))}</span><div><div class="w"><b>${esc(c.last_who||"")}</b>${cxWhen(c.last_at)}</div><p>${c.last_del?"сообщение удалено":c.last_files&&!c.last_t?CX_I.clip+" файл":esc(c.last_t||"")}</p></div></div>`:"";
+ return `<div class="mx-disc ${n?"":"mx-empty"}" data-cxbox="${u}"><button class="mx-dh" data-cxou="${u}"><h4>Обсуждение</h4>${n?`<span class="c">${n} ${plural(n,"сообщение","сообщения","сообщений")}</span>`:""}${nw?`<span class="nw">${nw} ${plural(nw,"новое","новых","новых")}</span>`:""}<span class="go">Открыть чат${CX_I.open}</span></button>
+  ${last}${cxWrite()?`<div class="mx-dbox"><textarea rows="1" placeholder="${n?"Написать в чат операции…":"Начать обсуждение…"}" data-cxqin="${u}"></textarea><button class="ib2" data-cxqclip="${u}" title="Приложить файл или фото">${CX_I.clip}</button><button class="ib2" data-cxqs="${u}" title="Отправить">${CX_I.send}</button></div>`:""}
+  ${n?"":`<p class="mx-dnote">${cxWrite()?"Первое сообщение откроет чат операции — его увидят все.":"Сообщений пока нет."}</p>`}</div>`}
+function cxPaintBoxes(){for(const b of $$("[data-cxbox]")){const ta=b.querySelector("textarea");if(ta&&(ta.value||document.activeElement===ta))continue;b.outerHTML=chatBoxHTML(+b.dataset.cxbox)}}
+async function cxQuick(u,files){const ta=$(`[data-cxqin="${u}"]`),t=ta?ta.value.trim():"";if(!t&&!(files&&files.length))return ta&&ta.focus();
+ const c0=cxByUid(u)||{id:null,kind:"task",uid:+u,proj:PROJ.k,name:(byId[u]||{}).name||""};
+ try{if(ta)ta.disabled=true;await cxSend(t,files||[],c0,null);if(ta)ta.value="";toast("Отправлено в чат операции",false);await chatRefresh(false);cxPaintBoxes()}
+ catch(e){toast("Не отправлено: "+dbErr(e),false)}finally{if(ta)ta.disabled=false}}
+const chatCount=u=>{const c=cxByUid(u);return c?c.n:0};
+/* вопрос стал (или перестал быть) «особо важным» — у себя или у другого: список чатов заново */
+function chatSoon(){if(!MX.on)return;clearTimeout(MX.t3);MX.t3=setTimeout(()=>chatRefresh(false),900)}
+
+/* ---- подсказка @ ---- */
+let cxPopI=0;
+function cxAtWord(inp){const v=inp.value.slice(0,inp.selectionStart),m=/(^|\s)@([\wА-Яа-яЁё.-]{0,30})$/.exec(v);return m?m[2]:null}
+function cxPop(){const inp=$("#mxIn"),pop=$("#mxPop");if(!inp||!pop)return;const w=cxAtWord(inp);
+ if(w==null){pop.hidden=true;return}
+ const L=cxPeople().filter(p=>p.name.toLowerCase().startsWith(w.toLowerCase())||p.name.toLowerCase().includes(" "+w.toLowerCase())).slice(0,6);
+ if(!L.length){pop.hidden=true;return}cxPopI=Math.min(cxPopI,L.length-1);
+ pop.innerHTML=L.map((p,k)=>`<div class="o ${k===cxPopI?"on":""}" data-cxat="${esc(p.name)}"><span class="mx-av">${esc(cxIni(p.name))}</span><span class="mx-nm">${esc(p.name)}</span></div>`).join("")+`<div class="ft"><kbd>↑↓</kbd> выбрать, <kbd>Enter</kbd> вставить, <kbd>Esc</kbd> закрыть</div>`;pop.hidden=false}
+function cxPutAt(name){const inp=$("#mxIn"),pos=inp.selectionStart,v=inp.value,b=v.slice(0,pos).replace(/@([\wА-Яа-яЁё.-]{0,30})$/,"@"+name+" ");
+ inp.value=b+v.slice(pos);inp.selectionStart=inp.selectionEnd=b.length;$("#mxPop").hidden=true;inp.focus()}
+
+/* ---- события ---- */
+let cxPickFor=null;
+function cxPick(target){cxPickFor=target;let f=$("#cxFile");if(!f){f=document.createElement("input");f.type="file";f.id="cxFile";f.multiple=true;f.hidden=true;document.body.appendChild(f);
+ f.onchange=()=>{const L=[...f.files];f.value="";if(!L.length)return;const big=L.filter(x=>x.size>CHAT_MAX);if(big.length)toast("Больше 30 МБ — не приложить: "+big.map(x=>x.name).join(", "),false);
+  const ok=L.filter(x=>x.size<=CHAT_MAX);if(!ok.length)return;
+  if(cxPickFor==="cmp"){MX.pend=[...MX.pend,...ok].slice(0,10);renderChat()}else cxQuick(cxPickFor,ok)}}
+ f.click()}
+document.addEventListener("click",async e=>{const el=e.target.closest("[data-cxo],[data-cxou],[data-cxback],[data-cxpin],[data-cxsend],[data-cxclip],[data-cxrm],[data-cxrep],[data-cxed],[data-cxdel],[data-cxnor],[data-cxnoe],[data-cxf],[data-cxq],[data-cxmore],[data-cxat],[data-cxqs],[data-cxqclip]");
+ if(!el||!MX.on)return;const a=el.dataset;
+ if(a.cxo)return chatOpen(a.cxo);
+ if(a.cxou){e.stopPropagation();closeDrawer();return chatOpenUid(+a.cxou)}
+ if(a.cxback!==undefined){MX.cur=null;return renderChat()}
+ if(a.cxpin!==undefined){const c=MX.cur;if(!c)return;try{const x=await cxEnsureChat(c);await DB.pin(ME_.uid,x.id,!c.pinned,c.last_id||0);MX.cur={...x,pinned:!c.pinned};await chatRefresh(false);toast(c.pinned?"Чат откреплён":"Чат закреплён у вас — он наверху списка",false)}catch(err){toast("Не получилось: "+dbErr(err),false)}return}
+ if(a.cxsend!==undefined)return cxSubmit();
+ if(a.cxclip!==undefined)return cxPick("cmp");
+ if(a.cxqclip)return cxPick(+a.cxqclip);
+ if(a.cxqs)return cxQuick(+a.cxqs);
+ if(a.cxrm!==undefined){MX.pend.splice(+a.cxrm,1);return renderChat()}
+ if(a.cxrep){MX.reply=+a.cxrep;MX.edit=null;MX.focus=true;return renderChat()}
+ if(a.cxed){const m=MX.msgs.find(x=>x.id===+a.cxed);if(!m)return;MX.edit=m.id;MX.reply=null;MX.focus=true;renderChat();const i=$("#mxIn");if(i){i.value=m.t;cxGrow(i)}return}
+ if(a.cxnor!==undefined){MX.reply=null;return renderChat()}
+ if(a.cxnoe!==undefined){MX.edit=null;const i=$("#mxIn");if(i)i.value="";return renderChat()}
+ if(a.cxdel){const m=MX.msgs.find(x=>x.id===+a.cxdel);if(!m||!confirm("Удалить сообщение? Вместо него будет «Сообщение удалено», файлы пропадут."))return;
+  try{await DB.unsend(m);await cxLoad(false);await chatRefresh(false)}catch(err){toast("Не удалено: "+dbErr(err),false)}return}
+ if(a.cxf){const f=cxFile(a.cxf);if(!f)return;try{const u=await DB.fileUrl(f,!/^image\//.test(f.mime));
+  if(/^image\//.test(f.mime))window.open(u,"_blank","noopener");else location.href=u}catch(err){toast("Файл не открылся: "+dbErr(err),false)}return}
+ if(a.cxq){const t=$("#mx-"+a.cxq);if(t){t.scrollIntoView({behavior:"smooth",block:"center"});t.classList.add("hov");setTimeout(()=>t.classList.remove("hov"),1400)}return}
+ if(a.cxmore!==undefined){const fe=$("#mxFeed"),h=fe.scrollHeight;try{const old=await DB.messages(MX.cur.id,MX.msgs[0].id);MX.more=old.length>=50;MX.msgs=[...old,...MX.msgs];renderChat();const f2=$("#mxFeed");f2.scrollTop=f2.scrollHeight-h}catch(err){}return}
+ if(a.cxat)return cxPutAt(a.cxat)});
+document.addEventListener("keydown",e=>{const t=e.target;if(!MX.on)return;
+ if(t.id==="mxIn"){const pop=$("#mxPop");
+  if(pop&&!pop.hidden){const o=$$("#mxPop .o");if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();cxPopI=(cxPopI+(e.key==="ArrowDown"?1:o.length-1))%o.length;return cxPop()}
+   if(e.key==="Enter"||e.key==="Tab"){e.preventDefault();return cxPutAt(o[cxPopI].dataset.cxat)}if(e.key==="Escape"){e.preventDefault();pop.hidden=true;return}}
+  if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing&&!PHONE()){e.preventDefault();return cxSubmit()}
+  if(e.key==="Escape"&&(MX.edit||MX.reply)){MX.edit=null;MX.reply=null;t.value="";renderChat()}}
+ else if(t.dataset&&t.dataset.cxqin&&e.key==="Enter"&&!e.shiftKey&&!e.isComposing&&!PHONE()){e.preventDefault();cxQuick(+t.dataset.cxqin)}
+ else if(t.closest&&t.closest(".mx-ci")&&(e.key==="Enter"||e.key===" ")){e.preventDefault();chatOpen(t.closest(".mx-ci").dataset.cxo)}});
+document.addEventListener("input",e=>{const t=e.target;if(t.id==="mxIn"){cxGrow(t);cxPopI=0;cxPop();MX.draft[cxKey()]=t.value}
+ else if(t.id==="mxQ"){MX.q=t.value;cxPaintList()}
+ else if(t.dataset&&t.dataset.cxqin){t.style.height="auto";t.style.height=Math.min(t.scrollHeight,140)+"px"}});
+/* вставка картинки из буфера (снимок экрана) — в поле ввода чата */
+document.addEventListener("paste",e=>{if(!MX.on||e.target.id!=="mxIn"||!cxWrite())return;const fs=[...(e.clipboardData&&e.clipboardData.files||[])];if(!fs.length)return;
+ e.preventDefault();MX.pend=[...MX.pend,...fs.filter(f=>f.size<=CHAT_MAX).map((f,k)=>f.name&&f.name!=="image.png"?f:new File([f],`Снимок ${fDT(new Date()).replace(/[.:]/g,"-")}${k?"-"+k:""}.png`,{type:f.type}))].slice(0,10);renderChat()});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&MX.on)chatRefresh(UI.tab==="cht")});
+setInterval(()=>{if(MX.on&&!document.hidden)chatRefresh(UI.tab==="cht")},60000);
 
 </script>
 </body>
