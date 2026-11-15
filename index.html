@@ -2018,10 +2018,14 @@ const updText=u=>{const x=upd(u);return x?`Обновлено: ${x.who||"—"}, 
 
 /* ================== расчёт: проценты и прогноз ================== */
 /* s0 — прогнозное начало (не раньше конца предшественников, compute); план (S0/F0 этапов) — всегда от начала операции */
-function stepPlan(u,s0){const t=byId[u],items=ST(u),a0=stFree(u)?+D(items[0].free):+t.S0;let cur=s0!=null?Math.max(a0,s0):a0,base=a0;
+/* этапы «не двигают операцию» — это сроки «до 16.11» (15.11, проверка «Пашей»: «до 17.11» показывало «прогноз 28.11» —
+   не начатый этап «начинался сегодня» и шёл все сутки от прошлого срока). Прогноз такого этапа — его срок; просрочен и
+   не готов — не раньше сегодня; не раньше прогноза предыдущего. Этапы, которые двигают операцию, — как в Project. */
+function stepPlan(u,s0){const t=byId[u],items=ST(u),fr=stFree(u),a0=fr?+D(items[0].free):+t.S0;let cur=s0!=null?Math.max(a0,s0):a0,base=a0;
  return items.map((x,i)=>{const ok=i===0||items[i-1].pct>=100,pc=ok?+x.pct||0:0,du=Math.max(.5,+x.dur||1)*DAY;
   let s=new Date(cur),f=new Date(cur+du);const b0=base;base+=du;
-  if(pc<100){if(pc===0&&s<TODAY){s=new Date(TODAY);f=new Date(+s+du)}else if(pc>0&&f<TODAY)f=new Date(+TODAY+du*(1-pc/100))}
+  if(fr){s=new Date(Math.max(b0,cur));f=new Date(pc>=100?base:Math.max(base,cur,base<+TODAY?+TODAY:0))}
+  else if(pc<100){if(pc===0&&s<TODAY){s=new Date(TODAY);f=new Date(+s+du)}else if(pc>0&&f<TODAY)f=new Date(+TODAY+du*(1-pc/100))}
   cur=+f;return{i,n:x.n,who:x.who,dur:x.dur,pct:pc,raw:+x.pct||0,locked:!ok,S:s,F:f,S0:new Date(b0),F0:new Date(base)}})}
 const stDur=x=>Math.max(.5,+x.dur||1);
 /* готовность операции с этапами — по суткам (как в Project), 06.11 */
@@ -2522,10 +2526,14 @@ const LAG_TIP="Прогноз окончания операции позже п�
 let litId=null;const EDS=new Set();
 /* срок этапа — датой «до 16.11» (13.11, пользователь: Паша думает датами, а не сутками); хранится по-прежнему в сутках */
 const stTo=d=>fD(d)+(d.getFullYear()!==TODAY.getFullYear()?"."+String(d.getFullYear()).slice(2):"");
+/* срок этапа из поля: «17.11», «17,11» (запятая с цифровой клавиатуры — 15.11, «Паша»), «17.11.26»; «05.01» при сроках в декабре — следующий год */
+function stDate(raw,ref){const v=String(raw||"").trim().replace(/,/g,".");if(!/^\d{1,2}\.\d{2}(\.\d{2}|\.\d{4})?$/.test(v))return null;   // месяц — двумя цифрами: «2,5» (старые «сутки») и «1.1» — не дата
+ let ms=parseDT(v,ref);if(ms!=null&&ms<ref-180*DAY&&v.length<=5)ms=parseDT(v+"."+(new Date(ref).getFullYear()+1),ref);
+ return ms}
 function stepsHTML(u){const sp=(FC[u]&&FC[u].steps)||stepPlan(u),cur=sp.find(x=>!x.locked&&x.pct<100),fr=stFree(u);
  const nm=x=>x.n||"Этап "+(x.i+1);
  if(!EDS.has(u)||!can("steps_edit"))return `<div class="pipe"><div class="pipe-h"><h4>Этапы решения</h4>${can("steps_edit")?`<button data-eds="${u}">Изменить этапы</button>`:""}</div>
-  <div class="segs">${sp.map(x=>`<div class="sg ${x.pct>=100?"d":""} ${x.locked?"l":""} ${cur&&cur.i===x.i?"cur":""}"><div class="b"><i style="width:${x.pct}%"></i></div><div class="n">${esc(nm(x))}</div><div class="m">${esc(x.who||"—")}, до ${stTo(x.F0)}, ${x.pct}%</div>${x.pct<100&&+x.F-x.F0>36e5?`<div class="m lt">прогноз ${fD(x.F)}</div>`:""}</div>`).join("")}</div></div>`;
+  <div class="segs">${sp.map(x=>`<div class="sg ${x.pct>=100?"d":""} ${x.locked?"l":""} ${cur&&cur.i===x.i?"cur":""}"><div class="b"><i style="width:${x.pct}%"></i></div><div class="n">${esc(nm(x))}</div><div class="m">${x.who?esc(x.who)+", ":""}до ${stTo(x.F0)}, ${x.pct}%</div>${x.pct<100&&+x.F-x.F0>36e5?`<div class="m lt">прогноз ${fD(x.F)}</div>`:""}</div>`).join("")}</div></div>`;
  return `<div class="steps"><div class="pipe-h"><h4>Этапы решения</h4><button data-eds="${u}">Готово</button><span class="sp"></span>
   <label class="stmode" title="${fr?"Сейчас этапы — только план решения вопроса: даты и готовность операции свои":"Сейчас окончание и готовность операции считаются по этапам"}"><input type="checkbox" data-stmode="${u}" ${fr?"":"checked"}> двигают операцию в Графике</label></div>
  ${sp.length?`<div class="stp sh"><span></span><span>Этап</span><span>Исполнитель</span><span>Срок</span><span>Готово, %</span><span></span></div>`:""}
@@ -3222,14 +3230,13 @@ function stepsFrom(u,text,at){u=+u;const t=byId[u];if(!t)return toast("Опер�
    ${pickHTML(`data-sfw`,o?o.who:"","Кто")}
    <input type="checkbox" data-sfd ${o&&(+o.pct||0)>=100?"checked":""} title="Этап уже выполнен"></div>`}).join("")}</div>
   <div class="sfo">${old.length?`<label><input type="radio" name="sfm" value="r" checked> Заменить этапы (сейчас ${old.length})</label><label><input type="radio" name="sfm" value="a"> Добавить после них</label>`:""}
-   <label title="Окончание и готовность операции — по этапам; операции после неё по связям сдвинутся"><input type="checkbox" id="sfMove" ${old.length&&!stFree(u)?"checked":""}> Сроки этапов двигают операцию в Графике</label></div>
+   <label title="Окончание и готовность операции — по этапам; операции после неё по связям сдвинутся"><input type="checkbox" id="sfMove" ${old.length&&!stFree(u)&&L[0].at>=new Date(t.S0).setHours(0,0,0,0)?"checked":""}> Сроки этапов двигают операцию в Графике</label></div>
   <div class="mfoot"><button class="btn ghost" data-act="mclose">Отмена</button><button class="btn pri" data-act="sfok">Сделать этапами</button></div>`);
  $("#modal").classList.add("wide")}
 function stepsFromOk(){const q=SFQ;if(!q)return closeModal();const u=q.u,t=byId[u];if(!t)return closeModal();
  const add=!!$('input[name="sfm"][value="a"]:checked'),move=$("#sfMove").checked,R=[];
  for(const r of $$("#modal .sfr[data-sfi]")){if(!r.querySelector("[data-sfon]").checked)continue;
-  const tv=r.querySelector("[data-sfto]").value.trim(),n=pickNorm(r.querySelector("[data-sfn]").value);let ms=parseDT(tv,q.ref);
-  if(ms!=null&&ms<q.ref-200*DAY)ms=parseDT(tv+"."+(new Date(q.ref).getFullYear()+1),q.ref);
+  const tv=r.querySelector("[data-sfto]").value.trim(),n=pickNorm(r.querySelector("[data-sfn]").value),ms=stDate(tv,q.ref);
   if(ms==null){r.querySelector("[data-sfto]").focus();return toast("Срок — дата вида 16.11 или 16.11.26",false)}
   R.push({at:ms,n,who:pickNorm(r.querySelector("[data-sfw]").value),done:r.querySelector("[data-sfd]").checked})}
  if(!R.length)return toast("Не выбрано ни одной строки",false);
@@ -3237,7 +3244,9 @@ function stepsFromOk(){const q=SFQ;if(!q)return closeModal();const u=q.u,t=byId[
  const old=ST(u),keep=add?old.map(x=>({...x})):[],byN=new Map(old.map(x=>[stNorm(x.n),x]));
  /* откуда идут сроки: двигают операцию — от её начала; нет — от дня сообщения (или раньше, если первый срок раньше);
     «добавить» — после последнего этапа */
- let a0;if(add&&keep.length){const sp=stepPlan(u);a0=+sp[sp.length-1].F0}
+ let a0;if(add&&keep.length){const sp=stepPlan(u);a0=+sp[sp.length-1].F0;
+  const lo=new Date(a0).setHours(0,0,0,0),bad=R.find(x=>x.at<lo);   // 15.11, «Паша»: 09.11 и 14.11 молча становились 11.12 и 12.12
+  if(bad)return toast(`Срок ${stTo(new Date(bad.at))} раньше окончания имеющихся этапов (${stTo(new Date(a0))}) — выберите «Заменить этапы» или снимите эту строку`,false)}
  else if(move)a0=+t.S0;
  else{const d=new Date(q.ref);d.setHours(0,0,0,0);a0=Math.min(+d,R[0].at-DAY)}
  const tm=new Date(a0),hm=[tm.getHours(),tm.getMinutes()];let cur=a0;const items=[];
@@ -3592,7 +3601,7 @@ document.addEventListener("change",e=>{const a=e.target.dataset;
  if(a.stmode)return stepMode(+a.stmode,e.target.checked,e.target);
  if(a.step){let[u,k,f]=a.step.split(":");return need(()=>{let v=e.target.value;
   if(f==="to"){const x=stepPlan(+u)[k],s0=+x.S0,raw=String(v).trim();if(!raw){e.target.value=e.target.defaultValue;return}
-   let ms=parseDT(raw,s0);if(ms!=null&&ms<s0-180*DAY)ms=parseDT(raw+"."+(new Date(s0).getFullYear()+1),s0);   // «05.01» в декабре — следующий год
+   const ms=stDate(raw,s0);
    if(ms==null){e.target.value=e.target.defaultValue;return toast("Срок — дата вида 16.11 или 16.11.26",false)}
    const a0=new Date(s0),d=new Date(ms);d.setHours(a0.getHours(),a0.getMinutes(),0,0);   // окончание — в то же время суток, что начало этапа
    const n=Math.round(dd(s0,+d)*100)/100;
