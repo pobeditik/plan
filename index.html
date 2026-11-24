@@ -2302,7 +2302,7 @@ function progEdit(u){const R=progRows(),r=R&&R.find(x=>x.uid===u),t=byId[u];if(!
    <label class="pchk"><input type="checkbox" id="pfOC" ${r.note.other?"checked":""}> Делает другая бригада — может идти одновременно с работами этой бригады</label>
    ${pWhy(R,r)}
    <div class="pfaw" id="pfAw"><label>Идёт после<input class="ed" id="pfAq" placeholder="Найти: 235, КП-5, ДПМ…" autocomplete="off" spellcheck="false"></label>${pafSel(R,r)}
-   <p class="m" id="pfAh">${pafHint(R,r.pred,r.note.lag,r.snet)}</p></div>`}`:""}
+   <p class="m" id="pfAh">${pafHint(R,r.pred,r.note.lag,r.snet,r.note.factStart)}</p></div>`}`:""}
   ${r.depth?`<div class="padd-row"><span class="m">Добавить строку ниже:</span><button class="btn ghost" data-act="padd-dpm">ДПМ</button><button class="btn ghost" data-act="padd-work">ЗБС</button><button class="btn ghost" data-act="padd-pad">куст</button><button class="btn ghost" data-act="padd-fld">месторождение</button><span class="sp"></span><button class="btn ghost" data-act="pmv-up" title="Поставить выше среди соседних строк">↑ выше</button><button class="btn ghost" data-act="pmv-dn" title="Поставить ниже среди соседних строк">↓ ниже</button></div>`:""}</div>
   <div class="mfoot">${r.depth?`<button class="btn ghost" data-act="pdel" style="color:var(--red)">Удалить${r.sum?" вместе со строками":""}</button>`:""}<span class="sp"></span>
    <button class="btn pri" data-act="psave">Сохранить</button></div>`);
@@ -2368,14 +2368,20 @@ function pafSel(R,r){const u=r.uid,after=new Set([u]);let grow=true;
   if(x.uid!==u&&cur)cur.it.push(x)});
  const n=grp.reduce((a,g)=>a+g.it.length,0)+1;
  return `<select class="ed paf" id="pfAf" size="${Math.min(9,n+grp.length)}"><option value="—" ${r.pred==null?"selected":""}>ни после чего — только свои даты</option>${grp.filter(g=>g.it.length).map(g=>`<optgroup label="${esc(g.lab)}">${g.it.map(x=>after.has(x.uid)?`<option disabled>${esc(x.name)} — идёт после этой строки</option>`:`<option value="${x.uid}" ${r.pred===x.uid?"selected":""}>${esc(x.name)} — до ${pfd(pPF(x))}</option>`).join("")}</optgroup>`).join("")}</select>`}
-function pafHint(R,pred,lag,ne){const p0=pred!=null&&R.find(x=>x.uid===pred);if(!p0)return"Не связана с другими строками: даты — как впишете.";const p={...p0,F:pPF(p0)};
+const pPredReady=(p,lag)=>p?.F?+p.F+Math.round((lag||0)*1440)*6e4:null;
+const pFactConflict=(fact,p,lag)=>fact&&p?.F&&pPredReady(p,lag)>+D(fact)+6e4;
+const pFactMessage=(name,fact,p,lag)=>`«${esc(name)}» началась ${fmtDT(+D(fact))}. По связи «Идёт после» она должна дождаться окончания «${esc(p.name)}» (${fmtDT(+p.F)})${lag?` и паузы до ${fmtDT(pPredReady(p,lag))}`:""}.`;
+function pafHint(R,pred,lag,ne,fact){const p0=pred!=null&&R.find(x=>x.uid===pred);if(!p0)return"Не связана с другими строками: даты — как впишете.";const p={...p0,F:pPF(p0)};
+ if(fact)return pFactConflict(fact,p0,lag)?`Связь конфликтует с фактом: ${pFactMessage("Работа",fact,p0,lag)} Фактическое начало сохраняется.`
+  :`Предшественник — «${esc(p0.name)}». Его сдвиг не меняет подтверждённое начало ${fmtDT(+D(fact))}.`;
  if(ne)return `Начнётся после окончания «${esc(p.name)}» (${pfd(p.F)}), но не раньше ${pfd(ne)}.`;
  if(lag<0)return `Начало раньше окончания «${esc(p.name)}» (${pfd(p.F)}) — при сохранении спросим: оставить связь или убрать.`;
  return `Начнётся ${lag>0?"через "+pdur(0,lag*DAY)+" сут после":"сразу после"} окончания «${esc(p.name)}» (${pfd(p.F)}). Сдвинется она — раньше или позже — сдвинется и эта строка.`}
 /* подсказка по тому, что сейчас вписано в окне: пауза = начало − конец выбранной строки */
 function pafLive(){const sel=$("#pfAf"),h=$("#pfAh");if(!sel||!h)return;const R=progRows(),v=sel.value,p=v&&v!=="—"&&R.find(x=>x.uid===+v);
  const r0=(R||[]).find(x=>x.uid===PEU),sv=pDT($("#pfS").value,r0&&r0.S?+r0.S:Date.now()),ne=$("#pfNE")&&$("#pfNE").checked&&sv!=null?new Date(sv):null;
- h.innerHTML=pafHint(R,p?p.uid:null,p&&sv!=null&&pPF(p)?Math.round((sv-+pPF(p))/6e4)/1440:0,ne)}
+ const lag=r0?.note.factStart?(p?.uid===r0.pred?r0.note.lag:0):p&&sv!=null&&pPF(p)?Math.round((sv-+pPF(p))/6e4)/1440:0;
+ h.innerHTML=pafHint(R,p?p.uid:null,lag,ne,r0?.note.factStart)}
 const pafNorm=x=>String(x).toLowerCase().replace(/ё/g,"е").replace(/[^a-zа-я0-9]+/g," ").trim();
 function pafFilter(q){const sel=$("#pfAf");if(!sel)return;const tk=pafNorm(q).split(" ").filter(Boolean);   // каждое слово где угодно: «кп5», «скв 235», «235 збс», «мирное»
  sel.querySelectorAll("optgroup").forEach(g=>{let any=false;
@@ -2399,7 +2405,7 @@ function pAsk(o){const ae=document.activeElement;PKQ=o;if(ae&&ae!==document.body
  <div class="mfoot pkb">${o.opts.map((x,i)=>`<button class="btn ${x.pri?"pri":"ghost"}" data-act="pkx" data-i="${i}">${x.l}</button>`).join("")}</div>`);$("#modal").classList.add("wide")}
 function pAskGo(i){const o=PKQ;if(!o)return;const x=o.opts[i];if(!x)return;let d=null;
  if(o.date&&x.date!==false){d=pDT(pval("pkD"),o.d0);if(d==null)return toast("Дата вида 05.11.26 12:00",false);
-  if(d>Date.now()+36e5)return toast("Дата — не позже сегодняшней: работа уже идёт или сделана",false);
+  if(d>Date.now()+(o.noFuture?0:36e5))return toast(o.noFuture?"Дата — не позже текущего времени":"Дата — не позже сегодняшней: работа уже идёт или сделана",false);
   if(o.dmin!=null&&d<=o.dmin)return toast(`Не раньше ${fmtDT(o.dmin)} — тогда она начинается`,false)}
  PKQ=null;closeModal();x.fn(d)}
 function progSave(){const u=PEU,t=byId[u],R=progRows(),r=R&&R.find(x=>x.uid===u);if(!t||!r)return closeModal();
@@ -2409,51 +2415,64 @@ function progSave(){const u=PEU,t=byId[u],R=progRows(),r=R&&R.find(x=>x.uid===u)
  if(v.hasD&&(!pYearOk(v.sv)||!pYearOk(v.fv)))return toast("Проверьте год: "+pfd(new Date(!pYearOk(v.sv)?v.sv:v.fv))+" — далеко от проекта",false);
  const parts=[...$("#modal").childNodes],scroll=$("#modal").scrollTop;
  v.back=()=>{const m=$("#modal");m.replaceChildren(...parts);m.classList.add("wide");$("#scrim").classList.add("on");m.scrollTop=scroll};
- if(progAsk(v,r,R))return;
+ if(!r.note.factStart&&progAsk(v,r,R))return;
  progSave2(v,r,R)}
 function progSave2(v,r,R){
- if(v.hasD&&!v.lk&&v.af!=null&&v.af!=="—"){const p0=R.find(x=>x.uid===+v.af),p=p0&&{...p0,F:pPF(p0)};   // начало раньше конца строки «после» — спросить, как в графике
+ if(!r.note.factStart&&v.hasD&&!v.lk&&v.af!=null&&v.af!=="—"){const p0=R.find(x=>x.uid===+v.af),p=p0&&{...p0,F:pPF(p0)};   // начало раньше конца строки «после» — спросить, как в графике
   if(p&&p.F&&v.sv<+p.F-6e4&&(v.sv!==+pPS(r)||v.fv!==+pPF(r))){PPEND=v;return openModal(`${PMX}<h3>«${esc(v.nm)}» идёт после «${esc(p.name)}» и не может начаться раньше ${pfd(p.F)}</h3>
    <p>Оставить связь — начало будет ${pfd(p.F)}, длительность сохранится. Убрать связь — строка начнётся ${pfd(new Date(v.sv))}${p.kind===r.kind||!v.oc?", но если её делает та же бригада, в прогнозе она всё равно встанет после «"+esc(p.name)+"»: бригада одна":""}.</p>
    <div class="mfoot"><button class="btn ghost" data-act="pkeep">Оставить связь</button><button class="btn ghost" data-act="punlink">Убрать связь</button><button class="btn pri" data-act="punlink-oc">Убрать: делает другая бригада</button></div>`)}}
  progConfirm(v,r,R)}
 function progConfirm(v,r,R){
+ const actualBefore=r.note.factStart,now=Date.now(),startChanged=v.sv!==+pPS(r);
+ if(actualBefore&&(v.lk||startChanged&&v.sv>now)){
+  const next=v.lk?"будет брать даты и готовность из Графика":`вернётся в план с датой ${fmtDT(v.sv)} и готовностью 0 %. Прогноз учтёт связи и бригаду`;
+  return pAsk({h:"Заменить фактическое начало?",p:`Сейчас подтверждено начало ${fmtDT(+D(actualBefore))}. Строка ${next}.`,back:v.back,
+   opts:[{l:v.lk?"Брать даты из Графика":"Перенести в план и сбросить готовность",fn:()=>progApply({...v,factStart:null,pc:0}),pri:true}]})
+ }
  if(!v.hasD||v.lk){closeModal();return progApply(v)}
  const crewChanged=v.oc!=null&&v.oc!==r.note.other;
- const startChanged=v.sv!==+pPS(r),now=Date.now();
- const confirmStart=v.sv<now&&(startChanged||!r.note.factStart&&(crewChanged||v.startEdited))&&(+v.pc===0||!!r.note.factStart);
- if(!confirmStart&&!crewChanged){closeModal();return progApply(v)}
- const predId=v.af==null||v.af===""?r.pred:+v.af;
+ const confirmStart=v.sv<=now&&(startChanged||!actualBefore&&(crewChanged||v.startEdited))&&(+v.pc===0||!!actualBefore);
+ const complete=+v.pc>=100&&r.pct<100&&!!actualBefore;
+ const predId=v.af==null||v.af===""?r.pred:v.af==="—"?null:+v.af;
+ const predChanged=predId!==r.pred;
+ if(!confirmStart&&!crewChanged&&!complete&&!(actualBefore&&predChanged)){closeModal();return progApply(v)}
  const pred=R.find(x=>x.uid===predId);
  const crew=R.find(x=>x.uid===r.crewPrev);
  const other=v.oc??r.note.other;
  const crewText=crewChanged?(other
   ?`Работу делает другая бригада. Она может идти параллельно${crew?` с «${esc(crew.name)}»`:""}.`
-  :`Работу делает та же бригада.${crew?` Для ещё не начатой работы прогноз учитывает, когда бригада освободится с «${esc(crew.name)}» (${pfd(crew.F)}).`:""}`):"";
+  :crew?`Если вернуть ту же бригаду, она освободится после «${esc(crew.name)}» (${fmtDT(+crew.F)}).`:"Вернуть прежнюю бригаду?"):"";
  const predText=pred?`Связь «Идёт после ${esc(pred.name)}» действует отдельно.`:"";
  const apply=x=>progApply({...v,...x});
  const ask=(h,p,opts)=>pAsk({h,p:[p,crewText,predText].filter(Boolean).join(" "),opts,back:v.back});
  const save={l:"Сохранить",pri:true,fn:()=>apply({})};
  const actual=confirmStart?v.sv:r.note.factStart?+D(r.note.factStart):null;
- if(actual!=null&&(confirmStart||crewChanged&&!other)){
-  const predecessorBlocks=pred?.F&&+pred.F>actual+6e4;
+ if(actual!=null&&(confirmStart||predChanged||crewChanged&&!other)){
+  const lag=startChanged||predChanged?0:r.note.lag;
+  const predecessorBlocks=(confirmStart||predChanged)&&pFactConflict(strOf(actual),pred,lag);
   const crewBlocks=!other&&crew?.F&&+crew.F>actual+6e4;
   if(predecessorBlocks||crewBlocks){
    const blocker=predecessorBlocks?pred:crew;
    const options=[];
-   if(!predecessorBlocks)options.push({l:"Делает другая бригада",pri:true,fn:()=>progConfirm({...v,oc:true},r,R)});
+   if(!predecessorBlocks)options.push({l:r.note.other?"Оставить другую бригаду":"Делает другая бригада",pri:true,fn:()=>progConfirm({...v,oc:true},r,R)});
    return ask(`Начало ${fmtDT(actual)} требует уточнения`,
-    `«${esc(blocker.name)}» по прогнозу заканчивается ${fmtDT(+blocker.F)}. Проверьте ${predecessorBlocks?"связь «Идёт после»":"назначение бригады"}.`,options);
+    predecessorBlocks?pFactMessage(v.nm,strOf(actual),pred,lag):`Бригада занята на «${esc(blocker.name)}» до ${fmtDT(+blocker.F)}.`,options);
   }
  }
- if(!confirmStart)return ask("Изменить бригаду?", "", [save]);
+ const finish=()=>pAsk({h:"Работа закончена?",p:"Подтвердите фактическое окончание. Готовность станет 100 %.",
+  date:"Когда закончили",d0:Math.min(now,Math.max(v.sv+6e4,v.fv)),dmin:v.sv,noFuture:true,back:v.back,
+  opts:[{l:"Подтвердить окончание",pri:true,fn:d=>apply({factStart:strOf(v.sv),pc:100,fv:d})}]});
+ if(complete)return finish();
+ if(!confirmStart){if(crewChanged)return ask("Изменить бригаду?", "", [save]);closeModal();return apply({})}
  const duration=v.fv-v.sv,pct=Math.round(Math.max(0,Math.min(100,+v.pc||0)));
- const elapsed=duration>0?Math.min(100,Math.round((now-v.sv)*100/duration)):null;
+ const elapsed=duration>0?Math.min(99,Math.round((now-v.sv)*100/duration)):null;
  const factStart=strOf(v.sv);
  const options=[{l:`Оставить ${pct} %`,pri:elapsed==null||elapsed===pct,fn:()=>apply({factStart,pc:pct})}];
  if(elapsed!=null&&elapsed!==pct)options.unshift({l:`Поставить ${elapsed} %`,pri:true,fn:()=>apply({factStart,pc:elapsed})});
+ options.push({l:"Работа закончена",fn:finish});
  return ask(`Работа началась ${fmtDT(v.sv)}. Какую готовность записать?`,
-  elapsed==null?"Сохраните текущую готовность.":`К сегодняшнему дню прошло ${elapsed===100?"не меньше 100":elapsed} % плановой длительности. Начало сохранится при любом выборе.`,options);
+  elapsed==null?"Сохраните текущую готовность.":`По прошедшему времени можно поставить ${elapsed} %. Начало сохранится при любом выборе.`,options);
 }
 function progApply(v){const u=v.u,t=byId[u],R=progRows(),r=R&&R.find(x=>x.uid===u);if(!t||!r)return;toast.hot=false;$("#toast").classList.remove("on");   // прошлое «Изменено · Отменить» не должно висеть над этой правкой
  need(()=>{const n=progNote(t.note),snap=progSnap(t),was0=progSame(),lg0=S.log.length;
@@ -2461,7 +2480,7 @@ function progApply(v){const u=v.u,t=byId[u],R=progRows(),r=R&&R.find(x=>x.uid===
   if(v.hasD){const was=n.link!=null?n.link+" "+(n.part||"всё"):"",unl=!!was&&!v.lk,af=v.af===""?null:v.af;let afCh=false;   // "" — в списке ничего не выбрано (строки «после» нет): связь не трогаем
    if((v.lk||"")!==was){LOG({act:"edit",uid:u,name:t.name,field:"программа: откуда даты",from:pblk(was),to:pblk(v.lk),t:snap});const[lu,lp]=v.lk?v.lk.split(" "):[];n.link=lu?+lu:null;n.part=lu?lp:null;t.note=progNoteText(n)}
    if(!v.lk&&af!=null){const nv=af==="—"?null:+af,p0=nv!=null&&R.find(z=>z.uid===nv),p=p0&&{...p0,F:pPF(p0)};
-    const sv0=v.sv;if(p&&p.F&&v.sv<+p.F-6e4){const d=v.fv-v.sv;v.sv=+p.F;v.fv=v.sv+d}   // «оставить связь»: в базе и истории — то, что станет
+    const sv0=v.sv;if(!n.factStart&&!v.factStart&&p&&p.F&&v.sv<+p.F-6e4){const d=v.fv-v.sv;v.sv=+p.F;v.fv=v.sv+d}   // «оставить связь»: в базе и истории — то, что станет
     const touched=v.sv!==+pPS(r)||v.fv!==+pPF(r)||v.ne!=null&&(v.ne?strOf(sv0):null)!==(n.snet||null);   // сняли «не раньше» — пауза по видимой дате
     /* пауза после строки «после»: начало вписано позже её конца — разница и есть пауза; раньше («оставить связь») или
        даты не трогали, а связь сменили — сразу следом. Длительность — из вписанных дат. */
@@ -2481,7 +2500,7 @@ function progApply(v){const u=v.u,t=byId[u],R=progRows(),r=R&&R.find(x=>x.uid===
    if(!v.lk){   // даты строки «из графика» на листе не правятся (03.11, пользователь: «разграничить») — только в «Графике»
     if(v.sv!==+pPS(r)||v.fv!==+pPF(r))LOG({act:"edit",uid:u,name:t.name,field:"программа: сроки",from:pfd(pPS(r))+"–"+pfd(pPF(r)),to:pfd(new Date(v.sv))+"–"+pfd(new Date(v.fv)),t:snap});
     if(!t.s||!t.f||(v.factStart||v.sv!==+pPS(r)||v.fv!==+pPF(r)||unl||afCh)&&(+D(t.s)!==v.sv||+D(t.f)!==v.fv)){t.s=strOf(v.sv);t.f=strOf(v.fv)}   // в базе — то, что видно (связь убрали — даты не прыгают к старым)
-    const factStart=v.factStart??(v.sv!==+pPS(r)?null:n.factStart);
+    const factStart=v.factStart===undefined?n.factStart:v.factStart;
     if((factStart||null)!==(n.factStart||null)){LOG({act:"edit",uid:u,name:t.name,field:"программа: фактическое начало",from:n.factStart?fmtDT(+D(n.factStart)):"—",to:factStart?fmtDT(+D(factStart)):"—",t:snap});n.factStart=factStart;t.note=progNoteText(n)}
     if(v.pc!=null){const p=Math.max(0,Math.min(100,Math.round(+v.pc||0)));if(p!==(+t.pct||0)){LOG({act:"edit",uid:u,name:t.name,field:"программа: готовность",from:(+t.pct||0)+"%",to:p+"%",t:snap});t.pct=p}}}
    else if(n.factStart){n.factStart=null;t.note=progNoteText(n)}}
@@ -2513,10 +2532,16 @@ function progMove(dir){const u=PEU,t=byId[u];if(!t)return;const T=DATA.tasks,i=T
  let a,b,c;if(dir<0){let j=i-1;while(j>=0&&T[j].lvl>t.lvl)j--;if(j<0||T[j].lvl!==t.lvl||isProgRoot(T[j]))return toast("Выше некуда — это первая строка в своей группе",false);a=j;b=i;c=end(i)}
  else{const e=end(i);if(e>=T.length||T[e].lvl!==t.lvl)return toast("Ниже некуда — это последняя строка в своей группе",false);a=i;b=e;c=end(e)}
  const R0=progRows()||[],swap=()=>{const x=T.splice(a,c-a),A=x.slice(0,b-a),B=x.slice(b-a);T.splice(a,0,...B,...A);return[A.length,B.length]};
- const[la,lb]=swap(),R1=progRows()||[],ring=R1.find(r=>{for(let x=r.pred,k=0;x!=null&&k<999;k++){if(x===r.uid)return true;const y=R1.find(z=>z.uid===x);x=y&&!y.linked?y.pred:null}return false});
+ const[la,lb]=swap(),before=new Map(R0.map(r=>[r.uid,r]));
+ const pinned=(progRows()||[]).flatMap(r=>{const old=before.get(r.uid);if(!old?.note.factStart||!r.predAuto||old.pred===r.pred)return[];
+  const t=byId[r.uid];return[{t,note:t.note,next:progNoteText({...old.note,after:old.pred})}]});
+ const pin=()=>pinned.forEach(({t,next})=>{t.note=next});
+ pin();
+ const R1=progRows()||[],ring=R1.find(r=>{for(let x=r.pred,k=0;x!=null&&k<999;k++){if(x===r.uid)return true;const y=R1.find(z=>z.uid===x);x=y&&!y.linked?y.pred:null}return false});
+ pinned.forEach(({t,note})=>{t.note=note});
  {const x=T.splice(a,la+lb),B=x.slice(0,lb),A=x.slice(lb);T.splice(a,0,...A,...B)}   // вернуть как было: менять — только через need (право, отмена)
  if(ring)return toast(`Так нельзя: «${ring.name}» пошла бы после самой себя (по кругу) — сначала поменяйте «идёт после»`,false);
- need(()=>{swap();
+ need(()=>{swap();pin();
   /* строка, у которой после перестановки нет предыдущей, остаётся на тех датах, что были видны (как при удалении) */
   const R2=progRows()||[];R2.forEach(q=>{const o=R0.find(z=>z.uid===q.uid);if(q.sum||q.linked||q.pred!=null||!o||o.pred==null||!o.S||!o.F)return;const x=byId[q.uid];x.s=strOf(+o.S);x.f=strOf(+o.F)});
   LOG({act:"edit",uid:u,name:t.name,field:"программа: порядок",from:"",to:dir<0?"выше":"ниже"});
@@ -3007,13 +3032,15 @@ function approvePlan(){const b=BK[APPR],basis=(($("#apb")||{}).value||"").replac
 /* ================== ПАНЕЛЬ ДЕТАЛЕЙ ================== */
 /* предшественники списком под полем: номер, название, сдвиг; клик — к той операции */
 const predList=t=>t.pred.filter(p=>byId[p.uid]).length?`<div class="pl2">${t.pred.filter(p=>byId[p.uid]).map(p=>`<button class="cx2" data-id="${p.uid}">№${noOf(p.uid)} ${esc(byId[p.uid].name)}${p.lag?` <em>${p.lag>0?"+":"−"}${fmtLag(p.lag)} сут</em>`:""}</button>`).join("")}</div>`:"";
+const predFactHint=(t,u)=>pct(u)>=100&&t.pred.some(p=>p.lag&&FC[p.uid]&&fsStart(+FC[p.uid].F,p.lag)>+t.S0+6e4)?
+ "<div class=\"m\">Пауза сохранена в связи. Фактическое начало выполненной операции осталось прежним.</div>":"";
 function openDrawer(u){closeHist();if(UI.hot!==u){const o=UI.hot;UI.hot=null;if(o){const r=$("#r-"+o);if(r)r.classList.remove("hot")}}UI.sel=u;const t=byId[u],f=FC[u],i=S.issues[u],iss=openIss(u),p=Math.round(pct(u)),pl=PAIROF[u],shifted=+f.F>+f.F0+36e5;
  $("#drawer").innerHTML=`<div class="dr-h"><div style="flex:1"><div class="blk">${esc(BK[BOF[u]].title)}, операция №${t.id}</div><h3>${esc(t.name)}</h3></div><button class="dr-x" data-act="dclose" title="Закрыть">×</button></div>
  <div class="dr-b">
   <dl class="kv">
    ${canEdit(u)?`<dt>Название</dt><dd><textarea class="ed" rows="1" data-ed="${u}:name" spellcheck="false">${esc(t.name)}</textarea></dd>`:""}
    <dt>Ответственный</dt><dd>${canEdit(u)?pickHTML(`data-ed="${u}:resp"`,t.resp,"не назначен"):esc(t.resp||"—")}</dd>
-   ${canEdit(u)?`<dt>Начало</dt><dd><input class="ed" data-ed="${u}:s" value="${fmtDT(t.S0)}" spellcheck="false"></dd><dt>Окончание</dt><dd><input class="ed" data-ed="${u}:f" value="${fmtDT(shownEnd(u))}" spellcheck="false"></dd><dt>Длительность</dt><dd>${fN(dd(t.S0,endOf(u)))} сут${isP(u)?" — по этапам решения":""}</dd><dt>После операций</dt><dd><input class="ed" data-ed="${u}:pred" value="${esc(fmtPreds(t.pred,noOf))}" placeholder="72; 73+0,5" spellcheck="false">${predList(t)}</dd>`:`<dt>По графику</dt><dd>${fDH(f.S0)} — ${fDH(f.F0)}</dd>`}
+   ${canEdit(u)?`<dt>Начало</dt><dd><input class="ed" data-ed="${u}:s" value="${fmtDT(t.S0)}" spellcheck="false"></dd><dt>Окончание</dt><dd><input class="ed" data-ed="${u}:f" value="${fmtDT(shownEnd(u))}" spellcheck="false"></dd><dt>Длительность</dt><dd>${fN(dd(t.S0,endOf(u)))} сут${isP(u)?" — по этапам решения":""}</dd><dt>После операций</dt><dd><input class="ed" data-ed="${u}:pred" value="${esc(fmtPreds(t.pred,noOf))}" placeholder="72; 73+0,5" spellcheck="false">${predList(t)}${predFactHint(t,u)}</dd>`:`<dt>По графику</dt><dd>${fDH(f.S0)} — ${fDH(f.F0)}</dd>`}
    ${shifted||+f.S!==+f.S0?`<dt>Прогноз</dt><dd><span class="l">${fDH(f.S)} — ${fDH(f.F)}</span></dd>`:""}
    ${pl?`<dt>План</dt><dd>${fD(FC[pl].S)} — ${fD(FC[pl].F)}</dd>`:""}
    ${t.pred.length&&!canEdit(u)?`<dt>После операций</dt><dd>${fmtPreds(t.pred,noOf).replace(/; /g,", ")||"—"}</dd>`:""}
@@ -3199,7 +3226,34 @@ const predNo=n=>{const x=RAW.find(y=>y.id===n);
 let EARLY=null,STEPF=null,FUTQ=null;
 /* «так не бывает» для связей (03.11, «Паша»): сдвиг уносит выполненные (100 %) операции позже сегодняшнего дня — спросить */
 function futDone(res){const now=Date.now()+36e5;return res.changed.filter(x=>byId[x]&&!PLANIDS.has(x)&&pct(x)>=100).filter(x=>{const o=res.ops.find(y=>y.uid===x);return o&&o.f>now&&o.f>+byId[x].F0})}
-function planGo(res,u,lg){const f=futDone(res);if(!f.length)return need(()=>commitPlan(res,u,lg));FUTQ={res,u,lg};
+function affectedProgramFacts(res,step){
+ const before=progRows();if(!before?.some(r=>r.note.factStart))return[];
+ const saved=res.ops.map(o=>[byId[o.uid],o]).filter(([t])=>t).map(([t,o])=>[t,t.S0,t.F0,t.pred,o]);
+ const oldDuration=step?.item.dur;
+ let after;
+ try{
+  if(step)step.item.dur=step.duration;
+  saved.forEach(([t,s,f,p,o])=>{t.S0=new Date(o.s);t.F0=new Date(o.f);t.pred=o.pred});
+  after=progRows();
+ }finally{
+  if(step)step.item.dur=oldDuration;
+  saved.forEach(([t,s,f,p])=>{t.S0=s;t.F0=f;t.pred=p});
+  compute();
+ }
+ const old=new Map(before.map(r=>[r.uid,r])),next=new Map(after.map(r=>[r.uid,r]));
+ return after.flatMap(r=>{const p=next.get(r.pred),previous=old.get(r.pred),lag=r.note.lag;
+  return pFactConflict(r.note.factStart,p,lag)&&(!previous?.F||+p.F>+previous.F+6e4)?[pFactMessage(r.name,r.note.factStart,p,lag)]:[]});
+}
+function planCommitWithWarning(res,u,lg,step){
+ const apply=()=>need(()=>{if(step){step.item.dur=step.duration;touchSteps(u)}commitPlan(res,u,lg)});
+ const conflicts=affectedProgramFacts(res,step);
+ if(!conflicts.length)return apply();
+ pAsk({h:"Сдвиг конфликтует с фактическим началом",p:conflicts.slice(0,4).join("<br>")+
+  (conflicts.length>4?`<br>Ещё конфликтов: ${conflicts.length-4}.`:"")+
+  "<br>Можно сохранить сдвиг. Подтверждённое начало останется прежним, а в карточке Сводки будет указано противоречие.",
+  back:()=>rerender(),opts:[{l:"Отмена",fn:()=>rerender()},{l:"Сохранить сдвиг",pri:true,fn:apply}]});
+}
+function planGo(res,u,lg,step){const f=futDone(res);if(!f.length)return planCommitWithWarning(res,u,lg,step);FUTQ={res,u,lg,step};
  const fe=x=>fDT(new Date(res.ops.find(y=>y.uid===x).f));
  openModal(`<h3>Выполненные операции окажутся позже сегодняшнего дня</h3><p>${f.slice(0,4).map(x=>`№${byId[x].id} «${esc(trunc(byId[x].name,60))}» — 100 %, кончится ${fe(x)}`).join("<br>")}${f.length>4?`<br>и ещё ${f.length-4}`:""}</p>
   <p class="m">Сделанная работа не может кончиться в будущем. Если дата верная — у этих операций, видимо, не 100 %: поправьте готовность.</p>
@@ -3328,7 +3382,7 @@ const t0succ=u=>ORDER.some(i=>byId[i].pred.some(p=>p.uid===u));
 function stepFinishOk(){const z=STEPF;STEPF=null;closeModal();if(!z)return;const u=z.u,t=byId[u],x=ST(u)[z.k];
  need(()=>{const res=editFinish(planOps(),u,z.ms);if(res.error)return toast("Окончание не изменилось",false);
   const lg=[{act:"edit",uid:u,name:t.name,field:"этап "+(z.k+1)+": "+STF.dur,from:trunc(x.dur,80),to:trunc(z.nd,80)},{act:"edit",uid:u,name:t.name,field:"окончание",from:fmtDT(z.cur),to:fmtDT(z.shown)}];
-  x.dur=z.nd;touchSteps(u);commitPlan(res,u,lg)})}
+  planGo(res,u,lg,{item:x,duration:z.nd})})}
 function editField(el){const[us,f]=el.dataset.ed.split(":"),u=+us,t=byId[u];if(!t||!canEdit(u))return;const v=el.value;
  if(f==="name"){const n=v.replace(/\s+/g," ").trim();if(!n){el.value=t.name;return}if(n===t.name)return;
   return need(()=>{LOG({act:"edit",uid:u,name:t.name,field:"название",from:t.name,to:n});t.name=n;touch(u);save();buildModel();rerender()})}
@@ -3344,7 +3398,7 @@ function editField(el){const[us,f]=el.dataset.ed.split(":"),u=+us,t=byId[u];if(!
   if(res.error==="finishBeforeStart")return fieldErr(el,"Окончание раньше начала");
   if(res.error==="early"){EARLY={u,ms,calc:res.calc};
    const ns=t.pred.filter(p=>byId[p.uid]&&fsStart(+byId[p.uid].F0,p.lag)>ms).map(p=>"№"+noOf(p.uid)).join(", ");
-   return openModal(`<h3>Операция связана с ${ns} и не может начаться раньше ${fDT(new Date(res.calc))}</h3><p>Оставить как есть — дата вернётся к расчётной. Или удалить связь, тогда операция начнётся, когда вы указали.</p>
+   return openModal(`<h3>Операция связана с ${ns} и не может начаться раньше ${fDT(new Date(res.calc))}</h3><p>Оставить как есть — дата вернётся к расчётной. Или удалить связь, чтобы сохранить введённую дату в плане.${pct(u)===0&&ms<TODAY?" При 0 % прогноз начнётся с сегодня.":""}</p>
     <div class="mfoot"><button class="btn ghost" data-act="early-keep">Оставить как есть</button><button class="btn pri" data-act="early-unlink">Удалить связь</button></div>`)}
   if(res.error)return fieldErr(el,"Дату не удалось изменить");
   return planGo(res,u,{act:"edit",uid:u,name:t.name,field:f==="s"?"начало":"окончание",from:fmtDT(cur),to:fmtDT(ms)})}
@@ -3594,7 +3648,7 @@ document.addEventListener("click",e=>{if(!e.target.closest(".more"))$("#menu").h
    case"stepf-ok":return stepFinishOk();
    case"stepf-no":STEPF=null;closeModal();return rerender();
    case"fut-no":return closeModal();
-   case"fut-ok":{const z=FUTQ;FUTQ=null;closeModal();return z&&need(()=>commitPlan(z.res,z.u,z.lg))}
+   case"fut-ok":{const z=FUTQ;FUTQ=null;closeModal();return z&&planCommitWithWarning(z.res,z.u,z.lg,z.step)}
    case"delok":{const u=DELU;DELU=null;closeModal();return doDelOp(u)}
    case"undo":return undo();
    case"redo":return redo();
@@ -3623,6 +3677,7 @@ function impInfoModal(){const L=S.lastImport;if(!L)return;
 document.addEventListener("change",e=>{const a=e.target.dataset;
  if(e.target.id==="pfAf"){const R=progRows(),r=R&&R.find(x=>x.uid===PEU),v=e.target.value,p=v!=="—"&&R.find(x=>x.uid===+v);if(!r)return;   // новая связь — даты в окне сразу за той строкой
   const S=$("#pfS"),F=$("#pfF");if(!S||!F)return;
+  if(r.note.factStart){pafLive();return}
   if(p&&p.uid===r.pred&&PEK){S.value=PEK.s;F.value=PEK.f;PEK=null}   // вернулись к прежней строке — прежние даты (и пауза)
   else if(p&&p.F){const a=parseDT(S.value,+r.S),b=parseDT(F.value,+r.F),d=a!=null&&b!=null&&b>=a?b-a:+r.F-+r.S;   // длительность — как вписана сейчас
    if(!PEK)PEK={s:S.value,f:F.value};S.value=fmtDT(+p.F);F.value=fmtDT(+p.F+d)}
