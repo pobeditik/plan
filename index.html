@@ -2433,7 +2433,9 @@ function progConfirm(v,r,R){
  if(!v.hasD||v.lk){closeModal();return progApply(v)}
  const crewChanged=v.oc!=null&&v.oc!==r.note.other;
  const confirmStart=v.sv<=now&&(startChanged||!actualBefore&&(crewChanged||v.startEdited))&&(+v.pc===0||!!actualBefore);
- const complete=+v.pc>=100&&r.pct<100&&!!actualBefore;
+ const pct=Math.round(Math.max(0,Math.min(100,+v.pc||0)));
+ const reviseFinish=r.pct>=100&&pct===100&&v.fv!==+pPF(r);
+ const complete=reviseFinish||pct===100&&r.pct<100&&!!actualBefore;
  const predId=v.af==null||v.af===""?r.pred:v.af==="—"?null:+v.af;
  const predChanged=predId!==r.pred;
  if(!confirmStart&&!crewChanged&&!complete&&!(actualBefore&&predChanged)){closeModal();return progApply(v)}
@@ -2460,12 +2462,13 @@ function progConfirm(v,r,R){
     predecessorBlocks?pFactMessage(v.nm,strOf(actual),pred,lag):`Бригада занята на «${esc(blocker.name)}» до ${fmtDT(+blocker.F)}.`,options);
   }
  }
- const finish=()=>pAsk({h:"Работа закончена?",p:"Подтвердите фактическое окончание. Готовность станет 100 %.",
-  date:"Когда закончили",d0:Math.min(now,Math.max(v.sv+6e4,v.fv)),dmin:v.sv,noFuture:true,back:v.back,
-  opts:[{l:"Подтвердить окончание",pri:true,fn:d=>apply({factStart:strOf(v.sv),pc:100,fv:d})}]});
+ const finish=()=>pAsk({h:reviseFinish?"Изменить фактическое окончание?":"Работа закончена?",
+  p:reviseFinish?"Подтвердите новую дату окончания. Готовность останется 100 %.":"Подтвердите фактическое окончание. Готовность станет 100 %.",
+  date:"Когда закончили",d0:reviseFinish?v.fv:Math.min(now,Math.max(v.sv+6e4,v.fv)),dmin:v.sv,noFuture:true,back:v.back,
+  opts:[{l:"Подтвердить окончание",pri:true,fn:d=>apply({factStart:!reviseFinish||actualBefore?strOf(v.sv):undefined,pc:100,fv:d})}]});
  if(complete)return finish();
  if(!confirmStart){if(crewChanged)return ask("Изменить бригаду?", "", [save]);closeModal();return apply({})}
- const duration=v.fv-v.sv,pct=Math.round(Math.max(0,Math.min(100,+v.pc||0)));
+ const duration=v.fv-v.sv;
  const elapsed=duration>0?Math.min(99,Math.round((now-v.sv)*100/duration)):null;
  const factStart=strOf(v.sv);
  const options=[{l:`Оставить ${pct} %`,pri:elapsed==null||elapsed===pct,fn:()=>apply({factStart,pc:pct})}];
