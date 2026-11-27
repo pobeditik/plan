@@ -899,6 +899,15 @@ body.hist main{margin-right:min(420px,94vw)}
 .pblk.ph .pnm{font-size:15px;padding:11px 4px}.pblk.ph .pi{min-height:44px}.pblk.ph .pft{display:none}
 .pblk .pi .pst{flex:none;margin-left:auto;padding-left:8px}
 .pblk .pl,.pblk .pgr{display:grid;grid-template-columns:minmax(0,1fr)}
+#blockChooser{position:fixed;inset:0;margin:auto;width:min(560px,calc(100vw - 32px));max-height:calc(100dvh - 32px);padding:0;border:1px solid var(--rule2);border-radius:16px;background:var(--raised);color:var(--ink);overflow:hidden;box-shadow:0 24px 60px -20px rgba(58,54,51,.45)}
+#blockChooser[open]{display:flex;flex-direction:column}
+#blockChooser::backdrop{background:rgba(43,40,38,.28)}
+.bch-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px 6px}
+.bch-head h2{margin:0;font-size:21px}
+#blockChooser .pbh{padding:8px 20px 12px}
+#blockChooser .pbl{padding:6px 14px 14px}
+#blockChooser .pck{display:none}
+#blockChooser .pnm{min-height:44px;padding-inline:8px}
 
 /* ---------- «Особо важный» (13.11 вечер): кнопка с подписью и «!» у статуса; в строке — красный «!» ---------- */
 .vipm{display:inline-grid;place-items:center;width:16px;height:16px;margin-right:6px;color:var(--red);vertical-align:-2px;flex:none}
@@ -2074,7 +2083,7 @@ const people=()=>{const s=new Set();RAW.forEach(t=>t.resp&&t.resp.split("/").for
  return[...s].filter(Boolean).sort((a,b)=>a.localeCompare(b,"ru"))};
 
 /* ================== состояние интерфейса ================== */
-const UI={tab:"sum",blocks:[],scale:"month",plan:true,compact:false,sel:null,showImp:false,flt:{who:"",st:[],open:false,prob:false,crit:false,hz:0}};
+const UI={tab:"sum",blocks:[],scale:"month",compact:false,sel:null,showImp:false,flt:{who:"",st:[],open:false,prob:false,crit:false,hz:0}};
 const saveUI=()=>{};
 /* Сообщение внизу. Сразу после правки (toast.hot) к сообщению добавляется «Отменить» (кроме ошибок: toast(t,false)). */
 function toast(t,act){const e=$("#toast");if(act===undefined&&toast.hot)act={l:"Отменить",a:"undo"};   // act=false — сообщение об ошибке, без «Отменить»
@@ -2735,7 +2744,7 @@ document.addEventListener("pointerdown",e=>{const g=e.target.closest&&e.target.c
 const PXD={week:64,month:24};
 function ganttRows(){const rows=[],F=fActive();
  UI.blocks.forEach(k=>{const b=BK[k];if(!b)return;const arr=[];
-  if(b.merge)b.merge.forEach(x=>{if(x.f){if(passF(x.f)){arr.push({k:"task",id:x.f,p:UI.plan?x.p:null});if(hasSt(x.f)&&S.open[x.f])FC[x.f].steps.forEach(y=>arr.push({k:"step",id:x.f,x:y}))}}else if(UI.plan&&!F)arr.push({k:"gho",id:x.p})});
+  if(b.merge)b.merge.forEach(x=>{if(x.f){if(passF(x.f)){arr.push({k:"task",id:x.f,p:x.p});if(hasSt(x.f)&&S.open[x.f])FC[x.f].steps.forEach(y=>arr.push({k:"step",id:x.f,x:y}))}}else if(!F)arr.push({k:"gho",id:x.p})});
   else b.ids.filter(passF).forEach(u=>{arr.push({k:"task",id:u});if(hasSt(u)&&S.open[u])FC[u].steps.forEach(x=>arr.push({k:"step",id:u,x}))});
   const L=S.lastImport;
   if(UI.showImp&&L&&!F)L.removed.filter(r=>r.block===k).forEach(r=>{const i=r.after?arr.findIndex(x=>x.id===r.after&&x.k==="task"):-1;
@@ -2808,7 +2817,7 @@ function renderFeed(){compute();const y=scrollY;
    <span class="ft">${iss?I.flagF:""}${esc(t.name)}</span><span class="fq ${p>=100?"d":""}">${p}%</span>
    <span class="fm">№${t.id} · ${fD(f.S)} – ${fD(f.F)}${shifted?` <b>+${fN(dd(f.F0,f.F))} сут</b>`:""}${t.resp?" · "+esc(t.resp):""}${ncm?` · ${I.cm}${ncm}`:""}</span>
    ${miniBar(u,RG[bk])}</button>`});
- $("#tab-gnt").innerHTML=`<div class="fchips">${blkPopHTML(false)}</div><div class="feed">${h||`<div class="empty">${UI.blocks.length?"Нет операций":"Выберите блок для просмотра графика"}</div>`}</div>`;
+ $("#tab-gnt").innerHTML=`<div class="fchips">${blkPopHTML(false)}</div><div class="feed">${h||`<div class="empty">${UI.blocks.length?"Нет операций":BLOCKS.length?"Выберите блок для просмотра графика":"Нет блоков"}</div>`}</div>`;
  scrollTo(0,y)}
 /* Панель графика одной строкой (прогон 2, REDESIGN.md §3): блоки, масштаб, «Сегодня», «Фильтры», «?» — во всплывающих окнах */
 const fCount=()=>{const f=UI.flt;return(f.who?1:0)+f.st.length+(f.open?1:0)+(f.prob?1:0)+(f.crit?1:0)+(f.hz?1:0)};
@@ -2825,15 +2834,22 @@ function blkBtn(){const sel=UI.blocks.map(k=>BK[k]).filter(Boolean);
  return `<span class="bt">${esc(bnm(sel[0].title))}</span>${sel.length>1?`<span class="mu">+ ещё ${sel.length-1}</span>`:shiftT(sel[0])}`}
 function blkRow(b,sub){const on=UI.blocks.includes(b.key),s=blockShift(b),q=(bnm(b.title)+" "+(b.grp||"")).toLowerCase();
  return `<div class="pi ${on?"on":""} ${sub?"sub":""}" data-q="${esc(q)}"><button class="pck" data-blkt="${b.key}" aria-pressed="${on}" title="${on?"Убрать":"Добавить к выбранным"}"><i></i></button><button class="pnm" data-blk1="${b.key}" title="${esc(b.title)}${b.hint?" ("+esc(b.hint)+")":""}">${esc(bnm(b.title))}</button>${s>.05?`<span class="pst l" title="Отстаёт на ${fN(s)} сут">+${fN(s)}</span>`:`<span class="pst" title="В графике"></span>`}</div>`}
-function blkPop(ED){const G=blkGroups(),many=BLOCKS.length>=9,ph=PHONE();
+function blkPop(ED,chooser=false){const G=blkGroups(),many=chooser||BLOCKS.length>=9,ph=PHONE();
  const list=G.map((g,gi)=>{if(!g.g)return g.bs.map(b=>blkRow(b,false)).join("");
   const n=g.bs.filter(b=>UI.blocks.includes(b.key)).length,st=n===0?"":n===g.bs.length?"on":"part";
   return `<div class="pgr"><div class="pi pg ${st}" data-q="${esc(g.g.toLowerCase())}"><button class="pck" data-blkg="${gi}" title="Весь раздел"><i></i></button><button class="pnm" data-blkg1="${gi}" title="${esc(g.g)}">${esc(bnm(g.g))}</button></div>${g.bs.map(b=>blkRow(b,true)).join("")}</div>`}).join("");
- return `<div class="pbh">${many?`<label class="psr"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.5 10.5 14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><input id="blkQ" placeholder="Найти блок" value="${esc(UI.bq||"")}" autocomplete="off" spellcheck="false"></label>`:`<span class="sp"></span>`}
-  <button class="pba" data-blkall>${UI.bq?"Все найденные":"Все"}</button><button class="pba" data-blknone>Снять</button>${ph?`<button class="pba pri" data-blkdone>Готово</button>`:""}</div>
+ return `<div class="pbh">${many?`<label class="psr"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.5 10.5 14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><input id="blkQ" aria-label="Найти блок" placeholder="Найти блок" value="${esc(UI.bq||"")}" autocomplete="off" spellcheck="false"></label>`:`<span class="sp"></span>`}
+  <button class="pba" data-blkall>${UI.bq?"Все найденные":"Все"}</button>${chooser?"":`<button class="pba" data-blknone>Снять</button>${ph?`<button class="pba pri" data-blkdone>Готово</button>`:""}`}</div>
   <div class="pl pbl" id="blkL">${list}<div class="pnf" hidden>Нет блока «<span></span>»</div></div>
-  ${ED&&can("plan_edit")?`<button class="pi new" data-act="newblk">+ Новый блок</button>`:""}<div class="pft">Название — только этот · галочка — добавить</div>`}
+  ${ED&&can("plan_edit")?`<button class="pi new" data-act="newblk">+ Новый блок</button>`:""}${chooser?"":`<div class="pft">Название — только этот · галочка — добавить</div>`}`}
 const blkPopHTML=ED=>popHTML("blk",`${blkBtn()}<i class="cv">▾</i>`,blkPop(ED)).replace('class="pop ',`class="pop pblk ${PHONE()?"ph":""} `);
+function renderBlockChooser(){const existing=$("#blockChooser[open]"),search=document.activeElement?.id==="blkQ";
+ if(!existing){closePop();UI.bq=""}
+ $("#tab-gnt").innerHTML=`<dialog id="blockChooser" class="pblk" aria-labelledby="blockChooserTitle"><div class="bch-head">
+  <h2 id="blockChooserTitle" tabindex="-1" autofocus>Выберите блок</h2>${LAND()?"":`<button class="btn ghost" data-tab="sum">К Сводке</button>`}</div>
+  ${blkPop(false,true)}</dialog>`;
+ const d=$("#blockChooser");d.oncancel=e=>{e.preventDefault();if(!LAND())go("sum")};d.showModal();
+ if(!PHONE()||search)$("#blkQ").focus();blkFilter()}
 /* поиск в списке — без перерисовки (фокус не теряется) */
 function blkFilter(){const L=$("#blkL");if(!L)return;const q=(UI.bq||"").trim().toLowerCase();let any=false;
  L.querySelectorAll(".pgr").forEach(g=>{const hd=g.querySelector(".pg"),hit=!q||hd.dataset.q.includes(q);let n=0;
@@ -2850,9 +2866,10 @@ document.addEventListener("click",e=>{if(!UI.pop||e.target.closest(".pop"))retur
 /* выбранный блок — таблица к нему (заголовок блока под шапкой таблицы) */
 function blkScroll(k){requestAnimationFrame(()=>{const gw=$("#gw"),r=gw&&gw.querySelector(`.row.blk[data-blk="${k}"]`),hd=gw&&gw.querySelector(".ghd");
  if(r)gw.scrollTop=Math.max(0,r.offsetTop-(hd?hd.offsetHeight:0));else if(PORT()){const f=$(`#tab-gnt .fh[data-blk="${k}"]`);if(f)f.scrollIntoView({block:"start"})}})}
-function blkSet(keys,{close=false,to=null}={}){UI.blocks=BLOCKS.map(b=>b.key).filter(k=>keys.includes(k));UI.none=!UI.blocks.length;
- const L=$("#blkL"),st=L?L.scrollTop:0;if(close){UI.pop=null;UI.bq=""}saveUI();renderGnt();
- const L2=$("#blkL");if(L2){L2.scrollTop=st;blkFilter()}if(to)blkScroll(to)}
+function blkSet(keys,{close=false,to=null}={}){const chooser=$("#blockChooser")?.open;
+ UI.blocks=BLOCKS.map(b=>b.key).filter(k=>keys.includes(k));UI.none=!UI.blocks.length;
+ const L=$("#blkL"),st=L?L.scrollTop:0;if(close||chooser){UI.pop=null;UI.bq=""}saveUI();renderGnt();
+ const L2=$("#blkL");if(L2){L2.scrollTop=st;blkFilter()}if(chooser)$('#tab-gnt [data-pop="blk"]')?.focus({preventScroll:true});if(to)blkScroll(to)}
 const popHTML=(k,btn,body,right)=>`<div class="pop ${right?"r":""}"><button class="btn ${UI.pop===k?"on":""}" data-act="pop" data-pop="${k}">${btn}</button><div class="popb" ${UI.pop===k?"":"hidden"}>${body}</div></div>`;
 /* «+ Новый блок» (06.10: не выпячивать) — последней блёклой строкой списка блоков, только при «Правке». Блок — сводная
    строка с одной операцией «Новая операция» с сегодняшнего дня; дальше Паша правит как обычно. */
@@ -2870,7 +2887,7 @@ function newBlock(){closeDrawer();const n=(($("#nbn")||{}).value||"").replace(/\
   const k=BOF[op.uid];if(k)UI.blocks=[k];touch(op.uid);save();rerender();
   requestAnimationFrame(()=>{const i=$(`[data-ed="${op.uid}:name"]`);if(i){i.focus();i.select()}})})}
 function gtoolsHTML(pairSel,scaleSeg,ED){const L=S.lastImport,sel=UI.blocks.map(k=>BK[k]).filter(Boolean),n=fCount();
- const leg=`<div class="gleg pl"><span><i class="s" style="background:var(--work)"></i>в работе</span><span><i class="s" style="background:var(--green)"></i>выполнено</span><span><i class="s" style="background:var(--ochre)"></i>срок прошёл</span><span><i class="s" style="background:var(--red)"></i>проблемный вопрос</span><span><i class="s" style="box-shadow:inset 0 0 0 1.5px var(--work)"></i>не начато</span><span><i class="s" style="background:repeating-linear-gradient(-45deg,var(--ink3) 0 2px,transparent 2px 5px)"></i>прогнозный сдвиг</span>${pairSel.length&&UI.plan?`<span><i class="s" style="background:var(--ghost)"></i>план</span>`:""}<span><i class="s" style="width:2px;background:var(--ink)"></i>сегодня</span><span class="m">Клик по строке — подробности, связи и комментарии</span></div>`;
+ const leg=`<div class="gleg pl"><span><i class="s" style="background:var(--work)"></i>в работе</span><span><i class="s" style="background:var(--green)"></i>выполнено</span><span><i class="s" style="background:var(--ochre)"></i>срок прошёл</span><span><i class="s" style="background:var(--red)"></i>проблемный вопрос</span><span><i class="s" style="box-shadow:inset 0 0 0 1.5px var(--work)"></i>не начато</span><span><i class="s" style="background:repeating-linear-gradient(-45deg,var(--ink3) 0 2px,transparent 2px 5px)"></i>прогнозный сдвиг</span>${pairSel.length?`<span><i class="s" style="background:var(--ghost)"></i>план</span>`:""}<span><i class="s" style="width:2px;background:var(--ink)"></i>сегодня</span><span class="m">Клик по строке — подробности, связи и комментарии</span></div>`;
  const flt=`${filtersHTML()}${ED?"":`<label class="tgl"><input type="checkbox" data-opt="compact" ${UI.compact?"checked":""}><span></span>Краткая таблица</label>`}
   ${recentImp(L)?`<button class="chip imp ${UI.showImp?"on":""}" data-act="showimp" title="Показать в графике, что изменилось при последней загрузке из Project">Изменения последней загрузки<b>${impCount(L)}</b></button>`:""}`;
  return `<div class="gtools one">
@@ -2878,12 +2895,11 @@ function gtoolsHTML(pairSel,scaleSeg,ED){const L=S.lastImport,sel=UI.blocks.map(
   ${scaleSeg}<button class="btn" data-act="today">Сегодня</button>
   ${popHTML("flt",`Фильтры${n?` · ${n}`:""}<i class="cv">▾</i>`,flt)}${n?`<button class="freset" data-fr title="Сбросить фильтры">×</button>`:""}
   <span class="sp"></span>
-  ${pairSel.length?`<label class="tgl"><input type="checkbox" data-opt="plan" ${UI.plan?"checked":""}><span></span>План тенью</label>`:""}
   ${popHTML("leg","?",leg,true)}
   ${SITE&&!siteCan("plan_edit")?"":`<label class="tgl"><input type="checkbox" data-opt="edit" ${UI.edit?"checked":""}><span></span>Правка</label>`}
  </div>`}
 const PORT=()=>PHONE()&&!LAND();   // телефон вертикально — лента; Гант — только горизонтально (решение 06.10)
-function renderGnt(keep){if(PORT())return renderFeed();compute();
+function renderGnt(keep){if(SITE&&BLOCKS.length&&!UI.blocks.length){compute();return renderBlockChooser()}if(PORT())return renderFeed();compute();
  const old=$("#gw"),sl=old?old.scrollLeft:0,stp=old?old.scrollTop:0;
  const rows=ganttRows();
  const ts=[+TODAY];rows.forEach(r=>{if(r.k==="del"){ts.push(+D(r.r.s),+D(r.r.f));return}if(r.k==="task"){const o=UI.showImp&&S.lastImport&&(S.lastImport.old||{})[r.id];if(o)ts.push(+D(o.s),+D(o.f));ts.push(+FC[r.id].S,+FC[r.id].F,+FC[r.id].S0,+FC[r.id].F0);if(r.p)ts.push(+FC[r.p].S,+FC[r.p].F)}else if(r.k==="gho")ts.push(+FC[r.id].S,+FC[r.id].F);else if(r.k==="step")ts.push(+r.x.S,+r.x.F);else if(r.k==="mgrp")r.ids.forEach(i=>ts.push(+FC[i].S,+FC[i].F))});
@@ -2956,10 +2972,10 @@ function renderGnt(keep){if(PORT())return renderFeed();compute();
   <div class="gcard"><div class="gw" id="gw" style="--lw:${lw}px;--W:${W}px;--cols:${cols}"><div class="gin">
    <div class="gbg">${bg}</div>
    <div class="ghd"><div class="lc">${hl}</div><div class="tc">${hd}</div></div>
-   ${rows.length?R+(rows[0].k==="blk"?"</div>":""):`<div class="empty" style="margin:30px;position:sticky;left:30px;width:520px">${UI.blocks.length?"Под фильтр ничего не попало":"Выберите блок для просмотра графика"}</div>`}
+   ${rows.length?R+(rows[0].k==="blk"?"</div>":""):`<div class="empty" style="margin:30px;position:sticky;left:30px;width:520px">${UI.blocks.length?"Под фильтр ничего не попало":BLOCKS.length?"Выберите блок для просмотра графика":"Нет блоков"}</div>`}
    <svg class="links" width="${W}" height="${y}"><defs><marker id="ar" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8z" fill="var(--ink)"/></marker></defs>${links}</svg>
   </div></div>
-  ${narrow?`<div class="gleg"><span><i class="s" style="background:var(--work)"></i>в работе</span><span><i class="s" style="background:var(--green)"></i>выполнено</span><span><i class="s" style="background:var(--ochre)"></i>срок прошёл</span><span><i class="s" style="background:var(--red)"></i>проблемный вопрос</span><span><i class="s" style="box-shadow:inset 0 0 0 1.5px var(--work)"></i>не начато</span><span><i class="s" style="background:repeating-linear-gradient(-45deg,var(--ink3) 0 2px,transparent 2px 5px)"></i>прогнозный сдвиг</span>${pairSel.length&&UI.plan?`<span><i class="s" style="background:var(--ghost)"></i>план</span>`:""}<span><i class="s" style="width:2px;background:var(--ink)"></i>сегодня</span><span style="margin-left:auto">Клик по строке — подробности, связи и комментарии</span>`:""}</div></div>
+  ${narrow?`<div class="gleg"><span><i class="s" style="background:var(--work)"></i>в работе</span><span><i class="s" style="background:var(--green)"></i>выполнено</span><span><i class="s" style="background:var(--ochre)"></i>срок прошёл</span><span><i class="s" style="background:var(--red)"></i>проблемный вопрос</span><span><i class="s" style="box-shadow:inset 0 0 0 1.5px var(--work)"></i>не начато</span><span><i class="s" style="background:repeating-linear-gradient(-45deg,var(--ink3) 0 2px,transparent 2px 5px)"></i>прогнозный сдвиг</span>${pairSel.length?`<span><i class="s" style="background:var(--ghost)"></i>план</span>`:""}<span><i class="s" style="width:2px;background:var(--ink)"></i>сегодня</span><span style="margin-left:auto">Клик по строке — подробности, связи и комментарии</span>`:""}</div></div>
   ${pairSel.map(cmpHTML).join("")}`;
  const gw=$("#gw");
  if(keep===true){gw.scrollLeft=sl;gw.scrollTop=stp}else{gw.scrollLeft=Math.max(0,x(TODAY)-(gw.clientWidth-lw)*.3);
@@ -3542,6 +3558,7 @@ function go(tab,push=true){UI.tab=tab;saveUI();document.body.classList.toggle("c
  $$("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.tab===tab));
  $$("section.tab").forEach(s=>s.classList.toggle("on",s.id==="tab-"+tab));if(push)history.replaceState(null,"","#"+tab);renderTab()}
 function renderTab(keep){renderMe();paintDirty();const n=issList(true).length;$("#cntI").textContent=n;$("#cntI").classList.toggle("z",!n);
+ if(UI.tab!=="gnt"&&!LAND())$("#blockChooser")?.close();
  if(LAND())renderGnt(keep);else if(UI.tab==="sum")renderSum();else if(UI.tab==="iss")renderIss();else if(UI.tab==="cht"&&typeof renderChat==="function")renderChat();else renderGnt(keep)}
 const rerender=()=>{renderTab(true);refreshDrawer();refreshHist()};
 const newDay=()=>{if(DATA&&dayTick()){buildModel();$("#asof").innerHTML=asofHTML();rerender()}};
