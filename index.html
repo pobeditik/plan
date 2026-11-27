@@ -1960,8 +1960,7 @@ function buildModel(){
   const[nm,kind]=p,other=cand.find(q=>q.s.uid!==o.s.uid&&pre(q.s.name)&&pre(q.s.name)[0]===nm&&pre(q.s.name)[1]!==kind);
   if(!other)return;const fact=kind==="ФАКТ"?o.s:other.s,plan=kind==="ФАКТ"?other.s:o.s;
   used.add(o.s.uid);used.add(other.s.uid);
-  const programUid=+(String(fact.note||"").match(/^сроки из сводки: (\d+)$/m)||[])[1]||null;
-  BLOCKS.push(mk(o,{kind:"pair",key:slug(nm),title:/^\d+$/.test(nm)?"Скважина "+nm:nm,sub:o.ctx,main:fact.uid,plan:plan.uid,programUid,ids:(CH[fact.uid]||[]).map(c=>c.uid),pids:(CH[plan.uid]||[]).map(c=>c.uid)}))});
+  BLOCKS.push(mk(o,{kind:"pair",key:slug(nm),title:/^\d+$/.test(nm)?"Скважина "+nm:nm,sub:o.ctx,main:fact.uid,plan:plan.uid,ids:(CH[fact.uid]||[]).map(c=>c.uid),pids:(CH[plan.uid]||[]).map(c=>c.uid)}))});
  cand.forEach(o=>{if(used.has(o.s.uid))return;BLOCKS.push(mk(o,{kind:"single",main:o.s.uid,ids:(CH[o.s.uid]||[]).map(c=>c.uid)}))});
  if(misc.length)BLOCKS.push({kind:"misc",key:"misc",title:"Общее по "+PNAME,sub:"Операции вне блоков",grp:"",hint:"",main:null,plan:null,ids:misc,pids:[]});
  BK={};BOF={};PAIROF={};PLANIDS=new Set();
@@ -2039,18 +2038,6 @@ const stPct=u=>{const sp=stepPlan(u),d=sp.reduce((a,x)=>a+stDur(x),0);return d?s
 function pct(u){if(isP(u))return stPct(u);
  const v=S.tasks[u]&&S.tasks[u].pct;return v==null?byId[u].pct:v}
 let FC={};
-function programForecast(){return progCompute(progSubtree(DATA.tasks),D,(u,part)=>{
- const b=BLOCKS.find(x=>x.main===u);if(!b||b.programUid)return null;
- const ids=progPart(b.ids,i=>byId[i].name,part).filter(i=>FC[i]);if(!ids.length)return null;
- return{S:new Date(Math.min(...ids.map(i=>+FC[i].S))),F:new Date(Math.max(...ids.map(i=>+FC[i].F))),pct:Math.round(blockPct(ids))}
- },DAY,{crew:true,today:+TODAY})}
-/* Сводка задаёт окно факта. Вписанные даты операций задают их порядок и долю времени внутри окна. */
-function programBlockDates(b,r){const root=FC[b.main];if(!root||!r?.S||!r.F)return;
- const d=root.F0-root.S0,at=t=>new Date(+r.S+(d?Math.round((t-root.S0)/d*(r.F-r.S)):0));
- for(const i of b.ids){const f=FC[i];if(!f)continue;
-  f.S=at(f.S0);f.F=d?at(f.F0):r.F;
-  if(f.steps&&!stFree(i))f.steps=f.steps.map(s=>({...s,S:at(s.S0),F:at(s.F0)}))}
- root.S=r.S;root.F=r.F}
 function compute(){FC={};
  for(const u of ORDER){const t=byId[u];
   const p=pct(u),du=t.F0-t.S0;
@@ -2068,10 +2055,7 @@ function compute(){FC={};
  PLANIDS.forEach(u=>{const t=byId[u];FC[u]={S:t.S0,F:t.F0,S0:t.S0,F0:t.F0}});
  const agg=(root,ids)=>{if(root==null||!ids.length)return;const a=ids.map(i=>FC[i]).filter(Boolean);if(!a.length)return;
   FC[root]={S:new Date(Math.min(...a.map(x=>+x.S))),F:new Date(Math.max(...a.map(x=>+x.F))),S0:new Date(Math.min(...a.map(x=>+x.S0))),F0:new Date(Math.max(...a.map(x=>+x.F0)))}};
- BLOCKS.forEach(b=>{agg(b.main,b.ids);agg(b.plan,b.pids)});
- const program=programForecast();
- BLOCKS.forEach(b=>{if(b.programUid)programBlockDates(b,program.find(r=>r.uid===b.programUid&&!r.sum))});
- return program}
+ BLOCKS.forEach(b=>{agg(b.main,b.ids);agg(b.plan,b.pids)})}
 const w=u=>Math.max(.25,dd(byId[u].S0,byId[u].F0));
 const blockPct=ids=>{let a=0,b=0;ids.forEach(i=>{a+=w(i)*pct(i);b+=w(i)});return b?a/b:0};
 const expectedPct=ids=>{let a=0,b=0;ids.forEach(i=>{const t=byId[i],d=w(i),x=Math.min(1,Math.max(0,dd(t.S0,TODAY)/d));a+=d*x*100;b+=d});return b?a/b:0};
@@ -2235,9 +2219,12 @@ function renderSumOld(){compute();
 /* ================== ПРОГРАММА РАБОТ: Сводка = лист A3 (16.10, src/program.js) ==================
    Лист как офисный A3 (Паша): проект → бригада → месторождение → куст → ДПМ и работы. Только факт и даты, без
    отставаний и вопросов; серая линия — согласованный срок. Правка прямо на листе (при «Правке», plan_edit):
-   у строки, связанной с операциями, новое начало сдвигает операции, новое окончание удлиняет последнюю;
+   у строки, связанной с операциями, сроки и готовность берутся из Графика;
    у остальных меняются свои даты. Нет программы в плане — прежняя сводка (renderSumOld). */
-function progRows(){const rows=compute();return rows.length?rows:null}
+function progRows(){compute();const rows=progSubtree(DATA.tasks);if(!rows.length)return null;
+ return progCompute(rows,D,(u,part)=>{const b=BLOCKS.find(x=>x.main===u);if(!b)return null;
+  const ids=progPart(b.ids,i=>byId[i].name,part).filter(i=>FC[i]);if(!ids.length)return null;
+  return{S:new Date(Math.min(...ids.map(i=>+FC[i].S))),F:new Date(Math.max(...ids.map(i=>+FC[i].F))),pct:Math.round(blockPct(ids))}},DAY,{crew:true,today:+TODAY})}   // честный прогноз (28.10): бригада подряд, не начатое — не в прошлом
 const pfd=d=>!d?"—":p2(d.getDate())+"."+p2(d.getMonth()+1)+"."+p2(d.getFullYear()%100);
 const pdur=(a,b)=>{const v=Math.round(dd(a,b)*10)/10;return String(v).replace(".",",")};
 const PMON=["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
@@ -2303,12 +2290,11 @@ function renderSum(){const R=progRows();if(!R)return renderSumOld();
 const PMX=`<button class="dr-x mx" data-act="mclose" title="Закрыть без сохранения" aria-label="Закрыть">×</button>`;
 let PEU=null,PEK=null;   // PEK — даты в окне до выбора в списке «идёт после»
 function progEdit(u){const R=progRows(),r=R&&R.find(x=>x.uid===u),t=byId[u];if(!r||!t||!(editing()&&can("plan_edit")))return;PEU=u;PEK=null;
- const drives=BLOCKS.find(b=>b.programUid===u);
- const opts=BLOCKS.filter(b=>b.main!=null&&!b.programUid).map(b=>[["работы","работы"],["дпм","ДПМ"],["всё","целиком"]].map(([p,l])=>`<option value="${b.main} ${p}" ${r.note.link===b.main&&(r.note.part||"всё")===p?"selected":""}>из графика: ${esc(b.title)} — ${l}</option>`).join("")).join("");
+ const opts=BLOCKS.filter(b=>b.main!=null).map(b=>[["работы","работы"],["дпм","ДПМ"],["всё","целиком"]].map(([p,l])=>`<option value="${b.main} ${p}" ${r.note.link===b.main&&(r.note.part||"всё")===p?"selected":""}>из графика: ${esc(b.title)} — ${l}</option>`).join("")).join("");
  const leaf=!(r.sum||r.depth===0),pr=r.pred!=null&&R.find(x=>x.uid===r.pred);
  openModal(`${PMX}<h3>${esc(t.name)}</h3><div class="pform">
   <label>Название<input class="ed" id="pfN" value="${esc(t.name)}" autocomplete="off"></label>
-  ${leaf?`${drives?`<p class="m">Сроки отсюда используются в графике «${esc(drives.title)}». <button class="btn" data-act="pgo-g">Открыть в Графике</button></p>`:`<label>Откуда даты<select class="ed" id="pfL"><option value="">свои — вписываются здесь</option>${opts}</select></label>`}
+  ${leaf?`<label>Откуда даты<select class="ed" id="pfL"><option value="">свои — вписываются здесь</option>${opts}</select></label>
   <div class="frow2"><label>Начало<input class="ed" id="pfS" value="${pPS(r)?fmtDT(+pPS(r)):""}" placeholder="22.10.26 12:00"${r.linked?" disabled":""}></label><label>Окончание<input class="ed" id="pfF" value="${pPF(r)?fmtDT(+pPF(r)):""}" placeholder="22.10.26 12:00"${r.linked?" disabled":""}></label>
    <label>Готовность, %<input class="ed" id="pfP" type="number" min="0" max="100" step="5" value="${r.pct}"${r.linked?" disabled":""}></label></div>
   ${r.linked?`<p class="m" id="pfLh"><span>${pLinkHint(r)}</span><button class="btn" data-act="pgo-g" style="justify-self:start">Открыть в Графике</button></p>`
@@ -3224,7 +3210,6 @@ function doneToday(u){const t=byId[u];if(!t)return;
  LOG(lg);touch(u);save();rerender()})}
 /* Подсказка в панели: почему прогноз операции позже графика — просрочена или сдвинута предшественниками. */
 function lateHint(u){const t=byId[u],f=FC[u];if(!f||isP(u)||pct(u)>=100||PLANIDS.has(u))return"";const l=dd(f.F0,f.F);if(l<=.05)return"";
- if(BK[BOF[u]]?.programUid)return `<div class="hint-late">Сроки блока берутся из Сводки. Окончание по графику ${fDH(f.F)}.</div>`;
  const own=+f.F0<+NOW;
  return `<div class="hint-late">${own?`Просрочена: по графику окончание ${fDH(f.F0)}, прогноз ${fDH(f.F)} (+${fN(l)} сут).${can("pct_edit")?" Обновите процент"+(can("plan_edit")?" или окончание":"")+".":""}`
   :`Прогноз сдвинут предшествующими операциями: +${fN(l)} сут, окончание ${fDH(f.F)}.`}</div>`}
@@ -3645,7 +3630,7 @@ document.addEventListener("click",e=>{if(!e.target.closest(".more"))$("#menu").h
     else{v.af="—";if(a.act==="punlink-oc")v.oc=true}
     return progConfirm(v,r,R)}
    case"pdel":return progDelAsk();
-  case"pgo-g":{const r=(progRows()||[]).find(x=>x.uid===PEU),b=r&&BLOCKS.find(x=>x.programUid===r.uid||x.main===r.note.link),ids=b?progPart(b.ids,i=>byId[i].name,r.note.part||"всё"):[];closeModal();return go_g(ids.find(i=>pct(i)<100)??ids[0])}
+  case"pgo-g":{const r=(progRows()||[]).find(x=>x.uid===PEU),b=r&&BLOCKS.find(x=>x.main===r.note.link),ids=b?progPart(b.ids,i=>byId[i].name,r.note.part||"всё"):[];closeModal();return go_g(ids.find(i=>pct(i)<100)??ids[0])}
    case"pdel2":return progDel();
    case"pmv-up":return progMove(-1);
    case"pmv-dn":return progMove(1);
