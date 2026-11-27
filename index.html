@@ -898,6 +898,9 @@ body.hist main{margin-right:min(420px,94vw)}
 .pblk.ph .popb{position:fixed;left:50%;transform:translateX(-50%);right:auto;top:auto;bottom:0;width:min(560px,100vw);max-width:100vw;max-height:88vh;border-radius:16px 16px 0 0;z-index:200}
 .pblk.ph .pnm{font-size:15px;padding:11px 4px}.pblk.ph .pi{min-height:44px}.pblk.ph .pft{display:none}
 .pblk .pi .pst{flex:none;margin-left:auto;padding-left:8px}
+.pblk .blk-del{display:grid;place-items:center;padding:6px;margin-left:4px;color:var(--ink3)}
+.pblk .blk-del:hover,.pblk .blk-del:focus-visible{color:var(--red)}
+.pblk .blk-del svg{width:15px;height:15px}
 .pblk .pl,.pblk .pgr{display:grid;grid-template-columns:minmax(0,1fr)}
 #blockChooser{position:fixed;inset:0;margin:auto;width:min(560px,calc(100vw - 32px));max-height:calc(100dvh - 32px);padding:0;border:1px solid var(--rule2);border-radius:16px;background:var(--raised);color:var(--ink);overflow:hidden;box-shadow:0 24px 60px -20px rgba(58,54,51,.45)}
 #blockChooser[open]{display:flex;flex-direction:column}
@@ -1399,6 +1402,7 @@ function makeHistory(snapNow){let last=snapNow(),saved=last;const u=[],r=[];
   commit(){const now=snapNow();if(now===last)return false;u.push(last);if(u.length>UNDO_MAX)u.shift();r.length=0;last=now;return true},
   undo(){if(!u.length)return null;r.push(last);last=u.pop();return last},
   redo(){if(!r.length)return null;u.push(last);last=r.pop();return last},
+  clear(){u.length=0;r.length=0},
   markSaved(){saved=last},isClean(){return last===saved},
   /* сайт: данные пришли из базы (свои же правки с отметками базы) — принять как текущие, шага не добавлять */
   rebase(){last=snapNow();saved=last},
@@ -2832,12 +2836,12 @@ const blkGroups=()=>{const out=[];BLOCKS.forEach(b=>{const g=b.grp||"",L=out[out
 function blkBtn(){const sel=UI.blocks.map(k=>BK[k]).filter(Boolean);
  if(!sel.length)return"Выбрать блок";if(sel.length===BLOCKS.length&&sel.length>1)return"Все блоки";
  return `<span class="bt">${esc(bnm(sel[0].title))}</span>${sel.length>1?`<span class="mu">+ ещё ${sel.length-1}</span>`:shiftT(sel[0])}`}
-function blkRow(b,sub){const on=UI.blocks.includes(b.key),s=blockShift(b),q=(bnm(b.title)+" "+(b.grp||"")).toLowerCase();
- return `<div class="pi ${on?"on":""} ${sub?"sub":""}" data-q="${esc(q)}"><button class="pck" data-blkt="${b.key}" aria-pressed="${on}" title="${on?"Убрать":"Добавить к выбранным"}"><i></i></button><button class="pnm" data-blk1="${b.key}" title="${esc(b.title)}${b.hint?" ("+esc(b.hint)+")":""}">${esc(bnm(b.title))}</button>${s>.05?`<span class="pst l" title="Отстаёт на ${fN(s)} сут">+${fN(s)}</span>`:`<span class="pst" title="В графике"></span>`}</div>`}
+function blkRow(b,sub,ed){const on=UI.blocks.includes(b.key),s=blockShift(b),q=(bnm(b.title)+" "+(b.grp||"")).toLowerCase();
+ return `<div class="pi ${on?"on":""} ${sub?"sub":""}" data-q="${esc(q)}"><button class="pck" data-blkt="${b.key}" aria-pressed="${on}" title="${on?"Убрать":"Добавить к выбранным"}"><i></i></button><button class="pnm" data-blk1="${b.key}" title="${esc(b.title)}${b.hint?" ("+esc(b.hint)+")":""}">${esc(bnm(b.title))}</button>${s>.05?`<span class="pst l" title="Отстаёт на ${fN(s)} сут">+${fN(s)}</span>`:`<span class="pst" title="В графике"></span>`}${ed&&b.main!=null?`<button class="pba blk-del" data-act="delblk" data-block="${b.main}" aria-label="Удалить блок «${esc(b.title)}»">${I.x}</button>`:""}</div>`}
 function blkPop(ED,chooser=false){const G=blkGroups(),many=chooser||BLOCKS.length>=9,ph=PHONE();
- const list=G.map((g,gi)=>{if(!g.g)return g.bs.map(b=>blkRow(b,false)).join("");
+ const ed=ED&&can("plan_edit"),list=G.map((g,gi)=>{if(!g.g)return g.bs.map(b=>blkRow(b,false,ed)).join("");
   const n=g.bs.filter(b=>UI.blocks.includes(b.key)).length,st=n===0?"":n===g.bs.length?"on":"part";
-  return `<div class="pgr"><div class="pi pg ${st}" data-q="${esc(g.g.toLowerCase())}"><button class="pck" data-blkg="${gi}" title="Весь раздел"><i></i></button><button class="pnm" data-blkg1="${gi}" title="${esc(g.g)}">${esc(bnm(g.g))}</button></div>${g.bs.map(b=>blkRow(b,true)).join("")}</div>`}).join("");
+  return `<div class="pgr"><div class="pi pg ${st}" data-q="${esc(g.g.toLowerCase())}"><button class="pck" data-blkg="${gi}" title="Весь раздел"><i></i></button><button class="pnm" data-blkg1="${gi}" title="${esc(g.g)}">${esc(bnm(g.g))}</button></div>${g.bs.map(b=>blkRow(b,true,ed)).join("")}</div>`}).join("");
  return `<div class="pbh">${many?`<label class="psr"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.5 10.5 14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><input id="blkQ" aria-label="Найти блок" placeholder="Найти блок" value="${esc(UI.bq||"")}" autocomplete="off" spellcheck="false"></label>`:`<span class="sp"></span>`}
   <button class="pba" data-blkall>${UI.bq?"Все найденные":"Все"}</button>${chooser?"":`<button class="pba" data-blknone>Снять</button>${ph?`<button class="pba pri" data-blkdone>Готово</button>`:""}`}</div>
   <div class="pl pbl" id="blkL">${list}<div class="pnf" hidden>Нет блока «<span></span>»</div></div>
@@ -2867,25 +2871,52 @@ document.addEventListener("click",e=>{if(!UI.pop||e.target.closest(".pop"))retur
 function blkScroll(k){requestAnimationFrame(()=>{const gw=$("#gw"),r=gw&&gw.querySelector(`.row.blk[data-blk="${k}"]`),hd=gw&&gw.querySelector(".ghd");
  if(r)gw.scrollTop=Math.max(0,r.offsetTop-(hd?hd.offsetHeight:0));else if(PORT()){const f=$(`#tab-gnt .fh[data-blk="${k}"]`);if(f)f.scrollIntoView({block:"start"})}})}
 function blkSet(keys,{close=false,to=null}={}){const chooser=$("#blockChooser")?.open;
+ if(SITE)resetBlockDay();
  UI.blocks=BLOCKS.map(b=>b.key).filter(k=>keys.includes(k));UI.none=!UI.blocks.length;
+ if(SITE)rememberBlocks();
  const L=$("#blkL"),st=L?L.scrollTop:0;if(close||chooser){UI.pop=null;UI.bq=""}saveUI();renderGnt();
  const L2=$("#blkL");if(L2){L2.scrollTop=st;blkFilter()}if(chooser)$('#tab-gnt [data-pop="blk"]')?.focus({preventScroll:true});if(to)blkScroll(to)}
 const popHTML=(k,btn,body,right)=>`<div class="pop ${right?"r":""}"><button class="btn ${UI.pop===k?"on":""}" data-act="pop" data-pop="${k}">${btn}</button><div class="popb" ${UI.pop===k?"":"hidden"}>${body}</div></div>`;
 /* «+ Новый блок» (06.10: не выпячивать) — последней блёклой строкой списка блоков, только при «Правке». Блок — сводная
    строка с одной операцией «Новая операция» с сегодняшнего дня; дальше Паша правит как обычно. */
-function newBlockModal(){if(!(editing()&&can("plan_edit")))return;UI.pop=null;
- openModal(`<h3>Новый блок</h3><p>Например, «Скважина 702» или «Запуск бригады КРС-5». В блоке появится первая операция — дальше правится как обычно.</p>
-  <div class="fld" style="margin:0 20px 12px"><label>Название блока</label><input class="ed" id="nbn" autocomplete="off"></div>
+function blockSections(){const excluded=new Set(progSubtree(RAW).map(({t})=>t.uid));
+ for(const b of BLOCKS){excluded.add(b.main);excluded.add(b.plan)}
+ return RAW.filter(t=>t.sum&&!excluded.has(t.uid))}
+function subtreeEnd(t){let i=RAW.indexOf(t)+1;while(i<RAW.length&&RAW[i].lvl>t.lvl)i++;return i}
+function newBlockModal(){if(!(editing()&&can("plan_edit")))return;closePop();
+ const current=UI.blocks.length===1?byId[BK[UI.blocks[0]]?.main]?.par:null;
+ openModal(`<h3>Новый блок</h3><div class="pform">
+  <label>Название блока<input class="ed" id="nbn" maxlength="500" autocomplete="off"></label>
+  <label>Раздел<select class="ed" id="nbsection"><option value="">Отдельный блок</option>${blockSections().map(t=>`<option value="${t.uid}"${t.uid===current?" selected":""}>${esc(bnm(t.name))}</option>`).join("")}</select></label></div>
   <div class="mfoot"><button class="btn ghost" data-act="mclose">Отмена</button><button class="btn pri" data-act="newblkok">Создать</button></div>`);
  setTimeout(()=>{const i=$("#nbn");if(i)i.focus()},40)}
-function newBlock(){closeDrawer();const n=(($("#nbn")||{}).value||"").replace(/\s+/g," ").trim();if(!n)return $("#nbn").focus();
- if(BLOCKS.some(b=>b.title.toLowerCase()===n.toLowerCase()))return toast("Блок с таким названием уже есть");closeModal();
- need(()=>{const ref=BLOCKS.find(b=>b.kind==="single"&&b.main!=null)||BLOCKS.find(b=>b.main!=null),lvl=ref?byId[ref.main].lvl:1,
-   s=new Date(TODAY),sum={id:0,uid:newUid(),lvl,name:n,sum:true,s:strOf(+s),f:strOf(+s+DAY),pct:0,crit:false,pred:[],resp:"",note:""};
-  const op={...sum,uid:0,lvl:lvl+1,name:"Новая операция",sum:false};op.uid=newUid();while(op.uid===sum.uid)op.uid=newUid();
-  DATA.tasks.push(sum,op);LOG({act:"add",uid:op.uid,name:n,t:"новый блок"});renumber(DATA.tasks);syncSums(DATA.tasks);buildModel();
-  const k=BOF[op.uid];if(k)UI.blocks=[k];touch(op.uid);save();rerender();
+function newBlock(){if(!editing()||!can("plan_edit")||!$("#nbn"))return;
+ const n=$("#nbn").value.replace(/\s+/g," ").trim(),section=$("#nbsection").value;if(!n)return $("#nbn").focus();
+ if(BLOCKS.some(b=>b.title.toLowerCase()===n.toLowerCase()))return toast("Блок с таким названием уже есть");
+ const parent=blockSections().find(t=>t.uid===+section);if(section&&!parent)return toast("Раздел больше недоступен",false);
+ closeModal();closeDrawer();if(SITE)resetBlockDay();need(()=>{
+  const lvl=parent?parent.lvl+1:RAW.length?Math.min(...RAW.map(t=>t.lvl)):1;
+  const sum={id:0,uid:newUid(),lvl,name:n,sum:true,s:strOf(+TODAY),f:strOf(+TODAY+DAY),pct:0,crit:false,pred:[],resp:"",note:""};
+  const op={...sum,uid:newUid(),lvl:lvl+1,name:"Новая операция",sum:false};while(op.uid===sum.uid)op.uid=newUid();
+  DATA.tasks.splice(parent?subtreeEnd(parent):RAW.length,0,sum,op);LOG({act:"add",uid:op.uid,name:n,t:"новый блок"});renumber(DATA.tasks);syncSums(DATA.tasks);buildModel();
+  UI.blocks=[BOF[op.uid]];if(SITE)rememberBlocks();touch(op.uid);save();rerender();
   requestAnimationFrame(()=>{const i=$(`[data-ed="${op.uid}:name"]`);if(i){i.focus();i.select()}})})}
+const editableBlock=uid=>editing()&&can("plan_edit")&&BLOCKS.find(b=>b.main===uid);
+function deleteBlockModal(uid){const b=editableBlock(uid);if(!b)return;closePop();
+ openModal(`<h3>Удалить блок «${esc(b.title)}»?</h3><p>Из Графика будут удалены все операции блока${b.plan!=null?" и его утверждённый план":""}. Удаление нельзя отменить. Связанные вопросы останутся в списке.</p>
+ <div class="mfoot"><button class="btn ghost" data-act="mclose">Отмена</button><button class="btn red" data-act="delblkok" data-block="${uid}">Удалить блок</button></div>`)}
+function deleteBlock(uid){const b=editableBlock(uid);if(!b)return;
+ const removed=new Set([b.main,b.plan].filter(u=>u!=null).flatMap(u=>{const t=byId[u];return RAW.slice(RAW.indexOf(t),subtreeEnd(t)).map(x=>x.uid)}));
+ closeModal();need(()=>{
+  for(const r of progRows()||[]){if(!r.linked||!removed.has(r.note.link))continue;const t=byId[r.uid];
+   t.s=strOf(+r.S);t.f=strOf(+r.F);t.pct=r.pct;t.note=progNoteText({...r.note,link:null,part:null,after:null,lag:0,snet:null})}
+  if(can("issue_edit")){const at=new Date().toISOString();for(const u of removed)if(S.issues[u])S.issues[u].gone={name:byId[u].name,at}}
+  const selected=UI.blocks.filter(k=>k!==b.key).map(k=>BK[k]?.main);
+  DATA.tasks=RAW.filter(t=>!removed.has(t.uid));for(const t of DATA.tasks)t.pred=t.pred.filter(p=>!removed.has(p.uid));
+  renumber(DATA.tasks);syncSums(DATA.tasks);buildModel();UI.blocks=BLOCKS.filter(b=>selected.includes(b.main)).map(b=>b.key);UI.none=!UI.blocks.length;
+  if(removed.has(UI.sel))closeDrawer();if(SITE)rememberBlocks();
+  LOG({act:"del",uid,name:b.title,t:"блок со всеми операциями"});save();
+  HIST.clear();UNDO_D.length=UNDO_L.length=REDO_D.length=REDO_L.length=0;toast.hot=false;rerender();toast("Блок удалён",false)})}
 function gtoolsHTML(pairSel,scaleSeg,ED){const L=S.lastImport,sel=UI.blocks.map(k=>BK[k]).filter(Boolean),n=fCount();
  const leg=`<div class="gleg pl"><span><i class="s" style="background:var(--work)"></i>в работе</span><span><i class="s" style="background:var(--green)"></i>выполнено</span><span><i class="s" style="background:var(--ochre)"></i>срок прошёл</span><span><i class="s" style="background:var(--red)"></i>проблемный вопрос</span><span><i class="s" style="box-shadow:inset 0 0 0 1.5px var(--work)"></i>не начато</span><span><i class="s" style="background:repeating-linear-gradient(-45deg,var(--ink3) 0 2px,transparent 2px 5px)"></i>прогнозный сдвиг</span>${pairSel.length?`<span><i class="s" style="background:var(--ghost)"></i>план</span>`:""}<span><i class="s" style="width:2px;background:var(--ink)"></i>сегодня</span><span class="m">Клик по строке — подробности, связи и комментарии</span></div>`;
  const flt=`${filtersHTML()}${ED?"":`<label class="tgl"><input type="checkbox" data-opt="compact" ${UI.compact?"checked":""}><span></span>Краткая таблица</label>`}
@@ -3550,11 +3581,11 @@ function flag(u){need(()=>{const cur=S.issues[u];
  S.order=bumpTop(S.order,u);touchIss(u);save();litId=u;toast("Операция отмечена как проблемный вопрос");closeDrawer();go("iss",false);
  requestAnimationFrame(()=>{const c=$("#card-"+u);if(c){c.scrollIntoView({behavior:"smooth",block:"center"});const ta=$(`[data-iss="${u}:problem"]`,c);if(ta&&!ta.value)setTimeout(()=>ta.focus(),350)}})})}
 /* «Показать в графике»: строка горит (UI.hot), пока открыта её панель; закрыли панель или открыли другую — гаснет (16.10) */
-function goto(u){const k=BOF[u];if(k&&!UI.blocks.includes(k)){UI.blocks=[k];UI.none=false}UI.sel=u;UI.hot=u;go("gnt",false);
+function goto(u){if(SITE)resetBlockDay();const k=BOF[u];if(k&&!UI.blocks.includes(k)){UI.blocks=[k];UI.none=false;if(SITE)rememberBlocks()}UI.sel=u;UI.hot=u;go("gnt",false);
  requestAnimationFrame(()=>{const r=$("#r-"+u),gw=$("#gw");if(PHONE()&&!LAND()&&r){r.scrollIntoView({block:"center"});openDrawer(u);return}if(!r||!gw)return;gw.scrollTop=Math.max(0,r.offsetTop-gw.clientHeight/2);
   if(geoCache)gw.scrollLeft=Math.max(0,geoCache.x(FC[u].S)-(gw.clientWidth-geoCache.lw)*.3);
   openDrawer(u)})}
-function go(tab,push=true){UI.tab=tab;saveUI();document.body.classList.toggle("cht",tab==="cht");   // «Чаты» — на весь экран (13.11 вечер)if(tab!=="gnt"&&$("#drawer").classList.contains("on"))closeDrawer();   // панель операции — только в «Графике» (03.11, «Паша»)
+function go(tab,push=true){if(SITE&&tab==="gnt")resetBlockDay();UI.tab=tab;saveUI();document.body.classList.toggle("cht",tab==="cht");   // «Чаты» — на весь экран (13.11 вечер)
  $$("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.tab===tab));
  $$("section.tab").forEach(s=>s.classList.toggle("on",s.id==="tab-"+tab));if(push)history.replaceState(null,"","#"+tab);renderTab()}
 function renderTab(keep){renderMe();paintDirty();const n=issList(true).length;$("#cntI").textContent=n;$("#cntI").classList.toggle("z",!n);
@@ -3656,6 +3687,8 @@ document.addEventListener("click",e=>{if(!e.target.closest(".more"))$("#menu").h
    case"sfoffer":{const o=SFO;SFO=null;$("#toast").classList.remove("on");return o&&stepsFrom(o.u,o.t,o.at)}
    case"newblk":return newBlockModal();
    case"newblkok":return newBlock();
+   case"delblk":return deleteBlockModal(+a.block);
+   case"delblkok":return deleteBlock(+a.block);
    case"lgclear":$("#lgc").innerHTML=`<span class="m">Удалить все записи?</span> <button class="btn red" data-act="lgclear2">Да, очистить</button> <button class="btn ghost" data-act="lgno">Нет</button>`;return;
    case"lgclear2":return clearLog();
    case"lgno":$("#lgc").innerHTML=`<button class="btn ghost" data-act="lgclear">Очистить журнал</button>`;return;
@@ -3832,7 +3865,7 @@ const setTop=()=>document.documentElement.style.setProperty('--toph',$('.top').o
 function boot(){buildModel();initState();
 (function(){const dl=document.createElement("datalist");dl.id="dlPeople";dl.innerHTML=people().map(p=>`<option value="${esc(p)}">`).join("");document.body.appendChild(dl)})();
 UI.blocks=UI.blocks.filter(k=>BK[k]);
-if(!SITE&&!UI.blocks.length){const b=BLOCKS.find(x=>x.def&&x.kind!=="misc")||BLOCKS[0];UI.blocks=b?[b.key]:[]}
+if(SITE)restoreBlocks();else if(!UI.blocks.length){const b=BLOCKS.find(x=>x.def&&x.kind!=="misc")||BLOCKS[0];UI.blocks=b?[b.key]:[]}
 $("#asof").innerHTML=asofHTML();
 if(S.copyAt){const b=$("#stale");b.hidden=false;$("#saveBtn").style.display="none";   // «Скачать копию» с сайта
  b.textContent=`Копия сайта от ${fDT(new Date(S.copyAt))} — для просмотра без интернета. Правки здесь на сайт не попадут.`}
@@ -3880,17 +3913,38 @@ const newKey=()=>crypto.randomUUID?crypto.randomUUID():"10000000-1000-4000-8000-
 /* Человек печатает или открыто окно — картину базы показываем после (иначе перерисовка съест ввод). */
 const busyUI=()=>$("#scrim").classList.contains("on")||!!document.activeElement&&document.activeElement.matches("main input:not(#mxQ),main textarea:not(.mx-in),main select,#drawer input,#drawer textarea,#drawer select");   // поле чата перерисовка не трогает (chat.js)
 
+/* Москва UTC+3: рабочий день с 02:00 МСК начинается в 23:00 UTC предыдущих суток. */
+const graphDay=()=>Math.floor((Date.now()+36e5)/DAY);
+const blockPrefKey=()=>`gdt_blocks:${ME_.uid}:${PROJ.k}`;
+let blockDay,blockTimer;
+const selectedBlockIds=()=>UI.blocks.flatMap(k=>BK[k]?[BK[k].main]:[]);
+function rememberBlocks(){if(!BOOTED||blockDay!==graphDay())return;
+ try{if(UI.blocks.length)localStorage.setItem(blockPrefKey(),JSON.stringify({day:blockDay,ids:selectedBlockIds()}));
+  else localStorage.removeItem(blockPrefKey())}catch(e){}}
+function restoreBlocks(){blockDay=graphDay();
+ try{const p=JSON.parse(localStorage.getItem(blockPrefKey()));
+  if(p?.day===blockDay&&Array.isArray(p.ids))UI.blocks=BLOCKS.filter(b=>p.ids.includes(b.main)).map(b=>b.key);
+  else localStorage.removeItem(blockPrefKey())}catch(e){}
+ scheduleBlockReset()}
+function resetBlockDay(){if(!BOOTED||blockDay===graphDay()||$("#scrim").classList.contains("on")||document.activeElement?.matches("#tab-gnt [data-ed],#drawer [data-ed],#drawer textarea"))return false;
+ blockDay=graphDay();UI.blocks=[];UI.bq="";closePop();rememberBlocks();closeDrawer();return true}
+function scheduleBlockReset(){clearTimeout(blockTimer);
+ if(resetBlockDay()&&(UI.tab==="gnt"||LAND()))renderGnt();
+ const next=(graphDay()+1)*DAY-36e5;
+ blockTimer=setTimeout(scheduleBlockReset,blockDay===graphDay()?Math.max(1,next-Date.now()):1000)}
+if(SITE)document.addEventListener("visibilitychange",()=>{if(BOOTED&&!document.hidden)scheduleBlockReset()});
+
 let logK=0;
 function siteRows(){for(const l of S.log)if(l.id==null&&!l._k)l._k="k"+(++logK);return toRows(DATA,S)}
 function siteApply(L,remote){
  if(BOOTED&&busyUI())return false;
- const x=fromRows(L),open=S.open||{};
+ const x=fromRows(L),open=S.open||{},selected=BOOTED?selectedBlockIds():[];
  DATA=x.DATA;S={...blankState(),...x.S,open,me:ME_.name,dirty:false};
  if(!BOOTED){BOOTED=true;boot();renderMe();impBtn();return true}
  buildModel();
  if(remote){HIST=makeHistory(snapNow);UNDO_D.length=0;REDO_D.length=0;UNDO_L.length=0;REDO_L.length=0;toast.hot=false}   // чужая правка: отмена не должна её затереть
  else HIST.rebase();
- UI.blocks=UI.blocks.filter(k=>BK[k]);
+ UI.blocks=BLOCKS.filter(b=>selected.includes(b.main)).map(b=>b.key);if(UI.blocks.length!==selected.length)rememberBlocks();
  if(UI.sel&&!byId[UI.sel])closeDrawer();
  $("#asof").innerHTML=asofHTML();rerender();return true}
 function siteError(e,kind){
